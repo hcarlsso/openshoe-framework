@@ -36,7 +36,7 @@ static struct rxtx_buffer{
 };
 
 // Error variables
-uint8_t error_vec=0;							//Error signaling vector. If zero no error has occurred.
+uint8_t error_signal=0;							//Error signaling vector. If zero no error has occurred.
 
 /************************ Command definitions and auxiliary objects ***************************/
 struct command_structure {
@@ -521,10 +521,10 @@ void gyro_self_calibration(uint8_t** no_arg){
 	
 	
 extern Bool new_orientation_flag;
-extern Bool acc_calibration_successful_flag;
+extern Bool acc_calibration_finished_flag;
 void new_calibration_orientation(void){
-	if(acc_calibration_successful_flag){
-		acc_calibration_successful_flag = false;
+	if(acc_calibration_finished_flag){
+		acc_calibration_finished_flag = false;
 		restore_process_sequence();
 		udi_cdc_putc(103);
 		//TODO: Send out acknowledgment that calibration was successful
