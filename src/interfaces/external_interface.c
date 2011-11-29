@@ -1,9 +1,14 @@
-/*
- * command_tables.c
- *
- * Created: 2011-10-14 15:25:14
- *  Author: jnil02
- */ 
+
+/** \file
+	\brief High level external user interface (USB).
+	
+	\details This file contains the functions for 1) receiving and parsing
+	commands and executing commands responses 2) determining what to transmit
+	and to transmit data to the system user via USB.
+	
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/ 
 
 #include <string.h>
 #include <math.h>
@@ -14,6 +19,7 @@
 
 #define RX_BUFFER_SIZE 20
 #define TX_BUFFER_SIZE 60
+#define SINGLE_TX_BUFFER_SIZE 10
 #define MIN_DATA 4
 #define MAX_RX_NRB 10
 
@@ -28,12 +34,18 @@
 #define COUNTER_RESET_VALUE 0
 #define NO_BYTES_RECEIVED_YET 0
 
+#define STATE_OUTPUT_HEADER 0xAA
+
 static struct rxtx_buffer{
 	uint8_t* buffer;
 	uint8_t* write_position;
 	uint8_t* read_position;
 	int  nrb;
 };
+
+// Single transmit buffer
+static uint8_t single_tx_buffer_array[SINGLE_TX_BUFFER_SIZE];
+static struct rxtx_buffer single_tx_buffer = {single_tx_buffer_array,single_tx_buffer_array,single_tx_buffer_array,0};
 
 // Error variables
 uint8_t error_signal=0;							//Error signaling vector. If zero no error has occurred.
@@ -212,7 +224,6 @@ const struct proc_func_info* processing_functions[] = {&update_imu_data_buffers_
 													   &calibrate_accelerometers_info};
 
 // Array containing the processing functions to run
-processing_function_p process_sequence[PROCESSING_ARRAY_SIZE];
 static struct proc_func_info* processing_functions_by_id[256];
 /**********************************************************************************************/
 
@@ -281,12 +292,29 @@ static inline bool has_valid_checksum(struct rxtx_buffer* buffer){
 	return (MSB(checksum)==*(buffer->write_position-1) && LSB(checksum)==*buffer->write_position);}
 
 static inline void send_ak(struct rxtx_buffer* buffer){
-	uint8_t ak[4] = { 0xa0, *buffer->buffer, 0, *buffer->buffer };
-	udi_cdc_write_buf((int*) ak,4);}
-
+	*single_tx_buffer.write_position = 0xa0;
+	increment_counter(single_tx_buffer.write_position);
+	*single_tx_buffer.write_position = *buffer->buffer;
+	uint16_t chk = calc_checksum(single_tx_buffer.write_position-1,single_tx_buffer.write_position);
+	increment_counter(single_tx_buffer.write_position);
+	*single_tx_buffer.write_position = MSB(chk);
+	increment_counter(single_tx_buffer.write_position);
+	*single_tx_buffer.write_position = LSB(chk);
+	increment_counter(single_tx_buffer.write_position);
+	
+//	uint8_t ak[4] = { 0xa0, *buffer->buffer, 0, *buffer->buffer };
+//	udi_cdc_write_buf((int*) ak,4);
+	}
 static inline void send_nak(void){
-	uint8_t nak[3] = { 0xa1, 0, 0 };
-	udi_cdc_write_buf((int*) nak,3);}
+	*single_tx_buffer.write_position = 0xa1;
+	increment_counter(single_tx_buffer.write_position);
+	*single_tx_buffer.write_position = 0x0;
+	increment_counter(single_tx_buffer.write_position);
+	*single_tx_buffer.write_position = 0xa1;
+	increment_counter(single_tx_buffer.write_position);
+//	uint8_t nak[3] = { 0xa1, 0, 0 };
+//	udi_cdc_write_buf((int*) nak,3);
+}
 
 static inline void parse_and_execute_command(struct rxtx_buffer* buffer,struct command_structure* cmd_info){
 	static uint8_t* command_arg[MAX_COMMAND_ARGS];
@@ -298,46 +326,76 @@ static inline void parse_and_execute_command(struct rxtx_buffer* buffer,struct c
 	// Execute command response
 	cmd_info->cmd_response(command_arg);}
 
+
+/*! \brief This functions collect the data which is to be transmitted and stores it in the argument buffer.
+
+	\detail This function collect single output data (e.g. acks) from the \#single_tx_buffer and continual output data
+	from the state variables based on the values of the \#state_output_rate_divider and the \#state_output_rate_counter.
+	The output data (single output data followed by state outputs) is stored in the argument buffer.
+	The argument buffer is reset before any data is written to it.
+	
+	@param[out] buffer						The buffer in which that output data is stored in.
+	@param[in]  single_tx_buffer			Buffer containing the data to be output once.
+	@param[in]  state_output_rate_divider	Array containing the dividers of the state output frequencies (and if they are to be output at all)
+	@param[in]  state_output_rate_counter	Array for keeping track of when to output data next
+*/
 static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	// Clear buffer
 	reset_buffer(buffer);
-	// Add header
-	*buffer->write_position = 0xaa; //0xaa=170
+	
+	// Copy one time transmit data to buffer
+	if(single_tx_buffer.write_position!=single_tx_buffer.buffer){
+		memcpy(buffer->write_position,single_tx_buffer.buffer,single_tx_buffer.write_position-single_tx_buffer.buffer);
+		buffer->write_position+=single_tx_buffer.write_position-single_tx_buffer.buffer;
+		reset_buffer(&single_tx_buffer);
+	}
+
+	// Save position of header
+	uint8_t* state_output_header_p = buffer->write_position;
+	// Add header for state data output
+	*buffer->write_position = STATE_OUTPUT_HEADER;
 	increment_counter(buffer->write_position);
 	// Copy all enabled states to buffer	
 	for(int i = 0; i<SID_LIMIT; i++){
-		//if( Tst_bits(state_tx_enabled[i/8], 1 << i%8) ){
 		if( state_output_rate_divider[i] ){
+			//TODO: Let counter count down instead of up
 			state_output_rate_counter[i]++;
 			if( state_output_rate_counter[i] == state_output_rate_divider[i]){
 				state_output_rate_counter[i] = 0;
+				//TODO: ensure no buffer overflow occur
 				memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
 				buffer->write_position+=state_info_access_by_id[i]->state_size;
 			}
 		}
 	}
 	// If any data was added, calculate and add checksum
-	if(buffer->buffer+1!=buffer->write_position){
-		uint16_t checksum = calc_checksum(buffer->buffer,buffer->write_position-1);
+	if(state_output_header_p+1!=buffer->write_position){
+		uint16_t checksum = calc_checksum(state_output_header_p,buffer->write_position-1);
 		*buffer->write_position = MSB(checksum);
 		increment_counter(buffer->write_position);
 		*buffer->write_position = LSB(checksum);
 		increment_counter(buffer->write_position);}
 	else {
-		reset_buffer(buffer);
+//		reset_buffer(buffer);
+		buffer->write_position = state_output_header_p;
 	}
 }
-/**********************************************************************************************/
-	
-/*************************** Main receive and transmit functions ******************************/
+
+/**
+	\brief Main function for receiving commands from user.
+
+	\detail In case the USB is attached (vbus is high) and there is data available the function
+	reads in at most MAX_RX_NRB number of bytes, parses the commands, and execute the command
+	response. In case the functions encounters a invalid header or checksum, it resets the
+	buffer and starts over reading a new command assuming the next byte is a header. The
+	function can split commands over different calls to the function.
+*/
 void receive_command(void){
 	static uint8_t rx_buffer_array[RX_BUFFER_SIZE];
-	static struct rxtx_buffer rx_buffer = {rx_buffer_array,rx_buffer_array,0};
+	static struct rxtx_buffer rx_buffer = {rx_buffer_array,rx_buffer_array,rx_buffer_array,0};
 	static int command_tx_timer;
 	static struct command_structure* info_last_command;
 	int rx_nrb_counter = NO_BYTES_RECEIVED_YET;
-	
-//	int counter = -Get_system_register(AVR32_COUNT);
 	
 	//If USB is attached and data is available, receive data (command)
 	if(is_usb_attached()){
@@ -360,15 +418,15 @@ void receive_command(void){
 			// Or a full command?
 			else if(is_end_of_command(rx_buffer.nrb)){
 				if(has_valid_checksum(&rx_buffer)){
-//					send_ak(&rx_buffer);
+					send_ak(&rx_buffer);
 					parse_and_execute_command(&rx_buffer,info_last_command);}
 				else{
-//					send_nak();
+					send_nak();
 				}
 				reset_buffer(&rx_buffer);
 				continue;}
 				
-			// Or are we in the middle of a command transmission?
+			// Otherwise we are in the middle of a command transmission
 			increment_counter(rx_buffer.write_position);
 			decrement_counter(rx_buffer.nrb);
 		}
@@ -380,55 +438,37 @@ void receive_command(void){
 	else{
 		reset_buffer(&rx_buffer);
 	}
-//	counter += Get_system_register(AVR32_COUNT);
-//	udi_cdc_write_buf(&counter,4);
-	// Return if: USB detached, no more data available, or receive limit attained
+	// Return if: USB detached, no more data available, or receive-limit reached
 	return;	
 }
 
+/**
+	\brief Main function to output data to user.
+	
+	\detail The function calls /#assemble_output_data with its internal output buffer as an argument.
+	This stores the relevant data (single output messages and continual state output) in the buffer.
+	Subsequently the data is written over byte by byte to the USB output buffer.
+*/
 void transmit_data(void){
 	static uint8_t tx_buffer_array[TX_BUFFER_SIZE];
-	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,0};
+	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,tx_buffer_array,0};
 	static uint8_t downsampling_tx_counter = 0;
 
 	if(is_usb_attached()){
-		bool any_data = false;
+//		bool any_data = false;
 		// Generate output
 		assemble_output_data(&tx_buffer);
-		if((tx_buffer.write_position-tx_buffer.buffer)!=0){
-			any_data = true;}
+//		if((tx_buffer.write_position-tx_buffer.buffer)!=0){
+//			any_data = true;}
 		// Transmit output
 		while(tx_buffer.read_position<tx_buffer.write_position && udi_cdc_is_tx_ready()){
 			udi_cdc_putc(*tx_buffer.read_position);
 			tx_buffer.read_position++;
 		}
 //		udi_cdc_write_buf((int*)tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer);
-//		gpio_tgl_gpio_pin(AVR32_PIN_PA08);
-//		counter += Get_system_register(AVR32_COUNT);
-//		reset_buffer(&tx_buffer);
-//		if(any_data){
-//			udi_cdc_write_buf(&counter,4);
-//		}
-//	}
 	}	
 }
-/**********************************************************************************************/
 
-/******************************** Processing array manipulation functions **********************************/
-
-void empty_process_sequence(void){
-	for(int i = 0;i<PROCESSING_ARRAY_SIZE;i++){
-		process_sequence[i]=NULL;}}
-
-static processing_function_p processing_array_storage[PROCESSING_ARRAY_SIZE];
-void store_and_empty_process_sequence(void){
-	for(int i = 0;i<PROCESSING_ARRAY_SIZE;i++){
-		processing_array_storage[i] = process_sequence[i];
-		process_sequence[i]=NULL;}}
-		
-void restore_process_sequence(void){
-	for(int i = 0;i<PROCESSING_ARRAY_SIZE;i++){
-		process_sequence[i] = processing_array_storage[i];}}
 
 /******************************** Command callback functions **********************************/
 void retransmit_header(uint8_t** command){
@@ -495,29 +535,40 @@ void processing_onoff(uint8_t** cmd_arg){
 	uint8_t function_id = cmd_arg[0][0];
 	uint8_t onoff    = cmd_arg[1][0];
 	uint8_t array_location = cmd_arg[2][0];	
-	process_sequence[array_location] = onoff ? (processing_functions_by_id[function_id]->func_p) : NULL;}
+	processing_function_p process_sequence_elem_value = onoff ? (processing_functions_by_id[function_id]->func_p) : NULL;
+	set_elem_in_process_sequence(process_sequence_elem_value,array_location);
+}
 
 extern bool initialize_flag;
 void stop_initial_alignement(void){
 	if(initialize_flag==false){
+		// Stop initial alignement
 		empty_process_sequence();
-		process_sequence[0] = processing_functions_by_id[UPDATE_BUFFER]->func_p;
-		process_sequence[1] = processing_functions_by_id[MECHANIZATION]->func_p;
-		process_sequence[2] = processing_functions_by_id[TIME_UPDATE]->func_p;
-		process_sequence[3] = processing_functions_by_id[ZUPT_DETECTOR]->func_p;
-		process_sequence[4] = processing_functions_by_id[ZUPT_UPDATE]->func_p;}}
+		// Start ZUPT aided INS
+		set_elem_in_process_sequence(processing_functions_by_id[UPDATE_BUFFER]->func_p,0);
+		set_elem_in_process_sequence(processing_functions_by_id[MECHANIZATION]->func_p,1);
+		set_elem_in_process_sequence(processing_functions_by_id[TIME_UPDATE]->func_p,2);
+		set_elem_in_process_sequence(processing_functions_by_id[ZUPT_DETECTOR]->func_p,3);
+		set_elem_in_process_sequence(processing_functions_by_id[ZUPT_UPDATE]->func_p,4);
+	}
+}
 
 void reset_zupt_aided_ins(uint8_t** no_arg){
+	// Stop whatever was going on
 	empty_process_sequence();
 	initialize_flag=true;
-	process_sequence[0] = processing_functions_by_id[UPDATE_BUFFER]->func_p;
-	process_sequence[1] = processing_functions_by_id[INITIAL_ALIGNMENT]->func_p;
-	process_sequence[PROCESSING_ARRAY_SIZE-1] = &stop_initial_alignement;}
+	// Start initial alignment
+	set_elem_in_process_sequence(processing_functions_by_id[UPDATE_BUFFER]->func_p,0);
+	set_elem_in_process_sequence(processing_functions_by_id[INITIAL_ALIGNMENT]->func_p,1);
+	// Set termination function of initial alignment which will also start INS
+	set_last_process_sequence_element(&stop_initial_alignement);
+}
 
 void gyro_self_calibration(uint8_t** no_arg){
 	store_and_empty_process_sequence();
-	process_sequence[0] = processing_functions_by_id[GYRO_CALIBRATION]->func_p;
-	process_sequence[PROCESSING_ARRAY_SIZE-1] = &restore_process_sequence;}
+	set_elem_in_process_sequence(processing_functions_by_id[GYRO_CALIBRATION]->func_p,0);
+	set_last_process_sequence_element(&restore_process_sequence);
+}
 	
 	
 extern Bool new_orientation_flag;
@@ -543,8 +594,8 @@ void acc_calibration(uint8_t ** cmd_arg){
 	nr_of_calibration_orientations = nr_orientations;
 	
 	store_and_empty_process_sequence();
-	process_sequence[0] = processing_functions_by_id[ACCELEROMETER_CALIBRATION]->func_p;
-	process_sequence[PROCESSING_ARRAY_SIZE-1] = &new_calibration_orientation;
+	set_elem_in_process_sequence(processing_functions_by_id[ACCELEROMETER_CALIBRATION]->func_p,0);
+	set_last_process_sequence_element(&new_calibration_orientation);
 }
 /**********************************************************************************************/
 

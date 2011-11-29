@@ -1,0 +1,31 @@
+
+/** \file
+	\brief Header file containing declarations for functions for manipulating and running process sequence.
+	
+	\details
+		
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/ 
+
+#ifndef PROCESS_SEQUENCE_H_
+#define PROCESS_SEQUENCE_H_
+
+#include "compiler.h"
+
+#define PROCESS_SEQUENCE_SIZE 10
+typedef void (*processing_function_p)(void);
+
+void run_process_sequence(void);
+
+void empty_process_sequence(void);
+
+void store_and_empty_process_sequence(void);
+
+void restore_process_sequence(void);
+
+void set_last_process_sequence_element(processing_function_p element_value);
+
+void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem_nr);
+
+#endif /* PROCESS_SEQUENCE_H_ */

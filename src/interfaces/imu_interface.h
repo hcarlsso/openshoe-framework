@@ -1,18 +1,12 @@
 
 /** \file
- *
- * \brief High level IMU interface.
- *
- * \details This file declares the high level interface functions used by the
- * rest of the system to interact with the IMU. The functions work for all IMUs
- * in the Analog Devices iSensor (R) serie. The communication is done via a SPI
- * interface. Before the functions are called the initialization routine
- * (imu_interface_init()) must be called to set up the SPI interface. The SPI
- * interface settings are found in conf_spi_master.h.
- *
- * \authors John-Olof Nilsson, Isaac Skog
- * \copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
- */ 
+	\brief High level IMU interface header file.
+	
+	\details
+	
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/ 
 
 
 #ifndef IMU_SPI_INTERFACE_H_

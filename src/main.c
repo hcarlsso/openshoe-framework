@@ -15,6 +15,7 @@
  */
 #include <asf.h>
 
+#include "process_sequence.h"
 #include "external_interface.h"
 #include "imu_interface.h"
 
@@ -29,8 +30,6 @@ int time_since_last_zupt;
 uint32_t process_cycle_counter = 0;
 
 
-// Global variable containing current processing functions
-extern processing_function_p process_sequence[PROCESSING_ARRAY_SIZE] = {NULL};
 // Global IMU interrupt (data) time-stamp variable
 uint32_t imu_interrupt_ts;
 // Variable that used to signal if an external interrupt occurs.
@@ -75,6 +74,7 @@ void eic_nmi_handler( void )
 
 int main (void) {
 	
+	// Initialize hardware and communication interfaces
 	irq_initialize_vectors();
 	cpu_irq_enable();
 	board_init();
@@ -83,22 +83,23 @@ int main (void) {
 	imu_interupt_init();
 	imu_interface_init();
 	
+	// Loop indefinately
 	while (true) {
-
+		
+		// Check if interrupt has occured
 		if(interupt_flag==true){
 			interupt_flag=false;
+
 			// Read data from IMU			
 			imu_burst_read();
 
-			// Cycle through all processing functions
-			for(int i=0;i<(sizeof(process_sequence)/sizeof(processing_function_p));i++){
-				if(process_sequence[i]){		// If function point not NULL 
-					process_sequence[i]();}}	// Call function
+			// Execute all processing functions (filtering)
+			run_process_sequence();
 
-			// Check if any command has been sent
+			// Check if any command has been sent and respond accordingly
 			receive_command();
 			
-			// Transmit data to user
+			// Transmit requested data to user
 			transmit_data();
 		}		
 	}
