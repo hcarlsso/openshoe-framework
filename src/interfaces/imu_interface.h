@@ -5,9 +5,16 @@
 	\details
 	
 	\authors John-Olof Nilsson, Isaac Skog
-	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)	
 */ 
 
+/**
+	\ingroup openshoe_software
+	
+	\defgroup imu_interface IMU interface	
+	\brief This group contains the IMU interface functionalities.
+	@{
+*/
 
 #ifndef IMU_SPI_INTERFACE_H_
 #define IMU_SPI_INTERFACE_H_
@@ -24,3 +31,5 @@ void imu_read_acc_and_gyro(void);
 
 
 #endif /* IMU_SPI_INTERFACE_H_ */
+
+//@}

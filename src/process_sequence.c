@@ -40,7 +40,7 @@ void store_and_empty_process_sequence(void){
 /**
 	\brief Copy the content of the \#process_sequence_storage to the \#process_sequence.
 
-	\detail This assumes that the store_and_empty_process_sequence routine has
+	\details This assumes that the store_and_empty_process_sequence routine has
 	been run prior to this routine call.
 */
 void restore_process_sequence(void){
@@ -49,7 +49,7 @@ void restore_process_sequence(void){
 /**
 	\brief Sets last element in the process sequence to the argument function pointer
 	
-	\detail Sets last element in the process sequence to the argument function pointer.
+	\details Sets last element in the process sequence to the argument function pointer.
 	This is often used for clean-up functions which will in turn empty, restore,
 	or manipulate the process_sequence.
 	
@@ -61,7 +61,7 @@ void set_last_process_sequence_element(processing_function_p elem_value){
 /**
 	\brief Sets process sequence element number to elem_value
 	
-	\detail If elem_nr is less than \#process_sequence length (less than \#PROCESS_SEQUENCE_SIZE),
+	\details If elem_nr is less than \#process_sequence length (less than \#PROCESS_SEQUENCE_SIZE),
 	sets the element value to elem_value. If the value is larger no action is taken.
 	It is left up to the user to ensure that the elem_nr is valid. For this
 	purpose the \#PROCESS_SEQUENCE_SIZE macro can be used.

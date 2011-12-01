@@ -444,6 +444,9 @@
     <Compile Include="src\asf\common\utils\interrupt\interrupt_avr32.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\commands.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\config\conf_board.h">
       <SubType>compile</SubType>
     </Compile>
@@ -474,10 +477,16 @@
     <Compile Include="src\main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\processing_functions.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\process_sequence.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\process_sequence.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\system_states.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

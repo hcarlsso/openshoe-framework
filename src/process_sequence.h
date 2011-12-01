@@ -6,7 +6,15 @@
 		
 	\authors John-Olof Nilsson, Isaac Skog
 	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
-*/ 
+*/
+
+/**
+	\ingroup openshoe_software
+	
+	\defgroup proc_sequence Processing sequence	
+	\brief This groupe contains the processing sequence declarations and definitions.
+	@{
+*/
 
 #ifndef PROCESS_SEQUENCE_H_
 #define PROCESS_SEQUENCE_H_
@@ -29,3 +37,5 @@ void set_last_process_sequence_element(processing_function_p element_value);
 void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem_nr);
 
 #endif /* PROCESS_SEQUENCE_H_ */
+
+//@}

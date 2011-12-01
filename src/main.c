@@ -9,6 +9,11 @@
  */
 
 
+/// \defgroup openshoe_software OpenShoe software
+///	This module collect all software written for OpenShoe.
+///	\ingroup openshoe_software
+///	@{
+
 /*
  * Include header files for all drivers that have been imported from
  * AVR Software Framework (ASF).
@@ -125,3 +130,5 @@ void ccdelay(unsigned int cc)
 	while ((count_end - count) > 0)
 		count = Get_system_register(AVR32_COUNT);
 }
+
+//! @}
