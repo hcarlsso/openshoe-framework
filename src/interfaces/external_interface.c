@@ -61,8 +61,10 @@ static command_structure* command_info_array[256]={NULL};
 
 // Bit-field of states which are to be included in the data transmission
 static state_t_info* state_info_access_by_id[SID_LIMIT];
-static uint8_t state_output_rate_divider[SID_LIMIT] = {0};
-static uint8_t state_output_rate_counter[SID_LIMIT] = {0};
+static uint16_t state_output_rate_divider[SID_LIMIT] = {0};
+static uint16_t state_output_rate_counter[SID_LIMIT] = {0};
+#define MAX_LOG2_DIVIDER 14
+#define MIN_LOG2_DIVIDER 0
 
 // Array containing the processing functions to run
 static proc_func_info* processing_functions_by_id[256];
@@ -198,14 +200,13 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	// Copy all enabled states to buffer	
 	for(int i = 0; i<SID_LIMIT; i++){
 		if( state_output_rate_divider[i] ){
-			//TODO: Let counter count down instead of up
-			state_output_rate_counter[i]++;
-			if( state_output_rate_counter[i] == state_output_rate_divider[i]){
-				state_output_rate_counter[i] = 0;
+			if( state_output_rate_counter[i] == 0){
+				state_output_rate_counter[i] = state_output_rate_divider[i];
 				//TODO: ensure no buffer overflow occur
 				memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
 				buffer->write_position+=state_info_access_by_id[i]->state_size;
 			}
+			state_output_rate_counter[i]--;
 		}
 	}
 	// If any data was added, calculate and add checksum
@@ -332,44 +333,56 @@ void retransmit_command_info(uint8_t** header_p){
 	}
 }
 
+/**
+	\brief Sets state_id state to be output with interrupt frequency divided by 2^divider. Divider=0 turns off output.
+	
+	\details The function checks that state_id is a valid state ID and that divider is within the allowable range.
+*/
+
+void set_state_output(uint8_t state_id, uint8_t divider){
+	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){
+		if (divider>MIN_LOG2_DIVIDER){
+			state_output_rate_divider[state_id] = 1<<(divider-1);
+			state_output_rate_counter[state_id] = 0;
+		} else {
+			state_output_rate_divider[state_id] = 0;
+			state_output_rate_counter[state_id] = 0;
+		}
+	}
+	// TODO: Set some error state if the above does not hold
+}
+
 void get_mcu_serial(uint8_t** arg){
 	udi_cdc_write_buf((int*)0x80800284,0x80800292-0x80800284);}
 
+// TODO: change all state_output settings to use the function set_state_output
 void output_state(uint8_t** cmd_arg){
 	uint8_t state_id = cmd_arg[0][0];
 	uint8_t output_divider    = cmd_arg[1][0];
 	uint8_t id_bit = 1 << (state_id % 8);
 	if(state_info_access_by_id[state_id]){  // Valid state?
-		state_output_rate_divider[state_id] = output_divider;
-		state_output_rate_counter[state_id] = 0;}}
+		set_state_output(state_id,output_divider);}}
 
 void toggle_inertial_output(uint8_t** cmd_arg){
 	uint8_t output_divider = cmd_arg[0][0];
-	state_output_rate_divider[ANGULAR_RATE_SID] = output_divider;
-	state_output_rate_counter[ANGULAR_RATE_SID] = 0;
-	state_output_rate_divider[SPECIFIC_FORCE_SID] = output_divider;
-	state_output_rate_counter[SPECIFIC_FORCE_SID] = 0;}
+	set_state_output(ANGULAR_RATE_SID,output_divider);
+	set_state_output(SPECIFIC_FORCE_SID,output_divider);}
 
 void position_plus_zupt(uint8_t** cmd_arg){
 	uint8_t output_divider = cmd_arg[0][0];
-	state_output_rate_divider[POSITION_SID] = output_divider;
-	state_output_rate_counter[POSITION_SID] = 0;
-	state_output_rate_divider[ZUPT_SID] = output_divider;
-	state_output_rate_counter[ZUPT_SID] = 0;}
+	set_state_output(POSITION_SID,output_divider);
+	set_state_output(ZUPT_SID,output_divider);}
 
 void output_navigational_states(uint8_t** cmd_arg){
 	uint8_t output_divider = cmd_arg[0][0];
-	state_output_rate_divider[POSITION_SID] = output_divider;
-	state_output_rate_counter[POSITION_SID] = 0;
-	state_output_rate_divider[VELOCITY_SID] = output_divider;
-	state_output_rate_counter[VELOCITY_SID] = 0;
-	state_output_rate_divider[QUATERNION_SID] = output_divider;
-	state_output_rate_counter[QUATERNION_SID] = 0;}
+	set_state_output(POSITION_SID,output_divider);
+	set_state_output(VELOCITY_SID,output_divider);
+	set_state_output(QUATERNION_SID,output_divider);
+	set_state_output(INTERRUPT_COUNTER_SID,output_divider);}
 
 void turn_off_output(uint8_t** cmd_arg){
-	for(int i = 0; i<SID_LIMIT; i++){
-		state_output_rate_divider[i]=0;
-		state_output_rate_counter[i]=0;}}
+	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++){
+		set_state_output(i,0);}}
 
 void processing_onoff(uint8_t** cmd_arg){
 	uint8_t function_id = cmd_arg[0][0];

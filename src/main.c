@@ -35,10 +35,12 @@ int time_since_last_zupt;
 uint32_t process_cycle_counter = 0;
 
 
+// Interrupt counter (essentially a time stamp)
+uint32_t interrupt_counter = 0;
 // Global IMU interrupt (data) time-stamp variable
 uint32_t imu_interrupt_ts;
 // Variable that used to signal if an external interrupt occurs.
-static volatile bool interupt_flag = false;
+static volatile bool imu_interrupt_flag = false;
 // Structure holding the configuration parameters of the EIC module.
 static eic_options_t eic_options;
 
@@ -70,15 +72,22 @@ void eic_nmi_handler( void )
 	
 	eic_clear_interrupt_line(&AVR32_EIC, IMU_INTERUPT_LINE1);
 	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
-	interupt_flag=true;
+	imu_interrupt_flag = true;
 	
 	// Restore the registers and leaving the exception handler.
 	__asm__ __volatile__ ("popm   r0-r12, lr\n\t" "rete");
 }
 
+inline void wait_for_interrupt(void){
+	while(true){
+		if(imu_interrupt_flag==true){
+			imu_interrupt_flag=false;
+			interrupt_counter++;
+		}
+	}	
+}	
 
-int main (void) {
-	
+inline void system_init(void){
 	// Initialize hardware and communication interfaces
 	irq_initialize_vectors();
 	cpu_irq_enable();
@@ -87,13 +96,24 @@ int main (void) {
 	com_interface_init();
 	imu_interupt_init();
 	imu_interface_init();
+	// Any new initialization function of the system should be added here or
+	// under any of the above initialization functions.
+}
+
+int main (void) {
+	
+	// Initialize system
+	system_init();
 	
 	// Loop indefinately
 	while (true) {
 		
 		// Check if interrupt has occured
-		if(interupt_flag==true){
-			interupt_flag=false;
+		wait_for_interrupt();
+/*
+		if(imu_interupt_flag==true){
+			imu_interupt_flag=false;
+			interrupt_counter++;*/
 
 			// Read data from IMU			
 			imu_burst_read();
@@ -106,7 +126,9 @@ int main (void) {
 			
 			// Transmit requested data to user
 			transmit_data();
-		}		
+			
+			// TODO: Check that the imu_interupt_flag is still false (otherwise the calculations has not completed in time and the system send a warning)
+//		}		
 	}
 }
 
