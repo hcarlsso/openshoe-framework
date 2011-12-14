@@ -74,6 +74,12 @@ extern uint8_t command_header_table[32];
 extern command_structure* command_info_array[256];
 void commands_init(void);
 
+inline bool is_valid_header(uint8_t header){
+	return command_header_table[header>>3] & (1<<(header & 7));}
+	
+inline command_structure* get_command_info(uint8_t header){
+	return command_info_array[header];}
+
 
 // Array containing the processing functions to run
 extern proc_func_info* processing_functions_by_id[256];

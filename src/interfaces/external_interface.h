@@ -25,6 +25,9 @@ void com_interface_init(void);
 void transmit_data(void);
 void receive_command(void);
 
+
+void set_state_output(uint8_t state_id, uint8_t divider);
+
 /// USB vbus callback function
 void vbus_event_callback(bool b_high);
 

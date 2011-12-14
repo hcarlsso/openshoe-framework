@@ -1,9 +1,4 @@
-/*
- * system_states.c
- *
- * Created: 2011-12-14 10:43:07
- *  Author: jnil02
- */ 
+
 
 #include "control_tables.h"
 
@@ -30,7 +25,6 @@ static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)
 static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
 	
-
 
 // System states
 extern uint32_t interrupt_counter;
