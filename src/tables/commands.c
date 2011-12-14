@@ -1,41 +1,11 @@
+/*
+ * commands.c
+ *
+ * Created: 2011-12-14 10:15:54
+ *  Author: jnil02
+ */ 
 
-/** \file
-	\brief Definitions of commands and declarations of command response functions.
-	
-	\details This header file contains
-	1) Declarations of the command response functions.
-	2) Definitions of commands
-	The command response functions are defined in external_interfaces.c.
-	This file contians multiple static variables so it should only be included
-	where necessary.
-	
-	\authors John-Olof Nilsson, Isaac Skog
-	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)	
-*/ 
-
-/**
-	\ingroup openshoe_software
-	
-	\defgroup tables System tables	
-	\brief This group contain table of system definitions.
-	@{
-*/
-
-
-#ifndef COMMANDS_H_
-#define COMMANDS_H_
-
-#include "compiler.h"
-
-
-// Definition structure of commands
-typedef const struct {
-	uint8_t header;
-	void (*cmd_response)(uint8_t**);
-	uint8_t nrb_payload;
-	uint8_t nr_fields;
-	uint8_t field_widths[];
-} command_structure;
+#include "commands.h"
 
 // Command response functions
 void retransmit_header(uint8_t**);
@@ -69,7 +39,7 @@ static command_structure acc_calibration_cmd = {0x12,&acc_calibration,1,1,{1}};
 static command_structure set_low_pass_imu_cmd = {0x13,&set_low_pass_imu,1,1,{1}};
 
 // Arrays/tables to find appropriate commands
-const static command_structure* commands[] = {&only_ack,
+static const command_structure* commands[] = {&only_ack,
 												  &mcu_id,
 												  &header_info,
 												  &command4,
@@ -83,8 +53,16 @@ const static command_structure* commands[] = {&only_ack,
 												  &gyro_calibration_cmd,
 												  &acc_calibration_cmd,
 												  &set_low_pass_imu_cmd};
-
-
-#endif /* COMMANDS_H_ */
-
-//@}
+												  
+// Arrays/tables for commands
+uint8_t command_header_table[32]={0};
+command_structure* command_info_array[256]={NULL};
+												  
+void commands_init(void){
+	// Initialize tables
+	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
+		command_header_table[ (commands[i]->header) >> 3 ] |= 1<<( (commands[i]->header) & 7);}
+		
+	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
+		command_info_array[commands[i]->header] = commands[i];}
+}

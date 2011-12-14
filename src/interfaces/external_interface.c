@@ -56,36 +56,44 @@ static struct rxtx_buffer single_tx_buffer = {single_tx_buffer_array,single_tx_b
 uint8_t error_signal=0;							//Error signaling vector. If zero no error has occurred.
 
 
+/*
 // Arrays/tables for commands
 static uint8_t command_header_table[32]={0};
-static command_structure* command_info_array[256]={NULL};
+static command_structure* command_info_array[256]={NULL};*/
 
 // Bit-field of states which are to be included in the data transmission
-static state_t_info* state_info_access_by_id[SID_LIMIT];
+//static state_t_info* state_info_access_by_id[SID_LIMIT];
 static uint16_t state_output_rate_divider[SID_LIMIT] = {0};
 static uint16_t state_output_rate_counter[SID_LIMIT] = {0};
 #define MAX_LOG2_DIVIDER 14
 #define MIN_LOG2_DIVIDER 0
 
+/*
 // Array containing the processing functions to run
-static proc_func_info* processing_functions_by_id[256];
+static proc_func_info* processing_functions_by_id[256];*/
 
 void com_interface_init(void){
 	// Start usb controller	
 	udc_start();
 	
+	commands_init();
+/*
 	// Initialize tables
 	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
 		command_header_table[ (commands[i]->header) >> 3 ] |= 1<<( (commands[i]->header) & 7);}
 		
 	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
-		command_info_array[commands[i]->header] = commands[i];}
-		
+		command_info_array[commands[i]->header] = commands[i];}*/
+	
+	system_states_init();
+/*
 	for(int i = 0;i<(sizeof(state_struct_array)/sizeof(state_struct_array[0])); i++){
-		state_info_access_by_id[state_struct_array[i]->id] = state_struct_array[i];}
+		state_info_access_by_id[state_struct_array[i]->id] = state_struct_array[i];}*/
 		
+	processing_functions_init();
+/*
 	for(int i = 0;i<(sizeof(processing_functions)/sizeof(processing_functions[0])); i++){
-		processing_functions_by_id[processing_functions[i]->id] = processing_functions[i];}
+		processing_functions_by_id[processing_functions[i]->id] = processing_functions[i];}*/
 }
 
 /***************** Define and inline functions to improve readability of code *****************/
