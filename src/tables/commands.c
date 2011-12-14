@@ -5,7 +5,7 @@
  *  Author: jnil02
  */ 
 
-#include "commands.h"
+#include "control_tables.h"
 
 // Command response functions
 void retransmit_header(uint8_t**);

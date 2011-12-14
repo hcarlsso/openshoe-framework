@@ -6,7 +6,7 @@
  */ 
 
 
-#include "processing_functions.h"
+#include "control_tables.h"
 
 // Externally declared processing functions
 extern void update_imu_data_buffers(void);

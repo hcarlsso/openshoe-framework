@@ -484,19 +484,13 @@
     <Compile Include="src\tables\commands.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\tables\commands.h">
+    <Compile Include="src\tables\control_tables.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\tables\processing_functions.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\tables\processing_functions.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\tables\system_states.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\tables\system_states.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
