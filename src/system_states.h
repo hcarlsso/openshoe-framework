@@ -28,6 +28,9 @@
 #ifndef SYSTEM_STATES_H_
 #define SYSTEM_STATES_H_
 
+#include "compiler.h"
+#include "nav_types.h"
+
 // State data type information
 typedef const struct {
 	uint8_t id;

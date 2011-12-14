@@ -25,6 +25,8 @@
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
 
+#include "compiler.h"
+
 
 // Definition structure of commands
 typedef const struct {
@@ -48,6 +50,7 @@ void processing_onoff(uint8_t**);
 void reset_zupt_aided_ins(uint8_t**);
 void gyro_self_calibration(uint8_t**);
 void acc_calibration(uint8_t **);
+void set_low_pass_imu(uint8_t **);
 
 // Definition of received commands
 static command_structure only_ack = {0x01,NULL,0,0,{0}};
@@ -63,6 +66,7 @@ static command_structure processing_function_onoff = {0x30,&processing_onoff,3,3
 static command_structure reset_system_cmd = {0x10,&reset_zupt_aided_ins,0,0,{0}};
 static command_structure gyro_calibration_cmd = {0x11,&gyro_self_calibration,0,0,{0}};
 static command_structure acc_calibration_cmd = {0x12,&acc_calibration,1,1,{1}};
+static command_structure set_low_pass_imu_cmd = {0x13,&set_low_pass_imu,1,1,{1}};
 
 // Arrays/tables to find appropriate commands
 const static command_structure* commands[] = {&only_ack,
@@ -77,7 +81,8 @@ const static command_structure* commands[] = {&only_ack,
 												  &processing_function_onoff,
 												  &reset_system_cmd,
 												  &gyro_calibration_cmd,
-												  &acc_calibration_cmd};
+												  &acc_calibration_cmd,
+												  &set_low_pass_imu_cmd};
 
 
 #endif /* COMMANDS_H_ */

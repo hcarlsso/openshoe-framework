@@ -78,16 +78,17 @@ void eic_nmi_handler( void )
 	__asm__ __volatile__ ("popm   r0-r12, lr\n\t" "rete");
 }
 
-inline void wait_for_interrupt(void){
+void wait_for_interrupt(void){
 	while(true){
 		if(imu_interrupt_flag==true){
 			imu_interrupt_flag=false;
 			interrupt_counter++;
+			return;
 		}
 	}	
 }	
 
-inline void system_init(void){
+void system_init(void){
 	// Initialize hardware and communication interfaces
 	irq_initialize_vectors();
 	cpu_irq_enable();
@@ -110,25 +111,20 @@ int main (void) {
 		
 		// Check if interrupt has occured
 		wait_for_interrupt();
-/*
-		if(imu_interupt_flag==true){
-			imu_interupt_flag=false;
-			interrupt_counter++;*/
 
-			// Read data from IMU			
-			imu_burst_read();
+		// Read data from IMU			
+		imu_burst_read();
 
-			// Execute all processing functions (filtering)
-			run_process_sequence();
+		// Execute all processing functions (filtering)
+		run_process_sequence();
 
-			// Check if any command has been sent and respond accordingly
-			receive_command();
+		// Check if any command has been sent and respond accordingly
+		receive_command();
 			
-			// Transmit requested data to user
-			transmit_data();
+		// Transmit requested data to user
+		transmit_data();
 			
-			// TODO: Check that the imu_interupt_flag is still false (otherwise the calculations has not completed in time and the system send a warning)
-//		}		
+		// TODO: Check that the imu_interupt_flag is still false (otherwise the calculations has not completed in time and the system send a warning)
 	}
 }
 

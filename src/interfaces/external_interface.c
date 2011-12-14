@@ -20,6 +20,7 @@
 #include "commands.h"
 #include "system_states.h"
 #include "processing_functions.h"
+#include "imu_interface.h"
 
 #define RX_BUFFER_SIZE 20
 #define TX_BUFFER_SIZE 60
@@ -311,6 +312,25 @@ void transmit_data(void){
 }
 
 
+/**
+	\brief Sets state_id state to be output with interrupt frequency divided by 2^divider. Divider=0 turns off output.
+	
+	\details The function checks that state_id is a valid state ID and that divider is within the allowable range.
+*/
+
+void set_state_output(uint8_t state_id, uint8_t divider){
+	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){
+		if (divider>MIN_LOG2_DIVIDER){
+			state_output_rate_divider[state_id] = 1<<(divider-1);
+			state_output_rate_counter[state_id] = 0;
+		} else {
+			state_output_rate_divider[state_id] = 0;
+			state_output_rate_counter[state_id] = 0;
+		}
+	}
+	// TODO: Set some error state if the above does not hold
+}
+
 /******************************** Command callback functions **********************************/
 void retransmit_header(uint8_t** command){
 	udi_cdc_putc(*(*command-1));
@@ -333,24 +353,6 @@ void retransmit_command_info(uint8_t** header_p){
 	}
 }
 
-/**
-	\brief Sets state_id state to be output with interrupt frequency divided by 2^divider. Divider=0 turns off output.
-	
-	\details The function checks that state_id is a valid state ID and that divider is within the allowable range.
-*/
-
-void set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){
-		if (divider>MIN_LOG2_DIVIDER){
-			state_output_rate_divider[state_id] = 1<<(divider-1);
-			state_output_rate_counter[state_id] = 0;
-		} else {
-			state_output_rate_divider[state_id] = 0;
-			state_output_rate_counter[state_id] = 0;
-		}
-	}
-	// TODO: Set some error state if the above does not hold
-}
 
 void get_mcu_serial(uint8_t** arg){
 	udi_cdc_write_buf((int*)0x80800284,0x80800292-0x80800284);}
@@ -449,6 +451,11 @@ void acc_calibration(uint8_t ** cmd_arg){
 	store_and_empty_process_sequence();
 	set_elem_in_process_sequence(processing_functions_by_id[ACCELEROMETER_CALIBRATION]->func_p,0);
 	set_last_process_sequence_element(&new_calibration_orientation);
+}
+
+void set_low_pass_imu(uint8_t ** cmd_arg){
+	uint8_t nr_filter_taps = cmd_arg[0][0];
+	low_pass_filter_setting(nr_filter_taps);
 }
 /**********************************************************************************************/
 

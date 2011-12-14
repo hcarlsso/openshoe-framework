@@ -19,6 +19,8 @@
 #ifndef IMU_SPI_INTERFACE_H_
 #define IMU_SPI_INTERFACE_H_
 
+#include "compiler.h"
+
 //void imu_interupt_init(void);
 
 /// Initialization routine for the IMU to MCU interface
@@ -27,6 +29,8 @@ void imu_interface_init(void);
 void imu_burst_read(void);
 /// Routine for reading only acc and gryo from IMU
 void imu_read_acc_and_gyro(void);
+/// Routine for setting number of filter taps in the IMU
+void low_pass_filter_setting(uint8_t nr_filter_taps);
 
 
 

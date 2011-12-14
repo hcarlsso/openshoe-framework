@@ -32,6 +32,8 @@
 #define BURST_READ 0x3E00
 #define PRECISION_GYRO_BIAS_CALIBRATION 0xBE10
 
+#define SET_NR_FILTER_TAPS 0xB8
+
 struct spi_device SPI_DEVICE_IMU = {
 	// SPI bus 0
 	.id = 0 };
@@ -166,6 +168,7 @@ void imu_burst_read(void){
 }
 
 #warning If this function is used the CONFIG_SPI_MASTER_DELAY_BCT macro must be set to >=9
+// Todo: above
 void imu_read_acc_and_gyro(void){
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,XGYRO_OUT);
@@ -201,4 +204,10 @@ void precision_gyro_bias_null_calibration(void){
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,PRECISION_GYRO_BIAS_CALIBRATION);
 	// After this the IMU will be off-line for ~15s
+}
+
+void low_pass_filter_setting(uint8_t nr_filter_taps){
+	uint16_t tx_word = nr_filter_taps + (1<<8)*SET_NR_FILTER_TAPS;
+	while (!spi_is_tx_ready(SPI_IMU)) {;}
+	spi_put(SPI_IMU,tx_word);
 }
