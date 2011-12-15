@@ -85,9 +85,6 @@ typedef const struct {
 #define ZUPT_SID 0x14
 // System states
 #define INTERRUPT_COUNTER_SID 0x21
-#define WINDOW_SIZE_PID 0x23
-#define TIME_SINCE_LAST_ZUPT_SID 0x24
-#define PROCESS_CYCLE_COUNTER_SID 0x25
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
 //@}
@@ -97,8 +94,6 @@ typedef const struct {
 //@{
 #define ONLY_ACK 0x01
 #define MCU_ID 0x02
-#define HEADER_INFO 0x03
-#define RETRANSMIT_HEADER 0x04
 #define OUTPUT_STATE 0x20
 #define OUTPUT_ALL_OFF 0x21
 #define OUTPUT_ONOFF_INERT 0x22

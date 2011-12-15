@@ -38,9 +38,6 @@ extern bool zupt;
 
 // System states
 extern uint32_t interrupt_counter;
-extern int window_size;
-extern int time_since_last_zupt;
-extern uint32_t process_cycle_counter;	
 
 // "Other" states
 extern vec3 accelerometer_biases;
@@ -58,18 +55,12 @@ static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)
 static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
-static state_t_info window_size_sti = {WINDOW_SIZE_PID, (void*) &window_size, sizeof(int)};
-static state_t_info time_since_last_zupt_sti = {TIME_SINCE_LAST_ZUPT_SID, (void*) &time_since_last_zupt, sizeof(int)};
-static state_t_info process_cycle_counter_sti = {PROCESS_CYCLE_COUNTER_SID, (void*) &process_cycle_counter, sizeof(uint32_t)};
 	
 static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) &accelerometer_biases, sizeof(vec3)};
 //@}
 	
 // Array of state data type struct pointers
 const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
-												   &window_size_sti,
-												   &time_since_last_zupt_sti,
-												   &process_cycle_counter_sti,
 												   &specific_force_sti,
 												   &angular_rate_sti,
 												   &imu_temperaturs_sti,

@@ -28,7 +28,9 @@ void receive_command(void);
 
 void set_state_output(uint8_t state_id, uint8_t divider);
 
+
 // USB vbus callback function
+// TODO: Put this function somewhere else.
 ///\cond
 void vbus_event_callback(bool b_high);
 ///\endcond

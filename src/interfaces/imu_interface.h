@@ -27,10 +27,11 @@
 void imu_interface_init(void);
 /// Routine for fast reading of vcc, acc, gyro, and temp from IMU
 void imu_burst_read(void);
-/// Routine for reading only acc and gryo from IMU
-void imu_read_acc_and_gyro(void);
 /// Routine for setting number of filter taps in the IMU
 void low_pass_filter_setting(uint8_t nr_filter_taps);
+
+// Routine for reading only acc and gryo from IMU
+//void imu_read_acc_and_gyro(void);
 
 
 

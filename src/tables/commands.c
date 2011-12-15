@@ -32,8 +32,6 @@
 ///  \name Command response functions
 ///  Functions which are executed in response to commands.  
 //@{
-void retransmit_header(uint8_t**);
-void retransmit_command_info(uint8_t**);
 void output_state(uint8_t**);
 void turn_off_output(uint8_t**);
 void get_mcu_serial(uint8_t**);
@@ -52,8 +50,6 @@ void set_low_pass_imu(uint8_t **);
 //@{
 static command_structure only_ack = {ONLY_ACK,NULL,0,0,{0}};
 static command_structure mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
-static command_structure header_info = {HEADER_INFO,&retransmit_command_info,1,1,{1}};
-static command_structure command4 = {RETRANSMIT_HEADER,&retransmit_header,4,2,{2,2}};
 static command_structure output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
 static command_structure output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
 static command_structure output_onoff_inert = {OUTPUT_ONOFF_INERT,&toggle_inertial_output,1,1,{1}};
@@ -69,8 +65,6 @@ static command_structure set_low_pass_imu_cmd = {SET_LOWPASS_FILTER_IMU,&set_low
 // Arrays/tables to find appropriate commands
 static const command_structure* commands[] = {&only_ack,
 												  &mcu_id,
-												  &header_info,
-												  &command4,
 												  &output_onoff_state,
 												  &output_all_off,
 												  &output_onoff_inert,
@@ -94,29 +88,6 @@ void commands_init(void){
 	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
 		command_info_array[commands[i]->header] = commands[i];}
 }
-
-
-void retransmit_header(uint8_t** command){
-//	udi_cdc_putc(*(*command-1));
-	return;}
-
-void retransmit_command_info(uint8_t** header_p){
-	uint8_t header = **header_p;
-	// Check that header is valid
-	if(is_valid_header(header)){
-		command_structure* cmd_info = get_command_info(header);
-/*
-		udi_cdc_putc(cmd_info->header);
-//		udi_cdc_putc(cmd_info->cmd_response);
-		udi_cdc_putc(cmd_info->nrb_payload);
-		udi_cdc_putc(cmd_info->nr_fields);
-		udi_cdc_write_buf((int*)cmd_info->field_width,cmd_info->nr_fields);*/
-		}
-	else {
-//		udi_cdc_putc(header);
-	}
-}
-
 
 void get_mcu_serial(uint8_t** arg){
 //	udi_cdc_write_buf((int*)0x80800284,0x80800292-0x80800284);
@@ -223,8 +194,10 @@ void acc_calibration(uint8_t ** cmd_arg){
 }
 
 void set_low_pass_imu(uint8_t ** cmd_arg){
-	uint8_t nr_filter_taps = cmd_arg[0][0];
-	low_pass_filter_setting(nr_filter_taps);
+	uint8_t log2_nr_filter_taps = cmd_arg[0][0];
+	if (log2_nr_filter_taps<=4){
+		low_pass_filter_setting(log2_nr_filter_taps);}
+	// Todo: set error state if above does not hold.
 }
 
 //@}

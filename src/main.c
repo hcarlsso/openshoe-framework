@@ -1,15 +1,22 @@
 
-/**
- * \mainpage The OpenShoe project
- * 
- * \section sec_intro Introduction
- * 
- * blablabla
- *
- */
+
+/** \file
+	\brief Main function and interrupt control
+	
+	\details This file contains the main function and interrupt control.
+	The main function control the execution of the program. The single
+	interrupt routine only toggles a flag which the main function is polling.
+	Each time the flag is toggled, the following will be executed in the main
+	loop: 1) data is read from the IMU 2) functions in the process sequence
+	are executed 3) commands are received from the user 4) and data are
+	transmitted back.
+	
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/ 
 
 
-/// \defgroup openshoe_software OpenShoe software
+/// \defgroup openshoe_software OpenShoe runtime framework
 ///	This module collect all software written for OpenShoe.
 ///	\ingroup openshoe_software
 ///	@{
@@ -23,17 +30,6 @@
 #include "process_sequence.h"
 #include "external_interface.h"
 #include "imu_interface.h"
-
-// Delay functions
-void mdelay(unsigned int ms);
-void ccdelay(unsigned int cc);
-
-// These should be removed
-int window_size;
-int time_since_last_zupt;
-// Iteration counter
-uint32_t process_cycle_counter = 0;
-
 
 // Interrupt counter (essentially a time stamp)
 uint32_t interrupt_counter = 0;
@@ -74,22 +70,16 @@ void eic_nmi_handler( void )
 	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
 	imu_interrupt_flag = true;
 	
+	// Significant amount of processing should not be done inside this routine
+	// since the USB communication will be blocked for its duration.
+	
 	// Restore the registers and leaving the exception handler.
 	__asm__ __volatile__ ("popm   r0-r12, lr\n\t" "rete");
 }
 
-void wait_for_interrupt(void){
-	while(true){
-		if(imu_interrupt_flag==true){
-			imu_interrupt_flag=false;
-			interrupt_counter++;
-			return;
-		}
-	}	
-}	
 
+/// Initialize hardware and communication interfaces
 void system_init(void){
-	// Initialize hardware and communication interfaces
 	irq_initialize_vectors();
 	cpu_irq_enable();
 	board_init();
@@ -101,15 +91,33 @@ void system_init(void){
 	// under any of the above initialization functions.
 }
 
+/// Wait for the interrupt flag to be set
+void wait_for_interrupt(void){
+	while(true){
+		if(imu_interrupt_flag==true){
+			imu_interrupt_flag=false;
+			interrupt_counter++;
+			return;
+		}
+	}	
+}
+
+/// Checks that the main loop has finished before next interrupt
+void within_time_limit(void){
+	if (imu_interrupt_flag!=false){
+		// Todo: Set some error state
+	}
+}
+
 int main (void) {
 	
 	// Initialize system
 	system_init();
 	
-	// Loop indefinately
+	// Loop indefinitely
 	while (true) {
 		
-		// Check if interrupt has occured
+		// Check if interrupt has occurred
 		wait_for_interrupt();
 
 		// Read data from IMU			
@@ -123,30 +131,10 @@ int main (void) {
 			
 		// Transmit requested data to user
 		transmit_data();
-			
-		// TODO: Check that the imu_interupt_flag is still false (otherwise the calculations has not completed in time and the system send a warning)
+		
+		// Ensure the loop was finished within time limit
+		within_time_limit();
 	}
-}
-
-
-void mdelay(unsigned int ms)
-{
-	int32_t count, count_end;
-
-	count = Get_system_register(AVR32_COUNT);
-	count_end = count + ((sysclk_get_cpu_hz() + 999) / 1000) * ms;
-	while ((count_end - count) > 0)
-		count = Get_system_register(AVR32_COUNT);
-}
-
-void ccdelay(unsigned int cc)
-{
-	int32_t count, count_end;
-
-	count = Get_system_register(AVR32_COUNT);
-	count_end = count + cc;
-	while ((count_end - count) > 0)
-		count = Get_system_register(AVR32_COUNT);
 }
 
 //! @}

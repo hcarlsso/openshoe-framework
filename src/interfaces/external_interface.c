@@ -26,7 +26,6 @@
 #include "udi_cdc.h"
 #include "usbc_device.h"
 
-
 ///\name Buffer settings
 //@{
 #define RX_BUFFER_SIZE 20
@@ -80,10 +79,9 @@ void com_interface_init(void){
 	// Start usb controller	
 	udc_start();
 	
-	commands_init();
-	
+	// These initialization functions should be replaced by a code generating script
+	commands_init();	
 	system_states_init();
-		
 	processing_functions_init();
 
 }
@@ -294,6 +292,8 @@ void transmit_data(void){
 			udi_cdc_putc(*tx_buffer.read_position);
 			tx_buffer.read_position++;
 		}
+		// This does not work cause it will hang if user does not clear his buffers sufficiently fast.
+		// Equivalent but non-blocking function should be written.
 //		udi_cdc_write_buf((int*)tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer);
 	}	
 }
@@ -319,7 +319,6 @@ void set_state_output(uint8_t state_id, uint8_t divider){
 
 
 
-// TODO: Put this function somewhere else.
 // Callback function for usb-vbus event (see conf_usb.h)
 ///\cond
 void vbus_event_callback(bool b_high){

@@ -12,7 +12,10 @@
  *
  * \authors John-Olof Nilsson, Isaac Skog
  * \copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
- */ 
+ */
+
+///\addtogroup imu_interface
+//@{
 
 #include "imu_interface.h"
 #include "conf_spi_master.h"
@@ -22,27 +25,35 @@
 #include <spi.h>
 #include <spi_master.h>
 
+/*
 #define XGYRO_OUT 0x0400
 #define YGYRO_OUT 0x0600
 #define ZGYRO_OUT 0x0800
 #define XACC_OUT 0x0A00
 #define YACC_OUT 0x0C00
-#define ZACC_OUT 0x0E00
+#define ZACC_OUT 0x0E00*/
 
+///\name IMU commands
+//@{
 #define BURST_READ 0x3E00
 #define PRECISION_GYRO_BIAS_CALIBRATION 0xBE10
-
 #define SET_NR_FILTER_TAPS 0xB8
+//@}
+
+#define MAX_LOG2_NR_FILTER_TAPS 4
 
 struct spi_device SPI_DEVICE_IMU = {
 	// SPI bus 0
 	.id = 0 };
 
+///\name Scaling of IMU raw data
+//@{
 #define SUPPLY_SCALE 0.002418f
 #define GYRO_SCALE 0.00087266f
 #define ACC_SCALE 0.0081643275f
 #define TEMP_SCALE 0.0085f
 #define SUPPLY_SCALE 0.000151125f
+//@}
 
 // Local variables to store imu raw output
 static uint16_t supply;
@@ -167,6 +178,7 @@ void imu_burst_read(void){
 	convert_auxiliary_data();
 }
 
+/*
 #warning If this function is used the CONFIG_SPI_MASTER_DELAY_BCT macro must be set to >=9
 // Todo: above
 void imu_read_acc_and_gyro(void){
@@ -198,7 +210,7 @@ void imu_read_acc_and_gyro(void){
 	zacc = spi_get(SPI_IMU);
 	
 	convert_inert_readings();
-}
+}*/
 
 void precision_gyro_bias_null_calibration(void){
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
@@ -207,7 +219,12 @@ void precision_gyro_bias_null_calibration(void){
 }
 
 void low_pass_filter_setting(uint8_t nr_filter_taps){
-	uint16_t tx_word = nr_filter_taps + (1<<8)*SET_NR_FILTER_TAPS;
+	uint8_t log2_nr_filter_taps = nr_filter_taps;
+	if (log2_nr_filter_taps>MAX_LOG2_NR_FILTER_TAPS){
+		log2_nr_filter_taps=MAX_LOG2_NR_FILTER_TAPS;}
+	uint16_t tx_word = log2_nr_filter_taps + (1<<8)*SET_NR_FILTER_TAPS;
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,tx_word);
 }
+
+//@}
