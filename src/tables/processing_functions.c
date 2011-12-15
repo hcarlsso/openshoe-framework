@@ -1,10 +1,29 @@
-/*
- * processing_functions.c
- *
- * Created: 2011-12-14 10:59:45
- *  Author: jnil02
- */ 
 
+
+/** \file
+	\brief Declarations of externally controlled process sequence frunctions.
+	
+	\details This file contain declarations of functions which can be added
+	to the process sequence and definitions of information structs to these
+	functions. The functions are declared and defined elsewhere in the system.
+	This is	just a place where the are all gathered. This will facilitate the
+	management of all processing functions.
+	Any function which should be inserted in to the process sequence should be
+	added to this file.
+	
+	The file also contain an initialization function to fill up some arrays of
+	states structs. This initialization function must be called before the
+	arrays are used. This should eventually be replaced by some code generating
+	script which explicitly declear the arrays.
+	
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/
+
+/**
+	\addtogroup control_tables
+	@{
+*/
 
 #include "control_tables.h"
 
@@ -18,6 +37,9 @@ extern void zupt_update(void);
 extern void precision_gyro_bias_null_calibration(void);
 extern void calibrate_accelerometers(void);
 
+///  \name Processing functions information
+///  Structs containing information and pointers to functions intended for the process sequence
+//@{
 static proc_func_info update_imu_data_buffers_info = {UPDATE_BUFFER,&update_imu_data_buffers,0};
 static proc_func_info initialize_navigation_algorithm_info = {INITIAL_ALIGNMENT,&initialize_navigation_algorithm,0};
 static proc_func_info strapdown_mechanisation_equations_info = {MECHANIZATION,&strapdown_mechanisation_equations,0};
@@ -26,6 +48,7 @@ static proc_func_info ZUPT_detector_info = {ZUPT_DETECTOR,&ZUPT_detector,0};
 static proc_func_info zupt_update_info = {ZUPT_UPDATE,&zupt_update,0};
 static proc_func_info precision_gyro_bias_null_calibration_info = {GYRO_CALIBRATION,&precision_gyro_bias_null_calibration,0};
 static proc_func_info calibrate_accelerometers_info = {ACCELEROMETER_CALIBRATION,&calibrate_accelerometers,0};
+//@}
 
 const proc_func_info* processing_functions[] = {&update_imu_data_buffers_info,
 													   &initialize_navigation_algorithm_info,

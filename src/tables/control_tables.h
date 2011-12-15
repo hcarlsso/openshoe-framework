@@ -1,9 +1,26 @@
-/*
- * control_tables.h
- *
- * Created: 2011-12-14 11:29:51
- *  Author: jnil02
- */ 
+
+
+/** \file
+	\brief Header file for all tabulated information for the control and communication.
+	
+	\details This file contains declarations of arrays containing tabulated
+	information about external system states, processing functions, and
+	commands. It also contains struct typedefs of structs containing such
+	information for individual states, functions, and commands, together
+	with ID macros for the same.
+	Delcarations of initialization functions for the arrays are also found.
+	
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/ 
+
+/**
+	\ingroup openshoe_software
+	
+	\defgroup control_tables Tabulated information	
+	\brief This group contains tabulated information for the control and communication.
+	@{
+*/
 
 
 #ifndef CONTROL_TABLES_H_
@@ -37,7 +54,9 @@ typedef const struct {
 } state_t_info;
 
 
-// Processing functions ids
+///  \name Processing functions IDs
+///  Macros for processing functions IDs
+//@{
 #define UPDATE_BUFFER 0x04
 #define INITIAL_ALIGNMENT 0x05
 #define MECHANIZATION 0x06
@@ -46,7 +65,11 @@ typedef const struct {
 #define ZUPT_UPDATE 0x09
 #define GYRO_CALIBRATION 0x10
 #define ACCELEROMETER_CALIBRATION 0x11
+//@}
 
+///  \name External state IDs
+///  Macros for external state IDs
+//@{
 // Maximum value of state ID (255)
 #define SID_LIMIT 0xFF
 // State IDs
@@ -67,7 +90,26 @@ typedef const struct {
 #define PROCESS_CYCLE_COUNTER_SID 0x25
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
+//@}
 
+///  \name Command IDs
+///  Macros for command IDs
+//@{
+#define ONLY_ACK 0x01
+#define MCU_ID 0x02
+#define HEADER_INFO 0x03
+#define RETRANSMIT_HEADER 0x04
+#define OUTPUT_STATE 0x20
+#define OUTPUT_ALL_OFF 0x21
+#define OUTPUT_ONOFF_INERT 0x22
+#define OUTPUT_POSITION_PLUS_ZUPT 0x23
+#define OUTPUT_NAVIGATIONAL_STATES 0x24
+#define PROCESSING_FUNCTION_ONOFF 0x30
+#define RESET_ZUPT_AIDED_INS 0x10
+#define GYRO_CALIBRATION_INIT 0x11
+#define ACC_CALIBRATION_INIT 0x12
+#define SET_LOWPASS_FILTER_IMU 0x13
+//@}
 
 // Global variables used to access command information
 extern uint8_t command_header_table[32];
@@ -92,3 +134,5 @@ void system_states_init(void);
 
 
 #endif /* CONTROL_TABLES_H_ */
+
+//@}

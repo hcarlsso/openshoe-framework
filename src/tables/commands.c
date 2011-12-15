@@ -1,13 +1,37 @@
 
 
+/** \file
+	\brief Definition of user commands and command response functions.
+	
+	\details This file contains definition of user commands used to control
+	the OpenShoe system. Each command is defined in a command info struct
+	containing an ID, a pointer to a response function, and information about
+	the arguemetns of the command.
+	
+	The command response functions are the functions which will be exectued as
+	a response to the command being called. These functions are also declared
+	and defined in this file.
+	
+	\authors John-Olof Nilsson, Isaac Skog
+	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
+*/ 
+
+
+///	\addtogroup control_tables
+///	@{
+
 #include "control_tables.h"
 
 // Needed include for definition of command response functions
 #include "external_interface.h"
 #include "process_sequence.h"
 #include "imu_interface.h"
+#include "udi_cdc.h"
 
-// Command response functions
+
+///  \name Command response functions
+///  Functions which are executed in response to commands.  
+//@{
 void retransmit_header(uint8_t**);
 void retransmit_command_info(uint8_t**);
 void output_state(uint8_t**);
@@ -21,22 +45,26 @@ void reset_zupt_aided_ins(uint8_t**);
 void gyro_self_calibration(uint8_t**);
 void acc_calibration(uint8_t **);
 void set_low_pass_imu(uint8_t **);
+//@}
 
-// Definition of received commands
-static command_structure only_ack = {0x01,NULL,0,0,{0}};
-static command_structure mcu_id = {0x02,&get_mcu_serial,0,0,{0}};
-static command_structure header_info = {0x03,&retransmit_command_info,1,1,{1}};
-static command_structure command4 = {0x04,&retransmit_header,4,2,{2,2}};
-static command_structure output_onoff_state = {0x20,&output_state,2,2,{1,1}};
-static command_structure output_all_off = {0x21,&turn_off_output,0,0,{0}};
-static command_structure output_onoff_inert = {0x22,&toggle_inertial_output,1,1,{1}};
-static command_structure output_position_plus_zupt = {0x23,&position_plus_zupt,1,1,{1}};
-static command_structure output_navigational_states_cmd = {0x24,&output_navigational_states,1,1,{1}};
-static command_structure processing_function_onoff = {0x30,&processing_onoff,3,3,{1,1,1}};
-static command_structure reset_system_cmd = {0x10,&reset_zupt_aided_ins,0,0,{0}};
-static command_structure gyro_calibration_cmd = {0x11,&gyro_self_calibration,0,0,{0}};
-static command_structure acc_calibration_cmd = {0x12,&acc_calibration,1,1,{1}};
-static command_structure set_low_pass_imu_cmd = {0x13,&set_low_pass_imu,1,1,{1}};
+///  \name Command definitions
+///  Structs containing the information/definitions of the commands.
+//@{
+static command_structure only_ack = {ONLY_ACK,NULL,0,0,{0}};
+static command_structure mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
+static command_structure header_info = {HEADER_INFO,&retransmit_command_info,1,1,{1}};
+static command_structure command4 = {RETRANSMIT_HEADER,&retransmit_header,4,2,{2,2}};
+static command_structure output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
+static command_structure output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
+static command_structure output_onoff_inert = {OUTPUT_ONOFF_INERT,&toggle_inertial_output,1,1,{1}};
+static command_structure output_position_plus_zupt = {OUTPUT_POSITION_PLUS_ZUPT,&position_plus_zupt,1,1,{1}};
+static command_structure output_navigational_states_cmd = {OUTPUT_NAVIGATIONAL_STATES,&output_navigational_states,1,1,{1}};
+static command_structure processing_function_onoff = {PROCESSING_FUNCTION_ONOFF,&processing_onoff,3,3,{1,1,1}};
+static command_structure reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_aided_ins,0,0,{0}};
+static command_structure gyro_calibration_cmd = {GYRO_CALIBRATION_INIT,&gyro_self_calibration,0,0,{0}};
+static command_structure acc_calibration_cmd = {ACC_CALIBRATION_INIT,&acc_calibration,1,1,{1}};
+static command_structure set_low_pass_imu_cmd = {SET_LOWPASS_FILTER_IMU,&set_low_pass_imu,1,1,{1}};
+//@}
 
 // Arrays/tables to find appropriate commands
 static const command_structure* commands[] = {&only_ack,
@@ -130,7 +158,9 @@ void processing_onoff(uint8_t** cmd_arg){
 	set_elem_in_process_sequence(process_sequence_elem_value,array_location);
 }
 
+///\cond
 extern bool initialize_flag;
+///\endcond
 void stop_initial_alignement(void){
 	if(initialize_flag==false){
 		// Stop initial alignement
@@ -161,9 +191,10 @@ void gyro_self_calibration(uint8_t** no_arg){
 	set_last_process_sequence_element(&restore_process_sequence);
 }
 	
-	
+///\cond
 extern Bool new_orientation_flag;
 extern Bool acc_calibration_finished_flag;
+///\endcond
 void new_calibration_orientation(void){
 	if(acc_calibration_finished_flag){
 		acc_calibration_finished_flag = false;
@@ -179,7 +210,9 @@ void new_calibration_orientation(void){
 	}
 }
 
+///\cond
 extern uint8_t nr_of_calibration_orientations;
+///\endcond
 void acc_calibration(uint8_t ** cmd_arg){
 	uint8_t nr_orientations = cmd_arg[0][0];
 	nr_of_calibration_orientations = nr_orientations;
@@ -193,3 +226,5 @@ void set_low_pass_imu(uint8_t ** cmd_arg){
 	uint8_t nr_filter_taps = cmd_arg[0][0];
 	low_pass_filter_setting(nr_filter_taps);
 }
+
+//@}

@@ -8,36 +8,50 @@
 	
 	\authors John-Olof Nilsson, Isaac Skog
 	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
-*/ 
+*/
 
+///	\addtogroup user_interface
+///	@{
+
+// Needed for memcpy
 #include <string.h>
-#include <math.h>
-#include "compiler.h"
-#include "external_interface.h"
-#include "udi_cdc.h"
-#include "gpio.h"
 
+#include "external_interface.h"
 #include "control_tables.h"
 
+// All USB include files (possibly not all needed)
+#include "conf_usb.h"
+#include "udd.h"
+#include "udc.h"
+#include "udi_cdc.h"
+#include "usbc_device.h"
+
+
+///\name Buffer settings
+//@{
 #define RX_BUFFER_SIZE 20
 #define TX_BUFFER_SIZE 60
 #define SINGLE_TX_BUFFER_SIZE 10
-#define MIN_DATA 4
 #define MAX_RX_NRB 10
+//@}
+
+///\cond
+#define CHECKSUM_BYTES 2
+#define HEADER_BYTES 1
+#define MAX_COMMAND_ARGS 10
 
 #define NO_EXPECTED_BYTES 0
 #define SINGLE_BYTE_EXPECTED 1
 
-#define MAX_COMMAND_ARGS 10
 #define USB_TIMEOUT_COUNT 200000000
-#define CHECKSUM_BYTES 2
-#define HEADER_BYTES 1
 #define NO_INITIATED_TRANSMISSION 0
 #define COUNTER_RESET_VALUE 0
 #define NO_BYTES_RECEIVED_YET 0
 
 #define STATE_OUTPUT_HEADER 0xAA
+///\endcond
 
+/// Receive and transmit buffer
 static struct rxtx_buffer{
 	uint8_t* buffer;
 	uint8_t* write_position;
@@ -52,11 +66,16 @@ static struct rxtx_buffer single_tx_buffer = {single_tx_buffer_array,single_tx_b
 // Error variables
 uint8_t error_signal=0;							//Error signaling vector. If zero no error has occurred.
 
-static uint16_t state_output_rate_divider[SID_LIMIT] = {0};
-static uint16_t state_output_rate_counter[SID_LIMIT] = {0};
+///\name State output divider limits
+//@{
 #define MAX_LOG2_DIVIDER 14
 #define MIN_LOG2_DIVIDER 0
+//@}
+// State output rate control variables
+static uint16_t state_output_rate_divider[SID_LIMIT] = {0};
+static uint16_t state_output_rate_counter[SID_LIMIT] = {0};
 
+/// Initialization function for communication interface
 void com_interface_init(void){
 	// Start usb controller	
 	udc_start();
@@ -69,7 +88,8 @@ void com_interface_init(void){
 
 }
 
-/***************** Define and inline functions to improve readability of code *****************/
+// Define and inline functions to improve readability of code
+///\cond
 #define receive_limit_not_reached(rx_nrb_counter) ((rx_nrb_counter)<MAX_RX_NRB)
 #define reset_timer(timer) ((timer) = Get_system_register(AVR32_COUNT))
 #define is_new_header(exp_nrb) ((exp_nrb) == NO_EXPECTED_BYTES)
@@ -77,6 +97,7 @@ void com_interface_init(void){
 #define has_timed_out(timeout_counter, exp_nrb) ((timeout_counter) + USB_TIMEOUT_COUNT < Get_system_register(AVR32_COUNT) && (exp_nrb) > 0)
 #define increment_counter(counter) ((counter)++)
 #define decrement_counter(counter) ((counter)--)
+///\endcond
 
 static inline void reset_buffer(struct rxtx_buffer* buffer){
 	buffer->write_position = buffer->buffer;
@@ -118,21 +139,15 @@ static inline void send_ak(struct rxtx_buffer* buffer){
 	*single_tx_buffer.write_position = MSB(chk);
 	increment_counter(single_tx_buffer.write_position);
 	*single_tx_buffer.write_position = LSB(chk);
-	increment_counter(single_tx_buffer.write_position);
+	increment_counter(single_tx_buffer.write_position);}
 	
-//	uint8_t ak[4] = { 0xa0, *buffer->buffer, 0, *buffer->buffer };
-//	udi_cdc_write_buf((int*) ak,4);
-	}
 static inline void send_nak(void){
 	*single_tx_buffer.write_position = 0xa1;
 	increment_counter(single_tx_buffer.write_position);
 	*single_tx_buffer.write_position = 0x0;
 	increment_counter(single_tx_buffer.write_position);
 	*single_tx_buffer.write_position = 0xa1;
-	increment_counter(single_tx_buffer.write_position);
-//	uint8_t nak[3] = { 0xa1, 0, 0 };
-//	udi_cdc_write_buf((int*) nak,3);
-}
+	increment_counter(single_tx_buffer.write_position);}
 
 static inline void parse_and_execute_command(struct rxtx_buffer* buffer,command_structure* cmd_info){
 	static uint8_t* command_arg[MAX_COMMAND_ARGS];
@@ -272,11 +287,8 @@ void transmit_data(void){
 	static uint8_t downsampling_tx_counter = 0;
 
 	if(is_usb_attached()){
-//		bool any_data = false;
 		// Generate output
 		assemble_output_data(&tx_buffer);
-//		if((tx_buffer.write_position-tx_buffer.buffer)!=0){
-//			any_data = true;}
 		// Transmit output
 		while(tx_buffer.read_position<tx_buffer.write_position && udi_cdc_is_tx_ready()){
 			udi_cdc_putc(*tx_buffer.read_position);
@@ -286,13 +298,12 @@ void transmit_data(void){
 	}	
 }
 
-
 /**
-	\brief Sets state_id state to be output with interrupt frequency divided by 2^divider. Divider=0 turns off output.
+	\brief Sets state_id state to be output with interrupt frequency divided by 2^(divider-1). Divider=0 turns off output.
 	
-	\details The function checks that state_id is a valid state ID and that divider is within the allowable range.
+	\details The function checks that state_id is a valid state ID and that
+	divider is within the allowable range.
 */
-
 void set_state_output(uint8_t state_id, uint8_t divider){
 	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){
 		if (divider>MIN_LOG2_DIVIDER){
@@ -307,8 +318,12 @@ void set_state_output(uint8_t state_id, uint8_t divider){
 }
 
 
-/**********************************************************************************************/
 
+// TODO: Put this function somewhere else.
 // Callback function for usb-vbus event (see conf_usb.h)
+///\cond
 void vbus_event_callback(bool b_high){
 	b_high ? udc_attach() : udc_detach();}
+///\endcond
+	
+// @}
