@@ -11,7 +11,10 @@
 		
 	\authors John-Olof Nilsson, Isaac Skog
 	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
-*/ 
+*/
+
+///\addtogroup proc_sequence
+//@{
 
 #include "process_sequence.h"
 
@@ -74,3 +77,5 @@ void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem
 		process_sequence[elem_nr] = elem_value;
 	}
 }
+
+//@}

@@ -41,8 +41,10 @@ void output_navigational_states(uint8_t**);
 void processing_onoff(uint8_t**);
 void reset_zupt_aided_ins(uint8_t**);
 void gyro_self_calibration(uint8_t**);
-void acc_calibration(uint8_t **);
-void set_low_pass_imu(uint8_t **);
+void acc_calibration(uint8_t**);
+void set_low_pass_imu(uint8_t**);
+void add_sync_output(uint8_t**);
+void sync_output(uint8_t**);
 //@}
 
 ///  \name Command definitions
@@ -60,21 +62,25 @@ static command_structure reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_ai
 static command_structure gyro_calibration_cmd = {GYRO_CALIBRATION_INIT,&gyro_self_calibration,0,0,{0}};
 static command_structure acc_calibration_cmd = {ACC_CALIBRATION_INIT,&acc_calibration,1,1,{1}};
 static command_structure set_low_pass_imu_cmd = {SET_LOWPASS_FILTER_IMU,&set_low_pass_imu,1,1,{1}};
+static command_structure add_sync_output_cmd = {ADD_SYNC_OUTPUT,&add_sync_output,2,2,{1,1}};
+static command_structure sync_output_cmd = {SYNC_OUTPUT,&sync_output,0,0,{0}};
 //@}
 
 // Arrays/tables to find appropriate commands
 static const command_structure* commands[] = {&only_ack,
-												  &mcu_id,
-												  &output_onoff_state,
-												  &output_all_off,
-												  &output_onoff_inert,
-												  &output_position_plus_zupt,
-												  &output_navigational_states_cmd,
-												  &processing_function_onoff,
-												  &reset_system_cmd,
-												  &gyro_calibration_cmd,
-												  &acc_calibration_cmd,
-												  &set_low_pass_imu_cmd};
+											  &mcu_id,
+											  &output_onoff_state,
+											  &output_all_off,
+											  &output_onoff_inert,
+											  &output_position_plus_zupt,
+											  &output_navigational_states_cmd,
+											  &processing_function_onoff,
+											  &reset_system_cmd,
+											  &gyro_calibration_cmd,
+											  &acc_calibration_cmd,
+											  &set_low_pass_imu_cmd,
+											  &add_sync_output_cmd,
+											  &sync_output_cmd};
 												  
 // Arrays/tables for commands
 uint8_t command_header_table[32]={0};
@@ -96,7 +102,6 @@ void get_mcu_serial(uint8_t** arg){
 void output_state(uint8_t** cmd_arg){
 	uint8_t state_id = cmd_arg[0][0];
 	uint8_t output_divider    = cmd_arg[1][0];
-	uint8_t id_bit = 1 << (state_id % 8);
 	if(state_info_access_by_id[state_id]){  // Valid state?
 		set_state_output(state_id,output_divider);}}
 
@@ -198,6 +203,18 @@ void set_low_pass_imu(uint8_t ** cmd_arg){
 	if (log2_nr_filter_taps<=4){
 		low_pass_filter_setting(log2_nr_filter_taps);}
 	// Todo: set error state if above does not hold.
+}
+
+void add_sync_output(uint8_t** cmd_arg){
+	uint8_t state_id = cmd_arg[0][0];
+	uint8_t output_divider    = cmd_arg[1][0];
+	if(state_info_access_by_id[state_id]){  // Valid state?
+		set_state_output(state_id,output_divider);}
+	reset_output_counters();
+}
+
+void sync_output(uint8_t** no_arg){
+	reset_output_counters();
 }
 
 //@}

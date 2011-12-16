@@ -95,6 +95,8 @@ void com_interface_init(void){
 #define has_timed_out(timeout_counter, exp_nrb) ((timeout_counter) + USB_TIMEOUT_COUNT < Get_system_register(AVR32_COUNT) && (exp_nrb) > 0)
 #define increment_counter(counter) ((counter)++)
 #define decrement_counter(counter) ((counter)--)
+#define FIRST_PAYLOAD_BYTE (state_output_header_p+2)
+#define PAYLOAD_SIZE_BYTE (state_output_header_p+1)
 ///\endcond
 
 static inline void reset_buffer(struct rxtx_buffer* buffer){
@@ -186,6 +188,7 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	// Add header for state data output
 	*buffer->write_position = STATE_OUTPUT_HEADER;
 	increment_counter(buffer->write_position);
+	increment_counter(buffer->write_position);
 	// Copy all enabled states to buffer	
 	for(int i = 0; i<SID_LIMIT; i++){
 		if( state_output_rate_divider[i] ){
@@ -195,18 +198,19 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 				memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
 				buffer->write_position+=state_info_access_by_id[i]->state_size;
 			}
+			// The counter counts down since then the comparison at each proceedure call can be done with a constant (0)
 			state_output_rate_counter[i]--;
 		}
 	}
-	// If any data was added, calculate and add checksum
-	if(state_output_header_p+1!=buffer->write_position){
+	// If any data was added, add payload size and calculate and add checksum
+	if(FIRST_PAYLOAD_BYTE!=buffer->write_position){
+		*PAYLOAD_SIZE_BYTE=buffer->write_position-FIRST_PAYLOAD_BYTE;
 		uint16_t checksum = calc_checksum(state_output_header_p,buffer->write_position-1);
 		*buffer->write_position = MSB(checksum);
 		increment_counter(buffer->write_position);
 		*buffer->write_position = LSB(checksum);
 		increment_counter(buffer->write_position);}
 	else {
-//		reset_buffer(buffer);
 		buffer->write_position = state_output_header_p;
 	}
 }
@@ -315,6 +319,13 @@ void set_state_output(uint8_t state_id, uint8_t divider){
 		}
 	}
 	// TODO: Set some error state if the above does not hold
+}
+
+// Reset the output counter such that the output become synchronized.
+void reset_output_counters(void){
+	for(int i=0;i<SID_LIMIT;i++){
+		state_output_rate_counter[i] = 0;
+	}
 }
 
 

@@ -27,6 +27,7 @@ void transmit_data(void);
 void receive_command(void);
 
 void set_state_output(uint8_t state_id, uint8_t divider);
+void reset_output_counters(void);
 
 
 // USB vbus callback function

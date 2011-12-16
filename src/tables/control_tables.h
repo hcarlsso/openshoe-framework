@@ -104,6 +104,8 @@ typedef const struct {
 #define GYRO_CALIBRATION_INIT 0x11
 #define ACC_CALIBRATION_INIT 0x12
 #define SET_LOWPASS_FILTER_IMU 0x13
+#define ADD_SYNC_OUTPUT 0x25
+#define SYNC_OUTPUT 0x26
 //@}
 
 // Global variables used to access command information
