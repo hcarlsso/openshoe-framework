@@ -8,18 +8,21 @@
 	interrupt routine only toggles a flag which the main function is polling.
 	Each time the flag is toggled, the following will be executed in the main
 	loop: 1) data is read from the IMU 2) functions in the process sequence
-	are executed 3) commands are received from the user 4) and data are
-	transmitted back.
+	are executed 3) commands are received from the user 4) data are
+	transmitted back 5) and it is checked that a new interrupt did not arrived
+	while the program was executing the main loop.
 	
 	\authors John-Olof Nilsson, Isaac Skog
 	\copyright Copyright (c) 2011 OpenShoe, ISC License (open source)
 */ 
 
-
-/// \defgroup openshoe_software OpenShoe runtime framework
-///	This module collect all software written for OpenShoe.
-///	\ingroup openshoe_software
-///	@{
+/**
+  \defgroup openshoe_runtime_framework OpenShoe runtime framework
+  \brief This module collect all software written for OpenShoe.
+  
+  \ingroup openshoe_runtime_framework
+  @{
+*/
 
 /*
  * Include header files for all drivers that have been imported from
@@ -91,7 +94,7 @@ void system_init(void){
 	// under any of the above initialization functions.
 }
 
-/// Wait for the interrupt flag to be set
+/// Wait for the interrupt flag to be set, toggle it, increase interrupt counter, and return.
 void wait_for_interrupt(void){
 	while(true){
 		if(imu_interrupt_flag==true){
@@ -114,7 +117,7 @@ int main (void) {
 	// Initialize system
 	system_init();
 	
-	// Loop indefinitely
+	// Main executing loop: Loops indefinitely
 	while (true) {
 		
 		// Check if interrupt has occurred

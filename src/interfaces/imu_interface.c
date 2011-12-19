@@ -42,10 +42,6 @@
 
 #define MAX_LOG2_NR_FILTER_TAPS 4
 
-struct spi_device SPI_DEVICE_IMU = {
-	// SPI bus 0
-	.id = 0 };
-
 ///\name Scaling of IMU raw data
 //@{
 #define SUPPLY_SCALE 0.002418f
@@ -54,6 +50,11 @@ struct spi_device SPI_DEVICE_IMU = {
 #define TEMP_SCALE 0.0085f
 #define SUPPLY_SCALE 0.000151125f
 //@}
+
+// Data structure need for SPI calls
+struct spi_device SPI_DEVICE_IMU = {
+	// SPI bus 0
+	.id = 0 };
 
 // Local variables to store imu raw output
 static uint16_t supply;
@@ -76,7 +77,7 @@ static int16_t aux_adc;
  */
 //@{
 vec3 accelerations_in;			///< \f$[m/s^2]\f$
-vec3 angular_rates_in;				///< \f$[rad/s]\f$
+vec3 angular_rates_in;			///< \f$[rad/s]\f$
 vec3 imu_temperaturs;			///< \f$[^circ C]\f$
 precision imu_supply_voltage;	///< \f$[V]\f$
 //@}
@@ -126,6 +127,23 @@ void convert_auxiliary_data(void){
 	imu_supply_voltage = SUPPLY_SCALE * supply;
 }
 
+
+/*! \brief Request and reads all sensor output data from IMU.
+
+	\details This function uses the IMU burst read functionallity in which all
+	IMU sensor data (rotation, specific force, temperature, and supply voltage)
+	is output by the IMU after a single request. This way only two clock
+	cycles are required between each read operation. This is faster than only
+	reading out rotation and specific force.
+	The functions first reads in the values in 16-bit intermediate variables
+	and then call the help functions convert_inert_readings() and
+	convert_auxiliary_data() to shift out status bits and scale to SI units.
+	
+	@param[out] angular_rates_in		Vector containing the 3 (x,y,z) angular rates in [rad/sec].
+	@param[out] accelerations_in		Vector containing the 3 (x,y,z) specific force in [m/s^2].
+	@param[out] imu_temperatures		Vector containing the 3 (x,y,z) temperatur readings in [C].
+	@param[out] imu_supply_voltage		Supply voltage measurement in [V].
+*/
 void imu_burst_read(void){
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,BURST_READ);
@@ -212,12 +230,24 @@ void imu_read_acc_and_gyro(void){
 	convert_inert_readings();
 }*/
 
+
+/*! \brief Initializes the internal IMU gyro calibration routine.
+
+	\details The internal gyro calibration routine will take the mean gyro
+	value over approx. 15s. During this time the IMU will be off-line (not
+	sending out any	interrupts). During this period the IMU should be kept
+	statinarry.
+*/
 void precision_gyro_bias_null_calibration(void){
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,PRECISION_GYRO_BIAS_CALIBRATION);
 	// After this the IMU will be off-line for ~15s
 }
 
+/*! \brief Sets the number of filter taps of the IMU internal low pass filter.
+
+	\details 
+*/
 void low_pass_filter_setting(uint8_t nr_filter_taps){
 	uint8_t log2_nr_filter_taps = nr_filter_taps;
 	if (log2_nr_filter_taps>MAX_LOG2_NR_FILTER_TAPS){

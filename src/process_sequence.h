@@ -9,7 +9,7 @@
 */
 
 /**
-	\ingroup openshoe_software
+	\ingroup openshoe_runtime_framework
 	
 	\defgroup proc_sequence Processing sequence	
 	\brief This groupe contains the processing sequence declarations and definitions.

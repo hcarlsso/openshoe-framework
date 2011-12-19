@@ -9,7 +9,7 @@
 */ 
 
 /**
-	\ingroup openshoe_software
+	\ingroup openshoe_runtime_framework
 	
 	\defgroup imu_interface IMU interface	
 	\brief This group contains the IMU interface functionalities.
@@ -25,9 +25,9 @@
 
 /// Initialization routine for the IMU to MCU interface
 void imu_interface_init(void);
-/// Routine for fast reading of vcc, acc, gyro, and temp from IMU
+// Routine for fast reading of vcc, acc, gyro, and temp from IMU
 void imu_burst_read(void);
-/// Routine for setting number of filter taps in the IMU
+// Routine for setting number of filter taps in the IMU
 void low_pass_filter_setting(uint8_t nr_filter_taps);
 
 // Routine for reading only acc and gryo from IMU

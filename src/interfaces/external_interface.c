@@ -35,13 +35,12 @@
 //@}
 
 ///\cond
+// Macros for improved readability. Excluded from doxygen.
 #define CHECKSUM_BYTES 2
 #define HEADER_BYTES 1
 #define MAX_COMMAND_ARGS 10
-
 #define NO_EXPECTED_BYTES 0
 #define SINGLE_BYTE_EXPECTED 1
-
 #define USB_TIMEOUT_COUNT 200000000
 #define NO_INITIATED_TRANSMISSION 0
 #define COUNTER_RESET_VALUE 0
@@ -70,23 +69,26 @@ uint8_t error_signal=0;							//Error signaling vector. If zero no error has occ
 #define MAX_LOG2_DIVIDER 14
 #define MIN_LOG2_DIVIDER 0
 //@}
-// State output rate control variables
+///\name State output rate control variables
+//@{
 static uint16_t state_output_rate_divider[SID_LIMIT] = {0};
 static uint16_t state_output_rate_counter[SID_LIMIT] = {0};
+//@}
 
 /// Initialization function for communication interface
 void com_interface_init(void){
 	// Start usb controller	
 	udc_start();
 	
-	// These initialization functions should be replaced by a code generating script
+	// These initialization functions should be replaced by a code generating script/preprocessors
+	// They only initialize constant arrays.
 	commands_init();	
 	system_states_init();
 	processing_functions_init();
 
 }
 
-// Define and inline functions to improve readability of code
+// Define and inline functions for improved readability of code
 ///\cond
 #define receive_limit_not_reached(rx_nrb_counter) ((rx_nrb_counter)<MAX_RX_NRB)
 #define reset_timer(timer) ((timer) = Get_system_register(AVR32_COUNT))
@@ -119,6 +121,7 @@ inline static int get_payload_size(command_structure* cmd_info){
 inline static int get_expected_nrb(command_structure* cmd_info){
 	return get_payload_size(cmd_info) + CHECKSUM_BYTES;}
 
+/// Calculates the 16-bit sum of all bytes between arguments.
 static inline uint16_t calc_checksum(uint8_t* first, uint8_t* last){
 	int length = last-first+1;
 	uint16_t checksum = 0;

@@ -40,7 +40,9 @@ void store_and_empty_process_sequence(void){
 	for(int i = 0;i<PROCESS_SEQUENCE_SIZE;i++){
 		process_sequence_storage[i] = process_sequence[i];
 		process_sequence[i]=NULL;}}
-/**
+
+
+/**	
 	\brief Copy the content of the \#process_sequence_storage to the \#process_sequence.
 
 	\details This assumes that the store_and_empty_process_sequence routine has
@@ -49,7 +51,9 @@ void store_and_empty_process_sequence(void){
 void restore_process_sequence(void){
 	for(int i = 0;i<PROCESS_SEQUENCE_SIZE;i++){
 		process_sequence[i] = process_sequence_storage[i];}}
-/**
+	
+		
+/**	
 	\brief Sets last element in the process sequence to the argument function pointer
 	
 	\details Sets last element in the process sequence to the argument function pointer.

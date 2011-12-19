@@ -15,7 +15,7 @@
 */ 
 
 /**
-	\ingroup openshoe_software
+	\ingroup openshoe_runtime_framework
 	
 	\defgroup control_tables Tabulated information	
 	\brief This group contains tabulated information for the control and communication.
@@ -30,7 +30,7 @@
 #include "compiler.h"
 #include "nav_types.h"
 
-// Definition structure of commands
+/// Definition structure of commands
 typedef const struct {
 	uint8_t header;
 	void (*cmd_response)(uint8_t**);
@@ -39,14 +39,14 @@ typedef const struct {
 	uint8_t field_widths[];
 } command_structure;
 
-// Information struct for processing functions
+/// Information struct for processing functions
 typedef const struct {
 	uint8_t id;
 	void (*func_p)(void);
 	int max_proc_time; 
 } proc_func_info;
 
-// State data type information
+/// State data type information struct
 typedef const struct {
 	uint8_t id;
 	void* state_p;

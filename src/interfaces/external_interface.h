@@ -9,7 +9,7 @@
 */
 
 /**
-	\ingroup openshoe_software
+	\ingroup openshoe_runtime_framework
 	
 	\defgroup user_interface User (USB) interface	
 	\brief This group contains high level functions for communication between user and system.
@@ -23,15 +23,16 @@
 
 void com_interface_init(void);
 
+// These are the two main functions used by the interface.
 void transmit_data(void);
 void receive_command(void);
 
+// These functions are used by command response functions in commands.c
 void set_state_output(uint8_t state_id, uint8_t divider);
 void reset_output_counters(void);
 
 
 // USB vbus callback function
-// TODO: Put this function somewhere else.
 ///\cond
 void vbus_event_callback(bool b_high);
 ///\endcond
