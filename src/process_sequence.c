@@ -80,6 +80,7 @@ void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem
 	if(elem_nr<PROCESS_SEQUENCE_SIZE){
 		process_sequence[elem_nr] = elem_value;
 	}
+	// TODO: set some error state if condition above is not fullfilled.
 }
 
 //@}

@@ -21,7 +21,9 @@
 
 #include "compiler.h"
 
+/// Size of process sequence
 #define PROCESS_SEQUENCE_SIZE 10
+/// Typedefinition for functions in the process sequence
 typedef void (*processing_function_p)(void);
 
 void run_process_sequence(void);

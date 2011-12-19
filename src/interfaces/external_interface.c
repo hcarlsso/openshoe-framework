@@ -324,7 +324,13 @@ void set_state_output(uint8_t state_id, uint8_t divider){
 	// TODO: Set some error state if the above does not hold
 }
 
-// Reset the output counter such that the output become synchronized.
+/**
+	\brief Reset the output counter such that the output become synchronized.
+	
+	\details Resets all output counters to zero. Since the output rate dividers
+	will always be a power of two. This mean that all outputs will be
+	synchronized independent of their dividers.
+*/
 void reset_output_counters(void){
 	for(int i=0;i<SID_LIMIT;i++){
 		state_output_rate_counter[i] = 0;

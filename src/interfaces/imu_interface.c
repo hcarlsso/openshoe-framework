@@ -52,9 +52,11 @@
 //@}
 
 // Data structure need for SPI calls
+///\cond
 struct spi_device SPI_DEVICE_IMU = {
 	// SPI bus 0
 	.id = 0 };
+///\endcond
 
 // Local variables to store imu raw output
 static uint16_t supply;
@@ -69,7 +71,7 @@ static int16_t ytemp;
 static int16_t ztemp;
 static int16_t aux_adc;
 
-/** \name IMU output variables
+/** \name Global IMU output variables
  * Global variable used for making sensor readings available to other parts of
  * the program. The variables will contain the latest read out sensor readings.
  * The values are scaled to SI units apart from the temperature which is in
@@ -97,6 +99,7 @@ void imu_interface_init(void){
 	spi_select_device(SPI_IMU,&SPI_DEVICE_IMU);
 }
 
+/// Converts raw (integer) inertial readings to float SI units.
 void convert_inert_readings(void){
 	// Shift out status bits
 	xgyro = xgyro << 2;
@@ -114,6 +117,7 @@ void convert_inert_readings(void){
 	accelerations_in[2] = ACC_SCALE * zacc;
 }
 
+/// Converts raw (integer) auxiliary data readings to float SI units.
 void convert_auxiliary_data(void){
 	// Shift out status bits
 	xtemp = xtemp << 4;

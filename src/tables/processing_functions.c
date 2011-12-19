@@ -50,7 +50,7 @@ static proc_func_info precision_gyro_bias_null_calibration_info = {GYRO_CALIBRAT
 static proc_func_info calibrate_accelerometers_info = {ACCELEROMETER_CALIBRATION,&calibrate_accelerometers,0};
 //@}
 
-const proc_func_info* processing_functions[] = {&update_imu_data_buffers_info,
+static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_info,
 													   &initialize_navigation_algorithm_info,
 													   &strapdown_mechanisation_equations_info,
 													   &time_up_data_info,
