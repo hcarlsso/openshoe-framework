@@ -108,7 +108,9 @@ void output_state(uint8_t** cmd_arg){
 void toggle_inertial_output(uint8_t** cmd_arg){
 	uint8_t output_divider = cmd_arg[0][0];
 	set_state_output(ANGULAR_RATE_SID,output_divider);
-	set_state_output(SPECIFIC_FORCE_SID,output_divider);}
+	set_state_output(SPECIFIC_FORCE_SID,output_divider);
+	set_state_output(INTERRUPT_COUNTER_SID,output_divider);
+	set_state_output(IMU_DT_SID,output_divider);}
 
 void position_plus_zupt(uint8_t** cmd_arg){
 	uint8_t output_divider = cmd_arg[0][0];
@@ -141,7 +143,7 @@ void stop_initial_alignement(void){
 	if(initialize_flag==false){
 		// Stop initial alignement
 		empty_process_sequence();
-		// Start ZUPT aided INS
+		// Start ZUPT-aided INS
 		set_elem_in_process_sequence(processing_functions_by_id[UPDATE_BUFFER]->func_p,0);
 		set_elem_in_process_sequence(processing_functions_by_id[MECHANIZATION]->func_p,1);
 		set_elem_in_process_sequence(processing_functions_by_id[TIME_UPDATE]->func_p,2);

@@ -36,8 +36,9 @@
 
 // Interrupt counter (essentially a time stamp)
 uint32_t interrupt_counter = 0;
-// Global IMU interrupt (data) time-stamp variable
+// Global IMU interrupt (data) time-stamp and time differential variables
 uint32_t imu_interrupt_ts;
+uint32_t imu_dt;
 // Variable that used to signal if an external interrupt occurs.
 static volatile bool imu_interrupt_flag = false;
 // Structure holding the configuration parameters of the EIC module.
@@ -72,6 +73,7 @@ void eic_nmi_handler( void )
 	eic_clear_interrupt_line(&AVR32_EIC, IMU_INTERUPT_LINE1);
 	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
 	imu_interrupt_flag = true;
+	interrupt_counter++;
 	
 	// Significant amount of processing should not be done inside this routine
 	// since the USB communication will be blocked for its duration.
@@ -96,10 +98,12 @@ void system_init(void){
 
 /// Wait for the interrupt flag to be set, toggle it, increase interrupt counter, and return.
 void wait_for_interrupt(void){
+	static uint32_t imu_interrupt_ts_old = 0;
 	while(true){
 		if(imu_interrupt_flag==true){
 			imu_interrupt_flag=false;
-			interrupt_counter++;
+			imu_dt = imu_interrupt_ts - imu_interrupt_ts_old;
+			imu_interrupt_ts_old = imu_interrupt_ts;
 			return;
 		}
 	}	

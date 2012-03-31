@@ -35,9 +35,11 @@ extern vec3 position;
 extern vec3 velocity;
 extern quat_vec quaternions;
 extern bool zupt;
+extern precision dt;
 
 // System states
 extern uint32_t interrupt_counter;
+extern uint32_t imu_dt;
 
 // "Other" states
 extern vec3 accelerometer_biases;
@@ -54,13 +56,15 @@ static state_t_info position_sti = {POSITION_SID, (void*) position, sizeof(vec3)
 static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)};
 static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
+static state_t_info dt_sti = {DT_SID, (void*) &dt, sizeof(dt)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
-	
+static state_t_info imu_dt_sti = {IMU_DT_SID, (void*) &imu_dt, sizeof(uint32_t)};
 static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) &accelerometer_biases, sizeof(vec3)};
 //@}
 	
 // Array of state data type struct pointers
 const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
+	                                               &imu_dt_sti,
 												   &specific_force_sti,
 												   &angular_rate_sti,
 												   &imu_temperaturs_sti,
@@ -69,6 +73,7 @@ const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
 								 	               &velocity_sti,
 												   &quaternions_sti,
 												   &zupt_sti,
+												   &dt_sti,
 												   &accelerometer_biases_sti};
 
 

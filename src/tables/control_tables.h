@@ -83,8 +83,10 @@ typedef const struct {
 #define VELOCITY_SID 0x12
 #define QUATERNION_SID 0x13
 #define ZUPT_SID 0x14
+#define DT_SID 0x15
 // System states
 #define INTERRUPT_COUNTER_SID 0x21
+#define IMU_DT_SID 0x22
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
 //@}
