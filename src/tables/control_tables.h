@@ -65,6 +65,7 @@ typedef const struct {
 #define ZUPT_UPDATE 0x09
 #define GYRO_CALIBRATION 0x10
 #define ACCELEROMETER_CALIBRATION 0x11
+#define STEPWISE_SYSTEM_RESET 0x13
 //@}
 
 ///  \name External state IDs
@@ -84,6 +85,9 @@ typedef const struct {
 #define QUATERNION_SID 0x13
 #define ZUPT_SID 0x14
 #define DT_SID 0x15
+// Step-wise dead reckoning data exchange states
+#define DX_SID 0x16
+#define DP_SID 0x17
 // System states
 #define INTERRUPT_COUNTER_SID 0x21
 #define IMU_DT_SID 0x22
@@ -106,8 +110,10 @@ typedef const struct {
 #define GYRO_CALIBRATION_INIT 0x11
 #define ACC_CALIBRATION_INIT 0x12
 #define SET_LOWPASS_FILTER_IMU 0x13
+#define RESET_STEPWISE_DEAD_RECKONING 0x14
 #define ADD_SYNC_OUTPUT 0x25
 #define SYNC_OUTPUT 0x26
+#define PROCESSING_OFF 0x27
 //@}
 
 // Global variables used to access command information

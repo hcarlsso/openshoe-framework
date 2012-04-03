@@ -37,6 +37,10 @@ extern quat_vec quaternions;
 extern bool zupt;
 extern precision dt;
 
+// Step-wise dead reckoning data exchange states
+extern vec4 dx;
+extern mat4sym dP;
+
 // System states
 extern uint32_t interrupt_counter;
 extern uint32_t imu_dt;
@@ -57,6 +61,8 @@ static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)
 static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
 static state_t_info dt_sti = {DT_SID, (void*) &dt, sizeof(dt)};
+static state_t_info dx_sti = {DX_SID, (void*) dx, sizeof(vec4)};
+static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(mat4sym)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
 static state_t_info imu_dt_sti = {IMU_DT_SID, (void*) &imu_dt, sizeof(uint32_t)};
 static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) &accelerometer_biases, sizeof(vec3)};
@@ -70,6 +76,8 @@ const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
 												   &imu_temperaturs_sti,
 												   &imu_supply_voltage_sti,
 												   &position_sti,
+												   &dx_sti,
+												   &dP_sti,
 								 	               &velocity_sti,
 												   &quaternions_sti,
 												   &zupt_sti,

@@ -50,7 +50,7 @@
 ///\endcond
 
 /// Receive and transmit buffer
-static struct rxtx_buffer{
+struct rxtx_buffer{
 	uint8_t* buffer;
 	uint8_t* write_position;
 	uint8_t* read_position;
@@ -69,10 +69,11 @@ uint8_t error_signal=0;							//Error signaling vector. If zero no error has occ
 #define MAX_LOG2_DIVIDER 14
 #define MIN_LOG2_DIVIDER 0
 //@}
-///\name State output rate control variables
+///\name State output control variables
 //@{
 static uint16_t state_output_rate_divider[SID_LIMIT] = {0};
 static uint16_t state_output_rate_counter[SID_LIMIT] = {0};
+static bool  state_output_cond[SID_LIMIT] = {0};
 //@}
 
 /// Initialization function for communication interface
@@ -191,18 +192,23 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	// Add header for state data output
 	*buffer->write_position = STATE_OUTPUT_HEADER;
 	increment_counter(buffer->write_position);
+	// Leave one blank buffer slot for payload size (see below)
 	increment_counter(buffer->write_position);
 	// Copy all enabled states to buffer	
 	for(int i = 0; i<SID_LIMIT; i++){
 		if( state_output_rate_divider[i] ){
 			if( state_output_rate_counter[i] == 0){
 				state_output_rate_counter[i] = state_output_rate_divider[i];
-				//TODO: ensure no buffer overflow occur
-				memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
-				buffer->write_position+=state_info_access_by_id[i]->state_size;
+				state_output_cond[i]=true;
 			}
-			// The counter counts down since then the comparison at each proceedure call can be done with a constant (0)
+			// The counter counts down since then the comparison at each procedure call can be done with a constant (0)
 			state_output_rate_counter[i]--;
+		}
+		if (state_output_cond[i]){
+			//TODO: ensure no buffer overflow occur
+			memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
+			buffer->write_position+=state_info_access_by_id[i]->state_size;
+			state_output_cond[i]=false;
 		}
 	}
 	// If any data was added, add payload size and calculate and add checksum
@@ -289,7 +295,7 @@ void receive_command(void){
 void transmit_data(void){
 	static uint8_t tx_buffer_array[TX_BUFFER_SIZE];
 	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,tx_buffer_array,0};
-	static uint8_t downsampling_tx_counter = 0;
+//	static uint8_t downsampling_tx_counter = 0;
 
 	if(is_usb_attached()){
 		// Generate output
@@ -335,6 +341,11 @@ void reset_output_counters(void){
 	for(int i=0;i<SID_LIMIT;i++){
 		state_output_rate_counter[i] = 0;
 	}
+}
+
+
+void set_conditional_output(uint8_t state_id){
+	state_output_cond[state_id]=true;
 }
 
 

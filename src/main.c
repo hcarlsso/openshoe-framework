@@ -36,9 +36,10 @@
 
 // Interrupt counter (essentially a time stamp)
 uint32_t interrupt_counter = 0;
-// Global IMU interrupt (data) time-stamp and time differential variables
+// Global IMU interrupt (data) time-stamp
 uint32_t imu_interrupt_ts;
-uint32_t imu_dt;
+// Input variable to Navigation algorithm for time differentials
+extern uint32_t imu_dt = 0;
 // Variable that used to signal if an external interrupt occurs.
 static volatile bool imu_interrupt_flag = false;
 // Structure holding the configuration parameters of the EIC module.

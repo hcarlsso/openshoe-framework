@@ -30,6 +30,7 @@ void receive_command(void);
 // These functions are used by command response functions in commands.c
 void set_state_output(uint8_t state_id, uint8_t divider);
 void reset_output_counters(void);
+void set_conditional_output(uint8_t state_id);
 
 
 // USB vbus callback function

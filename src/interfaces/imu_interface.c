@@ -44,10 +44,10 @@
 
 ///\name Scaling of IMU raw data
 //@{
-#define SUPPLY_SCALE 0.002418f
 #define GYRO_SCALE 0.00087266f
 #define ACC_SCALE 0.0081643275f
 #define TEMP_SCALE 0.0085f
+//#define SUPPLY_SCALE 0.002418f
 #define SUPPLY_SCALE 0.000151125f
 //@}
 
