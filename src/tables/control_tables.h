@@ -66,6 +66,9 @@ typedef const struct {
 #define GYRO_CALIBRATION 0x10
 #define ACCELEROMETER_CALIBRATION 0x11
 #define STEPWISE_SYSTEM_RESET 0x13
+#define UPDATE_ZARU_BUFFER 0x14
+#define ZARU_DETECTOR 0x15
+#define UPDATE_BUFFER2 0x16
 //@}
 
 ///  \name External state IDs
@@ -85,14 +88,53 @@ typedef const struct {
 #define QUATERNION_SID 0x13
 #define ZUPT_SID 0x14
 #define DT_SID 0x15
+#define TEST_STATISTICS_SID 0x19
+#define ZARU_TEST_STATISTICS_SID 0x1a
+#define GYRO_BIASES 0x1b
+#define ZARU_SID 0x1c
 // Step-wise dead reckoning data exchange states
 #define DX_SID 0x16
 #define DP_SID 0x17
+#define STEP_COUNTER_SID 0x18
 // System states
 #define INTERRUPT_COUNTER_SID 0x21
 #define IMU_DT_SID 0x22
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
+#define SAMSUNG_ID_SID 0x36
+// Massive MIMU raw register states
+#define IMU0_RD_SID 0x40
+#define IMU1_RD_SID (IMU0_RD_SID+1)
+#define IMU2_RD_SID (IMU0_RD_SID+2)
+#define IMU3_RD_SID (IMU0_RD_SID+3)
+#define IMU4_RD_SID (IMU0_RD_SID+4)
+#define IMU5_RD_SID (IMU0_RD_SID+5)
+#define IMU6_RD_SID (IMU0_RD_SID+6)
+#define IMU7_RD_SID (IMU0_RD_SID+7)
+#define IMU8_RD_SID (IMU0_RD_SID+8)
+#define IMU9_RD_SID (IMU0_RD_SID+9)
+#define IMU10_RD_SID (IMU0_RD_SID+10)
+#define IMU11_RD_SID (IMU0_RD_SID+11)
+#define IMU12_RD_SID (IMU0_RD_SID+12)
+#define IMU13_RD_SID (IMU0_RD_SID+13)
+#define IMU14_RD_SID (IMU0_RD_SID+14)
+#define IMU15_RD_SID (IMU0_RD_SID+15)
+#define IMU16_RD_SID (IMU0_RD_SID+16)
+#define IMU17_RD_SID (IMU0_RD_SID+17)
+#define IMU18_RD_SID (IMU0_RD_SID+18)
+#define IMU19_RD_SID (IMU0_RD_SID+19)
+#define IMU20_RD_SID (IMU0_RD_SID+20)
+#define IMU21_RD_SID (IMU0_RD_SID+21)
+#define IMU22_RD_SID (IMU0_RD_SID+22)
+#define IMU23_RD_SID (IMU0_RD_SID+23)
+#define IMU24_RD_SID (IMU0_RD_SID+24)
+#define IMU25_RD_SID (IMU0_RD_SID+25)
+#define IMU26_RD_SID (IMU0_RD_SID+26)
+#define IMU27_RD_SID (IMU0_RD_SID+27)
+#define IMU28_RD_SID (IMU0_RD_SID+28)
+#define IMU29_RD_SID (IMU0_RD_SID+29)
+#define IMU30_RD_SID (IMU0_RD_SID+30)
+#define IMU31_RD_SID (IMU0_RD_SID+31)
 //@}
 
 ///  \name Command IDs
@@ -105,12 +147,16 @@ typedef const struct {
 #define OUTPUT_ONOFF_INERT 0x22
 #define OUTPUT_POSITION_PLUS_ZUPT 0x23
 #define OUTPUT_NAVIGATIONAL_STATES 0x24
+#define OUTPUT_IMU_RD 0x28
 #define PROCESSING_FUNCTION_ONOFF 0x30
 #define RESET_ZUPT_AIDED_INS 0x10
 #define GYRO_CALIBRATION_INIT 0x11
 #define ACC_CALIBRATION_INIT 0x12
 #define SET_LOWPASS_FILTER_IMU 0x13
 #define RESET_STEPWISE_DEAD_RECKONING 0x14
+#define RESET_STEPWISE_DEAD_RECKONING2 0x16
+#define RESET_STEPWISE_DEAD_RECKONING3 0x17
+#define RESET_SWDR_GYROCAL 0x15
 #define ADD_SYNC_OUTPUT 0x25
 #define SYNC_OUTPUT 0x26
 #define PROCESSING_OFF 0x27

@@ -29,7 +29,7 @@
 ///\name Buffer settings
 //@{
 #define RX_BUFFER_SIZE 20
-#define TX_BUFFER_SIZE 60
+#define TX_BUFFER_SIZE 255
 #define SINGLE_TX_BUFFER_SIZE 10
 #define MAX_RX_NRB 10
 //@}
@@ -275,7 +275,9 @@ void receive_command(void){
 		}
 		// Reset buffer if initiated command transmission do not complete within timeout limit
 		if(has_timed_out(command_tx_timer,rx_buffer.nrb)){
-			reset_buffer(&rx_buffer);}
+			reset_buffer(&rx_buffer);
+			send_nak();
+		}
 	}
 	// If USB detached, reset buffers
 	else{
@@ -318,15 +320,35 @@ void transmit_data(void){
 	divider is within the allowable range.
 */
 void set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){
+	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){	
 		if (divider>MIN_LOG2_DIVIDER){
-			state_output_rate_divider[state_id] = 1<<(divider-1);
-			state_output_rate_counter[state_id] = 0;
+			uint16_t rate_divider = 1<<(divider-1);
+			uint16_t min_divider = 1<<(MAX_LOG2_DIVIDER-1);
+			uint16_t min_counter = 1; // 1 (instead of 0) to ensure that ACK and new output does not coincide
+			// Synchronize output with remaining output
+			// TODO: Test if this works!!! (could be a problem with output_imu_rd (would take to long time)?)
+/*			if (rate_divider>1)
+			{
+				min_counter = 0xFFFF - 0xFFFF%rate_divider;
+				for(int i=0;i<SID_LIMIT;i++)
+				{
+					if(state_output_rate_divider[i] && state_output_rate_divider[i]=<min_divider){
+						if (state_output_rate_counter[i]<min_counter)
+						{
+							min_counter=state_output_rate_counter[i];
+							min_divider=state_output_rate_divider[i];
+						}
+					}
+				}
+				min_counter = min_counter%rate_divider;
+			}*/
+			state_output_rate_divider[state_id] = rate_divider;
+			state_output_rate_counter[state_id] = min_counter;
 		} else {
 			state_output_rate_divider[state_id] = 0;
 			state_output_rate_counter[state_id] = 0;
 		}
-	}
+	}	
 	// TODO: Set some error state if the above does not hold
 }
 
