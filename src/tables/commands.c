@@ -25,7 +25,7 @@
 // Needed include for definition of command response functions
 #include "external_interface.h"
 #include "process_sequence.h"
-#include "imu_interface.h"
+#include "ADIS16367_interface.h"
 #include "udi_cdc.h"
 
 

@@ -17,7 +17,7 @@
 ///\addtogroup imu_interface
 //@{
 
-#include "imu_interface.h"
+#include "ADIS16367_interface.h"
 #include "conf_spi_master.h"
 #include "nav_types.h"
 

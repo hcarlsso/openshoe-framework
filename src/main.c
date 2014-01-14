@@ -32,7 +32,7 @@
 
 #include "process_sequence.h"
 #include "external_interface.h"
-#include "imu_interface.h"
+#include "ADIS16367_interface.h"
 #include "MPU9150_interface.h"
 #include "timer_interrupt.h"
 #include "toggle_interrupt.h"

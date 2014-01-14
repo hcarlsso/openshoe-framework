@@ -16,8 +16,8 @@
 	@{
 */
 
-#ifndef IMU_SPI_INTERFACE_H_
-#define IMU_SPI_INTERFACE_H_
+#ifndef ADIS16367_INTERFACE_H_
+#define ADIS16367_INTERFACE_H_
 
 #include "compiler.h"
 
@@ -35,6 +35,6 @@ void low_pass_filter_setting(uint8_t nr_filter_taps);
 
 
 
-#endif /* IMU_SPI_INTERFACE_H_ */
+#endif /* ADIS16367_INTERFACE_H_ */
 
 //@}
