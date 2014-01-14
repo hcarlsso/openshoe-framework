@@ -92,7 +92,7 @@ precision imu_supply_voltage;	///< \f$[V]\f$
  * conf_spi_master.h. The routine selects the IMU SPI for communication and
  * the interface functions will assume that the IMU SPI is still selected.
  */
-void imu_interface_init(void){	
+void ADIS16367_interface_init(void){	
 	spi_master_init(SPI_IMU);
 	spi_master_setup_device(SPI_IMU, &SPI_DEVICE_IMU, 3, SPI_IMU_BAUDRATE, 0);
 	spi_enable(SPI_IMU);

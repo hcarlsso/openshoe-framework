@@ -24,7 +24,7 @@
 //void imu_interupt_init(void);
 
 /// Initialization routine for the IMU to MCU interface
-void imu_interface_init(void);
+void ADIS16367_interface_init(void);
 // Routine for fast reading of vcc, acc, gyro, and temp from IMU
 void imu_burst_read(void);
 // Routine for setting number of filter taps in the IMU
