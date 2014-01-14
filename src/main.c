@@ -39,21 +39,8 @@
 #include "timing_control.h"
 
 
-/// Initialize hardware and communication interfaces
-void system_init(void){
-	board_init();
-	sysclk_init();
-	irq_initialize_vectors();
-	cpu_irq_enable();
-	
-//	timer_interrput_init();
-//	mpu9150_interface_init();
-
-	toggle_interrupt_init();
-	ADIS16367_interface_init();
-	
-	com_interface_init();
-}
+// Initialize system
+void system_init(void);
 
 int main (void) {
 	
@@ -84,6 +71,23 @@ int main (void) {
 		// Ensure the loop was finished within time limit
 		within_time_limit();
 	}
+}
+
+
+/// Initialize hardware and communication interfaces
+void system_init(void){
+	board_init();
+	sysclk_init();
+	irq_initialize_vectors();
+	cpu_irq_enable();
+	
+	//	timer_interrput_init();
+	//	mpu9150_interface_init();
+
+	toggle_interrupt_init();
+	ADIS16367_interface_init();
+	
+	com_interface_init();
 }
 
 //! @}
