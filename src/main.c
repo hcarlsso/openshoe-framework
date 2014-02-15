@@ -58,12 +58,12 @@ int main (void) {
 		// Read data from IMU			
 //		imu_burst_read();
 		mpu9150_read();
+		
+		// Check if any command has been sent and respond accordingly
+		receive_command();
 
 		// Execute all processing functions (filtering)
 		run_process_sequence();
-
-		// Check if any command has been sent and respond accordingly
-		receive_command();
 			
 		// Transmit requested data to user
 		transmit_data();
