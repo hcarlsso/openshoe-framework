@@ -34,6 +34,7 @@
 //@{
 void output_state(uint8_t**);
 void output_imu_rd(uint8_t**);
+void output_imu_temp(uint8_t**);
 void turn_off_output(uint8_t**);
 void get_mcu_serial(uint8_t**);
 void toggle_inertial_output(uint8_t**);
@@ -68,6 +69,7 @@ static command_structure output_onoff_inert = {OUTPUT_ONOFF_INERT,&toggle_inerti
 static command_structure output_position_plus_zupt = {OUTPUT_POSITION_PLUS_ZUPT,&position_plus_zupt,1,1,{1}};
 static command_structure output_navigational_states_cmd = {OUTPUT_NAVIGATIONAL_STATES,&output_navigational_states,1,1,{1}};
 static command_structure output_onoff_imu_rd = {OUTPUT_IMU_RD,&output_imu_rd,5,2,{4,1}};
+static command_structure output_onoff_imu_temp = {OUTPUT_IMU_TEMP,&output_imu_temp,5,2,{4,1}};
 static command_structure processing_function_onoff = {PROCESSING_FUNCTION_ONOFF,&processing_onoff,3,3,{1,1,1}};
 static command_structure reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_aided_ins,0,0,{0}};
 static command_structure reset_stepwise_dead_reckoning_cmd = {RESET_STEPWISE_DEAD_RECKONING,&reset_stepwise_dead_reckoning,0,0,{0}};
@@ -93,6 +95,7 @@ static const command_structure* commands[] = {&only_ack,
 											  &output_position_plus_zupt,
 											  &output_navigational_states_cmd,
 											  &output_onoff_imu_rd,
+											  &output_onoff_imu_temp,
 											  &processing_function_onoff,
 											  &reset_system_cmd,
 											  &reset_stepwise_dead_reckoning_cmd,
@@ -160,6 +163,35 @@ void output_imu_rd(uint8_t** cmd_arg){
 		set_state_output(IMU0_RD_SID+i+24,output_divider);
 	}
 	set_state_output(IMU_DT_SID,output_divider);
+}
+void output_imu_temp(uint8_t** cmd_arg){
+	// TODO: redo this with something like below and a single for loop
+	//	uint32_t imu_selector = *((uint32_t*)cmd_arg[0]);
+	uint8_t imu_selector0 = cmd_arg[0][3];
+	uint8_t imu_selector1 = cmd_arg[0][2];
+	uint8_t imu_selector2 = cmd_arg[0][1];
+	uint8_t imu_selector3 = cmd_arg[0][0];
+	uint8_t output_divider = cmd_arg[1][0];
+	for (uint8_t i=0;i<8;i++)
+	{
+		if( (imu_selector0>>i)&1 )
+		set_state_output(IMU0_TEMP_SID+i,output_divider);
+	}
+	for (uint8_t i=0;i<8;i++)
+	{
+		if( (imu_selector1>>i)&1 )
+		set_state_output(IMU0_TEMP_SID+i+8,output_divider);
+	}
+	for (uint8_t i=0;i<8;i++)
+	{
+		if( (imu_selector2>>i)&1 )
+		set_state_output(IMU0_TEMP_SID+i+16,output_divider);
+	}
+	for (uint8_t i=0;i<8;i++)
+	{
+		if( (imu_selector3>>i)&1 )
+		set_state_output(IMU0_TEMP_SID+i+24,output_divider);
+	}
 }
 
 void toggle_inertial_output(uint8_t** cmd_arg){

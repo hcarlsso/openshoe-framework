@@ -62,7 +62,7 @@ extern uint8_t samsung_id;
 
 // IMU register states
 // The matrix is split up into 32 stats for the user to access (one for each IMU, see below)
-extern int16_t mimu_data[32][6];
+extern int16_t mimu_data[32][7];
 ///\endcond
 
 ///  \name External state information
@@ -93,38 +93,71 @@ static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &int
 static state_t_info imu_dt_sti = {IMU_DT_SID, (void*) &imu_dt, sizeof(uint32_t)};
 static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) accelerometer_biases, sizeof(vec3)};
 static state_t_info samsung_id_sti = {SAMSUNG_ID_SID, (void*) &samsung_id, sizeof(uint8_t)};
-static state_t_info imu0_rd_sti = {IMU0_RD_SID, (void*) mimu_data[0], sizeof(mimu_data[0])};
-static state_t_info imu1_rd_sti = {IMU1_RD_SID, (void*) mimu_data[1], sizeof(mimu_data[1])};
-static state_t_info imu2_rd_sti = {IMU2_RD_SID, (void*) mimu_data[2], sizeof(mimu_data[2])};
-static state_t_info imu3_rd_sti = {IMU3_RD_SID, (void*) mimu_data[3], sizeof(mimu_data[3])};
-static state_t_info imu4_rd_sti = {IMU4_RD_SID, (void*) mimu_data[4], sizeof(mimu_data[4])};
-static state_t_info imu5_rd_sti = {IMU5_RD_SID, (void*) mimu_data[5], sizeof(mimu_data[5])};
-static state_t_info imu6_rd_sti = {IMU6_RD_SID, (void*) mimu_data[6], sizeof(mimu_data[6])};
-static state_t_info imu7_rd_sti = {IMU7_RD_SID, (void*) mimu_data[7], sizeof(mimu_data[7])};
-static state_t_info imu8_rd_sti = {IMU8_RD_SID, (void*) mimu_data[8], sizeof(mimu_data[8])};
-static state_t_info imu9_rd_sti = {IMU9_RD_SID, (void*) mimu_data[9], sizeof(mimu_data[9])};
-static state_t_info imu10_rd_sti = {IMU10_RD_SID, (void*) mimu_data[10], sizeof(mimu_data[10])};
-static state_t_info imu11_rd_sti = {IMU11_RD_SID, (void*) mimu_data[11], sizeof(mimu_data[11])};
-static state_t_info imu12_rd_sti = {IMU12_RD_SID, (void*) mimu_data[12], sizeof(mimu_data[12])};
-static state_t_info imu13_rd_sti = {IMU13_RD_SID, (void*) mimu_data[13], sizeof(mimu_data[13])};
-static state_t_info imu14_rd_sti = {IMU14_RD_SID, (void*) mimu_data[14], sizeof(mimu_data[14])};
-static state_t_info imu15_rd_sti = {IMU15_RD_SID, (void*) mimu_data[15], sizeof(mimu_data[15])};
-static state_t_info imu16_rd_sti = {IMU16_RD_SID, (void*) mimu_data[16], sizeof(mimu_data[16])};
-static state_t_info imu17_rd_sti = {IMU17_RD_SID, (void*) mimu_data[17], sizeof(mimu_data[17])};
-static state_t_info imu18_rd_sti = {IMU18_RD_SID, (void*) mimu_data[18], sizeof(mimu_data[18])};
-static state_t_info imu19_rd_sti = {IMU19_RD_SID, (void*) mimu_data[19], sizeof(mimu_data[19])};
-static state_t_info imu20_rd_sti = {IMU20_RD_SID, (void*) mimu_data[20], sizeof(mimu_data[20])};
-static state_t_info imu21_rd_sti = {IMU21_RD_SID, (void*) mimu_data[21], sizeof(mimu_data[21])};
-static state_t_info imu22_rd_sti = {IMU22_RD_SID, (void*) mimu_data[22], sizeof(mimu_data[22])};
-static state_t_info imu23_rd_sti = {IMU23_RD_SID, (void*) mimu_data[23], sizeof(mimu_data[23])};
-static state_t_info imu24_rd_sti = {IMU24_RD_SID, (void*) mimu_data[24], sizeof(mimu_data[24])};
-static state_t_info imu25_rd_sti = {IMU25_RD_SID, (void*) mimu_data[25], sizeof(mimu_data[25])};
-static state_t_info imu26_rd_sti = {IMU26_RD_SID, (void*) mimu_data[26], sizeof(mimu_data[26])};
-static state_t_info imu27_rd_sti = {IMU27_RD_SID, (void*) mimu_data[27], sizeof(mimu_data[27])};
-static state_t_info imu28_rd_sti = {IMU28_RD_SID, (void*) mimu_data[28], sizeof(mimu_data[28])};
-static state_t_info imu29_rd_sti = {IMU29_RD_SID, (void*) mimu_data[29], sizeof(mimu_data[29])};
-static state_t_info imu30_rd_sti = {IMU30_RD_SID, (void*) mimu_data[30], sizeof(mimu_data[30])};
-static state_t_info imu31_rd_sti = {IMU31_RD_SID, (void*) mimu_data[31], sizeof(mimu_data[31])};
+static state_t_info imu0_rd_sti = {IMU0_RD_SID, (void*) mimu_data[0], 12};
+static state_t_info imu1_rd_sti = {IMU1_RD_SID, (void*) mimu_data[1], 12};
+static state_t_info imu2_rd_sti = {IMU2_RD_SID, (void*) mimu_data[2], 12};
+static state_t_info imu3_rd_sti = {IMU3_RD_SID, (void*) mimu_data[3], 12};
+static state_t_info imu4_rd_sti = {IMU4_RD_SID, (void*) mimu_data[4], 12};
+static state_t_info imu5_rd_sti = {IMU5_RD_SID, (void*) mimu_data[5], 12};
+static state_t_info imu6_rd_sti = {IMU6_RD_SID, (void*) mimu_data[6], 12};
+static state_t_info imu7_rd_sti = {IMU7_RD_SID, (void*) mimu_data[7], 12};
+static state_t_info imu8_rd_sti = {IMU8_RD_SID, (void*) mimu_data[8], 12};
+static state_t_info imu9_rd_sti = {IMU9_RD_SID, (void*) mimu_data[9], 12};
+static state_t_info imu10_rd_sti = {IMU10_RD_SID, (void*) mimu_data[10], 12};
+static state_t_info imu11_rd_sti = {IMU11_RD_SID, (void*) mimu_data[11], 12};
+static state_t_info imu12_rd_sti = {IMU12_RD_SID, (void*) mimu_data[12], 12};
+static state_t_info imu13_rd_sti = {IMU13_RD_SID, (void*) mimu_data[13], 12};
+static state_t_info imu14_rd_sti = {IMU14_RD_SID, (void*) mimu_data[14], 12};
+static state_t_info imu15_rd_sti = {IMU15_RD_SID, (void*) mimu_data[15], 12};
+static state_t_info imu16_rd_sti = {IMU16_RD_SID, (void*) mimu_data[16], 12};
+static state_t_info imu17_rd_sti = {IMU17_RD_SID, (void*) mimu_data[17], 12};
+static state_t_info imu18_rd_sti = {IMU18_RD_SID, (void*) mimu_data[18], 12};
+static state_t_info imu19_rd_sti = {IMU19_RD_SID, (void*) mimu_data[19], 12};
+static state_t_info imu20_rd_sti = {IMU20_RD_SID, (void*) mimu_data[20], 12};
+static state_t_info imu21_rd_sti = {IMU21_RD_SID, (void*) mimu_data[21], 12};
+static state_t_info imu22_rd_sti = {IMU22_RD_SID, (void*) mimu_data[22], 12};
+static state_t_info imu23_rd_sti = {IMU23_RD_SID, (void*) mimu_data[23], 12};
+static state_t_info imu24_rd_sti = {IMU24_RD_SID, (void*) mimu_data[24], 12};
+static state_t_info imu25_rd_sti = {IMU25_RD_SID, (void*) mimu_data[25], 12};
+static state_t_info imu26_rd_sti = {IMU26_RD_SID, (void*) mimu_data[26], 12};
+static state_t_info imu27_rd_sti = {IMU27_RD_SID, (void*) mimu_data[27], 12};
+static state_t_info imu28_rd_sti = {IMU28_RD_SID, (void*) mimu_data[28], 12};
+static state_t_info imu29_rd_sti = {IMU29_RD_SID, (void*) mimu_data[29], 12};
+static state_t_info imu30_rd_sti = {IMU30_RD_SID, (void*) mimu_data[30], 12};
+static state_t_info imu31_rd_sti = {IMU31_RD_SID, (void*) mimu_data[31], 12};
+
+static state_t_info imu0_temp_sti = {IMU0_TEMP_SID, (void*) &mimu_data[0][6], 2};
+static state_t_info imu1_temp_sti = {IMU1_TEMP_SID, (void*) &mimu_data[1][6], 2};
+static state_t_info imu2_temp_sti = {IMU2_TEMP_SID, (void*) &mimu_data[2][6], 2};
+static state_t_info imu3_temp_sti = {IMU3_TEMP_SID, (void*) &mimu_data[3][6], 2};
+static state_t_info imu4_temp_sti = {IMU4_TEMP_SID, (void*) &mimu_data[4][6], 2};
+static state_t_info imu5_temp_sti = {IMU5_TEMP_SID, (void*) &mimu_data[5][6], 2};
+static state_t_info imu6_temp_sti = {IMU6_TEMP_SID, (void*) &mimu_data[6][6], 2};
+static state_t_info imu7_temp_sti = {IMU7_TEMP_SID, (void*) &mimu_data[7][6], 2};
+static state_t_info imu8_temp_sti = {IMU8_TEMP_SID, (void*) &mimu_data[8][6], 2};
+static state_t_info imu9_temp_sti = {IMU9_TEMP_SID, (void*) &mimu_data[9][6], 2};
+static state_t_info imu10_temp_sti = {IMU10_TEMP_SID, (void*) &mimu_data[10][6], 2};
+static state_t_info imu11_temp_sti = {IMU11_TEMP_SID, (void*) &mimu_data[11][6], 2};
+static state_t_info imu12_temp_sti = {IMU12_TEMP_SID, (void*) &mimu_data[12][6], 2};
+static state_t_info imu13_temp_sti = {IMU13_TEMP_SID, (void*) &mimu_data[13][6], 2};
+static state_t_info imu14_temp_sti = {IMU14_TEMP_SID, (void*) &mimu_data[14][6], 2};
+static state_t_info imu15_temp_sti = {IMU15_TEMP_SID, (void*) &mimu_data[15][6], 2};
+static state_t_info imu16_temp_sti = {IMU16_TEMP_SID, (void*) &mimu_data[16][6], 2};
+static state_t_info imu17_temp_sti = {IMU17_TEMP_SID, (void*) &mimu_data[17][6], 2};
+static state_t_info imu18_temp_sti = {IMU18_TEMP_SID, (void*) &mimu_data[18][6], 2};
+static state_t_info imu19_temp_sti = {IMU19_TEMP_SID, (void*) &mimu_data[19][6], 2};
+static state_t_info imu20_temp_sti = {IMU20_TEMP_SID, (void*) &mimu_data[20][6], 2};
+static state_t_info imu21_temp_sti = {IMU21_TEMP_SID, (void*) &mimu_data[21][6], 2};
+static state_t_info imu22_temp_sti = {IMU22_TEMP_SID, (void*) &mimu_data[22][6], 2};
+static state_t_info imu23_temp_sti = {IMU23_TEMP_SID, (void*) &mimu_data[23][6], 2};
+static state_t_info imu24_temp_sti = {IMU24_TEMP_SID, (void*) &mimu_data[24][6], 2};
+static state_t_info imu25_temp_sti = {IMU25_TEMP_SID, (void*) &mimu_data[25][6], 2};
+static state_t_info imu26_temp_sti = {IMU26_TEMP_SID, (void*) &mimu_data[26][6], 2};
+static state_t_info imu27_temp_sti = {IMU27_TEMP_SID, (void*) &mimu_data[27][6], 2};
+static state_t_info imu28_temp_sti = {IMU28_TEMP_SID, (void*) &mimu_data[28][6], 2};
+static state_t_info imu29_temp_sti = {IMU29_TEMP_SID, (void*) &mimu_data[29][6], 2};
+static state_t_info imu30_temp_sti = {IMU30_TEMP_SID, (void*) &mimu_data[30][6], 2};
+static state_t_info imu31_temp_sti = {IMU31_TEMP_SID, (void*) &mimu_data[31][6], 2};
 //@}
 	
 // Array of state data type struct pointers
@@ -184,7 +217,39 @@ const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
 												   &imu28_rd_sti,
 												   &imu29_rd_sti,
 												   &imu30_rd_sti,
-												   &imu31_rd_sti};
+												   &imu31_rd_sti,
+												   &imu0_temp_sti,
+												   &imu1_temp_sti,
+												   &imu2_temp_sti,
+												   &imu3_temp_sti,
+												   &imu4_temp_sti,
+												   &imu5_temp_sti,
+												   &imu6_temp_sti,
+												   &imu7_temp_sti,
+												   &imu8_temp_sti,
+												   &imu9_temp_sti,
+												   &imu10_temp_sti,
+												   &imu11_temp_sti,
+												   &imu12_temp_sti,
+												   &imu13_temp_sti,
+												   &imu14_temp_sti,
+												   &imu15_temp_sti,
+												   &imu16_temp_sti,
+												   &imu17_temp_sti,
+												   &imu18_temp_sti,
+												   &imu19_temp_sti,
+												   &imu20_temp_sti,
+												   &imu21_temp_sti,
+												   &imu22_temp_sti,
+												   &imu23_temp_sti,
+												   &imu24_temp_sti,
+												   &imu25_temp_sti,
+												   &imu26_temp_sti,
+												   &imu27_temp_sti,
+												   &imu28_temp_sti,
+												   &imu29_temp_sti,
+												   &imu30_temp_sti,
+												   &imu31_temp_sti};
 
 
 state_t_info* state_info_access_by_id[SID_LIMIT];

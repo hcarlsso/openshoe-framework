@@ -421,7 +421,7 @@ void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1,uint8_
 
 
 // IMU array data
-int16_t mimu_data[32][6];
+int16_t mimu_data[32][7];
 
 void mpu9150_interface_init(void){
 	
@@ -481,12 +481,14 @@ void mpu9150_read(void)
 		memcpy(mimu_data[i],data_array_port0+(32-1)-imus_pos[i],4);
 		memcpy(mimu_data[i]+2,data_array_port0+(64-1)-imus_pos[i],2);
 		memcpy(mimu_data[i]+3,data_array_port0+(96-1)-imus_pos[i],4);
-		memcpy(mimu_data[i]+5,data_array_port0+(128-1)-imus_pos[i],2);	
+		memcpy(mimu_data[i]+5,data_array_port0+(128-1)-imus_pos[i],2);
+		memcpy(mimu_data[i]+6,(uint16_t*)(data_array_port0+(64-1)-imus_pos[i])+1,2);
 	}
 	for (; i<NR_IMUS_PORTA+NR_IMUS_PORTC; i++) {
 		memcpy(mimu_data[i],data_array_port1+(32-1)-imus_pos[i],4);
 		memcpy(mimu_data[i]+2,data_array_port1+(64-1)-imus_pos[i],2);
 		memcpy(mimu_data[i]+3,data_array_port1+(96-1)-imus_pos[i],4);
 		memcpy(mimu_data[i]+5,data_array_port1+(128-1)-imus_pos[i],2);
+		memcpy(mimu_data[i]+6,(uint16_t*)(data_array_port1+(64-1)-imus_pos[i])+1,2);
 	}
 }
