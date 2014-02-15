@@ -56,8 +56,8 @@ int main (void) {
 //		gpio_tgl_gpio_pin(AVR32_PIN_PB01);
 		
 		// Read data from IMU			
-		imu_burst_read();
-//		mpu9150_read();
+//		imu_burst_read();
+		mpu9150_read();
 
 		// Execute all processing functions (filtering)
 		run_process_sequence();
@@ -81,11 +81,11 @@ void system_init(void){
 	irq_initialize_vectors();
 	cpu_irq_enable();
 	
-	//	timer_interrput_init();
-	//	mpu9150_interface_init();
+	timer_interrput_init();
+	mpu9150_interface_init();
 
-	toggle_interrupt_init();
-	ADIS16367_interface_init();
+//	toggle_interrupt_init();
+//	ADIS16367_interface_init();
 	
 	com_interface_init();
 }

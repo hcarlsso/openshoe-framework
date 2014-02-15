@@ -387,7 +387,7 @@ void single_byte_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1)
 	I2C_stop();
 }
 
-//Function that reads
+//Function that reads multiple bytes in a burst
 void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1,uint8_t nr_of_bytes)
 {
 	uint8_t ctr;
@@ -420,72 +420,8 @@ void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1,uint8_
 }
 
 
-// IMU register data
-uint16_t imu0_rd[6];
-uint16_t imu1_rd[6];
-uint16_t imu2_rd[6];
-uint16_t imu3_rd[6];
-uint16_t imu4_rd[6];
-uint16_t imu5_rd[6];
-uint16_t imu6_rd[6];
-uint16_t imu7_rd[6];
-uint16_t imu8_rd[6];
-uint16_t imu9_rd[6];
-uint16_t imu10_rd[6];
-uint16_t imu11_rd[6];
-uint16_t imu12_rd[6];
-uint16_t imu13_rd[6];
-uint16_t imu14_rd[6];
-uint16_t imu15_rd[6];
-uint16_t imu16_rd[6];
-uint16_t imu17_rd[6];
-uint16_t imu18_rd[6];
-uint16_t imu19_rd[6];
-uint16_t imu20_rd[6];
-uint16_t imu21_rd[6];
-uint16_t imu22_rd[6];
-uint16_t imu23_rd[6];
-uint16_t imu24_rd[6];
-uint16_t imu25_rd[6];
-uint16_t imu26_rd[6];
-uint16_t imu27_rd[6];
-uint16_t imu28_rd[6];
-uint16_t imu29_rd[6];
-uint16_t imu30_rd[6];
-uint16_t imu31_rd[6];
-
-uint16_t* imu_data_matrix[32] = {imu0_rd,
-								 imu1_rd,
-								 imu2_rd,
-								 imu3_rd,
-								 imu4_rd,
-								 imu5_rd,
-								 imu6_rd,
-								 imu7_rd,
-								 imu8_rd,
-								 imu9_rd,
-								 imu10_rd,
-								 imu11_rd,
-								 imu12_rd,
-								 imu13_rd,
-								 imu14_rd,
-								 imu15_rd,
-								 imu16_rd,
-								 imu17_rd,
-								 imu18_rd,
-								 imu19_rd,
-								 imu20_rd,
-								 imu21_rd,
-								 imu22_rd,
-								 imu23_rd,
-								 imu24_rd,
-								 imu25_rd,
-								 imu26_rd,
-								 imu27_rd,
-								 imu28_rd,
-								 imu29_rd,
-								 imu30_rd,
-								 imu31_rd};
+// IMU array data
+int16_t mimu_data[32][6];
 
 void mpu9150_interface_init(void){
 	
@@ -495,7 +431,7 @@ void mpu9150_interface_init(void){
 	// Wake up the devices and set the x-axis gyroscope as the reference oscillator
 	single_byte_write(MPU6150_RA_PWR_MGMT_1,0x01);
 
-	// Set the bandwidth of the sensors to 100 Hz (OBS we should sample with at least 200 Hz then). According to the datasheet
+	// Set the bandwidth of the sensors to 100 Hz (OBS we should sample with at least 200 Hz then). According to the data sheet
 	// this seems to set the internal sample rate of the sensors to 1kHz.l
 	single_byte_write(MPU6150_RA_CONFIG,0x02);
 
@@ -514,6 +450,8 @@ uint32_t data_array_port1[128];
 extern uint32_t imu_interrupt_ts;
 extern uint32_t imu_dt;
 
+uint32_t ts_u;
+
 // Read inertial measurements from IMU
 void mpu9150_read(void)
 {
@@ -524,6 +462,8 @@ void mpu9150_read(void)
 	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
 	imu_dt = imu_interrupt_ts - imu_interrupt_ts_old;
 	imu_interrupt_ts_old = imu_interrupt_ts;
+	
+	ts_u = imu_interrupt_ts;
 
 	// Transpose 32x32 bit-blocks
 	transpose32(data_array_port0);
@@ -538,15 +478,15 @@ void mpu9150_read(void)
 	// Copy to data state arrays
 	uint8_t i;
 	for (i=0; i<NR_IMUS_PORTA; i++) {
-		memcpy(imu_data_matrix[i],data_array_port0+32-1-imus_pos[i],4);
-		memcpy(imu_data_matrix[i]+2,data_array_port0+64-1-imus_pos[i],2);
-		memcpy(imu_data_matrix[i]+3,data_array_port0+96-1-imus_pos[i],4);
-		memcpy(imu_data_matrix[i]+5,data_array_port0+128-1-imus_pos[i],2);	
+		memcpy(mimu_data[i],data_array_port0+(32-1)-imus_pos[i],4);
+		memcpy(mimu_data[i]+2,data_array_port0+(64-1)-imus_pos[i],2);
+		memcpy(mimu_data[i]+3,data_array_port0+(96-1)-imus_pos[i],4);
+		memcpy(mimu_data[i]+5,data_array_port0+(128-1)-imus_pos[i],2);	
 	}
 	for (; i<NR_IMUS_PORTA+NR_IMUS_PORTC; i++) {
-		memcpy(imu_data_matrix[i],data_array_port1+32-1-imus_pos[i],4);
-		memcpy(imu_data_matrix[i]+2,data_array_port1+64-1-imus_pos[i],2);
-		memcpy(imu_data_matrix[i]+3,data_array_port1+96-1-imus_pos[i],4);
-		memcpy(imu_data_matrix[i]+5,data_array_port1+128-1-imus_pos[i],2);
+		memcpy(mimu_data[i],data_array_port1+(32-1)-imus_pos[i],4);
+		memcpy(mimu_data[i]+2,data_array_port1+(64-1)-imus_pos[i],2);
+		memcpy(mimu_data[i]+3,data_array_port1+(96-1)-imus_pos[i],4);
+		memcpy(mimu_data[i]+5,data_array_port1+(128-1)-imus_pos[i],2);
 	}
 }

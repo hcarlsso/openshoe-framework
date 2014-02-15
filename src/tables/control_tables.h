@@ -29,6 +29,7 @@
 
 #include "compiler.h"
 #include "nav_types.h"
+#include "inertial_frontend.h"
 
 /// Definition structure of commands
 typedef const struct {
@@ -69,6 +70,10 @@ typedef const struct {
 #define UPDATE_ZARU_BUFFER 0x14
 #define ZARU_DETECTOR 0x15
 #define UPDATE_BUFFER2 0x16
+// Frontend
+#define FRONTEND_PREPROC 0x20
+#define FRONTEND_STATDET 0x21
+#define FRONTEND_POSTPROC 0x22
 //@}
 
 ///  \name External state IDs
@@ -82,6 +87,9 @@ typedef const struct {
 #define ANGULAR_RATE_SID 0x02
 #define IMU_TEMPERATURS_SID 0x03
 #define IMU_SUPPLY_VOLTAGE_SID 0x04
+#define U_NEW_SID 0x05
+#define U_INT_K_SID 0x06
+#define U_K_SID 0x07
 // Filtering states
 #define POSITION_SID 0x11
 #define VELOCITY_SID 0x12
@@ -92,6 +100,8 @@ typedef const struct {
 #define ZARU_TEST_STATISTICS_SID 0x1a
 #define GYRO_BIASES 0x1b
 #define ZARU_SID 0x1c
+#define T1S2F 0x1d
+#define T2S2F 0x1e
 // Step-wise dead reckoning data exchange states
 #define DX_SID 0x16
 #define DP_SID 0x17
@@ -102,7 +112,7 @@ typedef const struct {
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
 #define SAMSUNG_ID_SID 0x36
-// Massive MIMU raw register states
+// MIMU raw register states
 #define IMU0_RD_SID 0x40
 #define IMU1_RD_SID (IMU0_RD_SID+1)
 #define IMU2_RD_SID (IMU0_RD_SID+2)
@@ -156,10 +166,12 @@ typedef const struct {
 #define RESET_STEPWISE_DEAD_RECKONING 0x14
 #define RESET_STEPWISE_DEAD_RECKONING2 0x16
 #define RESET_STEPWISE_DEAD_RECKONING3 0x17
+#define RESET_STEPWISE_DEAD_RECKONING4 0x18
 #define RESET_SWDR_GYROCAL 0x15
 #define ADD_SYNC_OUTPUT 0x25
 #define SYNC_OUTPUT 0x26
 #define PROCESSING_OFF 0x27
+#define MIMU_FRONTEND 0x30
 //@}
 
 // Global variables used to access command information

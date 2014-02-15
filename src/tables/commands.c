@@ -45,6 +45,7 @@ void reset_zupt_aided_ins2(uint8_t**);
 void reset_stepwise_dead_reckoning(uint8_t**);
 void reset_stepwise_dead_reckoning2(uint8_t**);
 void reset_stepwise_dead_reckoning3(uint8_t**);
+void reset_stepwise_dead_reckoning4(uint8_t**);
 void reset_swdr_gyrocal(uint8_t**);
 void gyro_self_calibration(uint8_t**);
 void acc_calibration(uint8_t**);
@@ -52,6 +53,8 @@ void set_low_pass_imu(uint8_t**);
 void add_sync_output(uint8_t**);
 void sync_output(uint8_t**);
 void processing_off(uint8_t**);
+
+void mimu_frontend(uint8_t**);
 //@}
 
 ///  \name Command definitions
@@ -70,6 +73,7 @@ static command_structure reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_ai
 static command_structure reset_stepwise_dead_reckoning_cmd = {RESET_STEPWISE_DEAD_RECKONING,&reset_stepwise_dead_reckoning,0,0,{0}};
 static command_structure reset_stepwise_dead_reckoning2_cmd = {RESET_STEPWISE_DEAD_RECKONING2,&reset_stepwise_dead_reckoning2,0,0,{0}};
 static command_structure reset_stepwise_dead_reckoning3_cmd = {RESET_STEPWISE_DEAD_RECKONING3,&reset_stepwise_dead_reckoning3,1,1,{1}};
+static command_structure reset_stepwise_dead_reckoning4_cmd = {RESET_STEPWISE_DEAD_RECKONING4,&reset_stepwise_dead_reckoning4,0,0,{0}};
 static command_structure reset_swdr_gyrocal_cmd = {RESET_SWDR_GYROCAL,&reset_swdr_gyrocal,1,1,{1}};
 static command_structure gyro_calibration_cmd = {GYRO_CALIBRATION_INIT,&gyro_self_calibration,0,0,{0}};
 static command_structure acc_calibration_cmd = {ACC_CALIBRATION_INIT,&acc_calibration,1,1,{1}};
@@ -77,6 +81,7 @@ static command_structure set_low_pass_imu_cmd = {SET_LOWPASS_FILTER_IMU,&set_low
 static command_structure add_sync_output_cmd = {ADD_SYNC_OUTPUT,&add_sync_output,2,2,{1,1}};
 static command_structure sync_output_cmd = {SYNC_OUTPUT,&sync_output,0,0,{0}};
 static command_structure processing_off_cmd = {PROCESSING_OFF,&processing_off,0,0,{0}};
+static command_structure mimu_frontend_cmd = {MIMU_FRONTEND,&mimu_frontend,0,0,{0}};
 //@}
 
 // Arrays/tables to find appropriate commands
@@ -93,13 +98,15 @@ static const command_structure* commands[] = {&only_ack,
 											  &reset_stepwise_dead_reckoning_cmd,
 											  &reset_stepwise_dead_reckoning2_cmd,
 											  &reset_stepwise_dead_reckoning3_cmd,
+											  &reset_stepwise_dead_reckoning4_cmd,
 											  &reset_swdr_gyrocal_cmd,
 											  &gyro_calibration_cmd,
 											  &acc_calibration_cmd,
 											  &set_low_pass_imu_cmd,
 											  &add_sync_output_cmd,
 											  &sync_output_cmd,
-											  &processing_off_cmd};
+											  &processing_off_cmd,
+											  &mimu_frontend_cmd};
 												  
 // Arrays/tables for commands
 uint8_t command_header_table[32]={0};
@@ -357,6 +364,56 @@ void reset_stepwise_dead_reckoning3(uint8_t** cmd_arg){
 	set_last_process_sequence_element(&start_stepwise_dead_reckoning3);
 }
 
+
+void set_conditional_output_reset4(void){
+	if(filter_reset_flag){
+		set_conditional_output(DX_SID);
+		set_conditional_output(DP_SID);
+		set_conditional_output(STEP_COUNTER_SID);
+	}
+}
+void start_stepwise_dead_reckoning4(void){
+	if(initialize_flag==false){
+		// Stop initial alignment
+		empty_process_sequence();
+		// Reset step counter;
+		step_counter=0;
+		// Start ZUPT-aided INS
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+		set_elem_in_process_sequence(processing_functions_by_id[STEPWISE_SYSTEM_RESET]->func_p,3);
+		set_elem_in_process_sequence(processing_functions_by_id[MECHANIZATION]->func_p,4);
+		set_elem_in_process_sequence(processing_functions_by_id[TIME_UPDATE]->func_p,5);
+		set_elem_in_process_sequence(processing_functions_by_id[ZUPT_UPDATE]->func_p,6);
+		set_elem_in_process_sequence(&set_conditional_output_reset4,7);
+	}
+}
+uint32_t number_of_calls = 0;
+void wait_for_filled_up_buffer(void){
+	number_of_calls++;
+	if (number_of_calls>64){
+		empty_process_sequence();
+		initialize_flag=true;
+		// Start initial alignment
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+		set_elem_in_process_sequence(processing_functions_by_id[INITIAL_ALIGNMENT]->func_p,3);
+		set_last_process_sequence_element(&start_stepwise_dead_reckoning4);
+	}
+}
+void reset_stepwise_dead_reckoning4(uint8_t** no_arg){
+	number_of_calls = 0;
+	empty_process_sequence();
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+	set_last_process_sequence_element(&wait_for_filled_up_buffer);
+}
+
+
+
 ///\cond
 extern uint32_t nr_of_inital_alignment_samples;
 ///\endcond
@@ -434,6 +491,14 @@ void sync_output(uint8_t** no_arg){
 void processing_off(uint8_t** no_arg){
 	// Stop whatever was going on
 	empty_process_sequence();
+}
+
+void mimu_frontend(uint8_t** no_arg){
+	empty_process_sequence();
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+//	set_state_output(U_K_SID,1);
 }
 
 //@}

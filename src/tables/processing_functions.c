@@ -41,6 +41,10 @@ extern void precision_gyro_bias_null_calibration(void);
 extern void calibrate_accelerometers(void);
 extern void stepwise_system_reset(void);
 
+extern void frontend_preproc(void);
+extern void frontend_statdet(void);
+extern void frontend_postproc(void);
+
 ///  \name Processing functions information
 ///  Structs containing information and pointers to functions intended for the process sequence
 //@{
@@ -56,6 +60,10 @@ static proc_func_info zupt_update_info = {ZUPT_UPDATE,&zupt_update,0};
 static proc_func_info precision_gyro_bias_null_calibration_info = {GYRO_CALIBRATION,&precision_gyro_bias_null_calibration,0};
 static proc_func_info calibrate_accelerometers_info = {ACCELEROMETER_CALIBRATION,&calibrate_accelerometers,0};
 static proc_func_info stepwise_system_reset_info = {STEPWISE_SYSTEM_RESET,&stepwise_system_reset,0};
+	
+static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
+static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
+static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
 //@}
 
 static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_info,
@@ -69,7 +77,10 @@ static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_
 													   &zupt_update_info,
 													   &precision_gyro_bias_null_calibration_info,
 													   &calibrate_accelerometers_info,
-													   &stepwise_system_reset_info};
+													   &stepwise_system_reset_info,
+													   &frontend_preproc_info,
+													   &frontend_statdet_info,
+													   &frontend_postproc_info};
 
 // Array containing the processing functions to run
 proc_func_info* processing_functions_by_id[256];
