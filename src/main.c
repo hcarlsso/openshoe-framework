@@ -32,11 +32,8 @@
 
 #include "process_sequence.h"
 #include "external_interface.h"
-#include "ADIS16367_interface.h"
-#include "MPU9150_interface.h"
-#include "timer_interrupt.h"
-#include "toggle_interrupt.h"
-#include "timing_control.h"
+#include "imu_interface.h"
+#include "imu_interrupt.h"
 
 
 // Initialize system
@@ -53,9 +50,8 @@ int main (void) {
 		// Check if interrupt has occurred
 		wait_for_interrupt();
 		
-		// Read data from IMU			
-//		imu_burst_read();
-		mpu9150_read();
+		// Read data from IMU
+		imu_read();
 		
 		// Check if any command has been sent and respond accordingly
 		receive_command();
@@ -80,13 +76,14 @@ void system_init(void){
 	irq_initialize_vectors();
 	cpu_irq_enable();
 	
-	timer_interrput_init();
-	mpu9150_interface_init();
+	imu_interrupt_init();
+	imu_interface_init();
 
-//	toggle_interrupt_init();
-//	ADIS16367_interface_init();
-	
 	com_interface_init();
+	
+	#ifdef LED0
+	gpio_set_gpio_pin(LED0);
+	#endif
 }
 
 //! @}

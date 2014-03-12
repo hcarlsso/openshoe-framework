@@ -11,6 +11,7 @@
 
 void board_init(void)
 {
+	// TODO: Move these calls to toggle_interrupt_init()
 	// GPIO pins and functions used for the IMU SPI interface
 	static const gpio_map_t SPI_GPIO_MAP = {
 		{AVR32_SPI0_SCK_PIN,  AVR32_SPI0_SCK_FUNCTION},
@@ -24,5 +25,4 @@ void board_init(void)
 	
 	// Map the interrupt line to appropriate GPIO pin and function
 	gpio_enable_module_pin(IMU_INTERUPT_PIN,IMU_INTERUPT_FUNCTION);
-	
 }
