@@ -91,7 +91,8 @@ SDA12 PC16*/
 // Functions pacing I2C bitbanging
 int32_t last_tick;
 #define QUATER_CC_COUNT 57
-// 115 gives ~100kHz
+// TODO: define this based on CPU freq and desired sampling rate
+// 115 gives ~100kHz (with 48MHz clock)
 __always_inline void start_tick(void){
 	last_tick = Get_system_register(AVR32_COUNT);
 }

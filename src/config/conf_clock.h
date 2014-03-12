@@ -38,7 +38,8 @@
 #ifndef CONF_CLOCK_H_INCLUDED
 #define CONF_CLOCK_H_INCLUDED
 
-#define CLOCK_FREQ 48000000UL
+#define CLOCK_FREQ 64000000UL
+#define USB_CLOCK_FREQ 48000000UL
 
 //#define CONFIG_SYSCLK_INIT_CPUMASK  (1 << SYSCLK_SYSTIMER)
 //#define CONFIG_SYSCLK_INIT_PBAMASK  (1 << SYSCLK_USART0)
@@ -60,8 +61,8 @@
 
 //#define CONFIG_USBCLK_SOURCE        USBCLK_SRC_OSC0
 //#define CONFIG_USBCLK_SOURCE        USBCLK_SRC_OSC1
-#define   CONFIG_USBCLK_SOURCE        USBCLK_SRC_PLL0
-//#define CONFIG_USBCLK_SOURCE        USBCLK_SRC_PLL1
+//#define CONFIG_USBCLK_SOURCE        USBCLK_SRC_PLL0
+#define CONFIG_USBCLK_SOURCE        USBCLK_SRC_PLL1
 
 /* Fusb = Fsys / USB_div */
 #define CONFIG_USBCLK_DIV             1
@@ -74,12 +75,12 @@
 #define CONFIG_PLL0_MUL               (CLOCK_FREQ / BOARD_OSC0_HZ)
 #define CONFIG_PLL0_DIV               1
 
-//#define CONFIG_PLL1_SOURCE          PLL_SRC_OSC0
+#define CONFIG_PLL1_SOURCE          PLL_SRC_OSC0
 //#define CONFIG_PLL1_SOURCE          PLL_SRC_OSC1
 //#define CONFIG_PLL1_SOURCE          PLL_SRC_RC8M
 
 /* Fpll1 = (Fclk * PLL_mul) / PLL_div */
-#define CONFIG_PLL1_MUL               (CLOCK_FREQ / BOARD_OSC0_HZ)
+#define CONFIG_PLL1_MUL               (USB_CLOCK_FREQ / BOARD_OSC0_HZ)
 #define CONFIG_PLL1_DIV               1
 
 #endif /* CONF_CLOCK_H_INCLUDED */

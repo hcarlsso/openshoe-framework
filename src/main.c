@@ -53,8 +53,6 @@ int main (void) {
 		// Check if interrupt has occurred
 		wait_for_interrupt();
 		
-//		gpio_tgl_gpio_pin(AVR32_PIN_PB01);
-		
 		// Read data from IMU			
 //		imu_burst_read();
 		mpu9150_read();
@@ -71,6 +69,7 @@ int main (void) {
 		// Ensure the loop was finished within time limit
 		within_time_limit();
 	}
+	
 }
 
 
