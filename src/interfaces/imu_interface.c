@@ -6,6 +6,8 @@
  */ 
 
 #include "imu_interface.h"
+#include <stdint.h>
+#include <asf.h>
 
 #if defined(OPENSHOE_CLASSIC)
 #include "ADIS16367_interface.h"
@@ -21,7 +23,11 @@ void imu_interface_init(void){
 	#endif
 }
 
+int16_t mimu_data[32][7];
+uint32_t ts_u;
+
 void imu_read(void){
+	ts_u = Get_system_register(AVR32_COUNT);
 	#if defined(OPENSHOE_CLASSIC)
 	imu_burst_read();
 	#elif defined(MIMU3333) || defined(MIMU22BT)

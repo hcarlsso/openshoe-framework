@@ -46,9 +46,6 @@
 // 16-bit dummy data word for slave-to-master communication
 #define CONFIG_SPI_MASTER_DUMMY                0xFFFF
 
-
-#define SPI_IMU             (&AVR32_SPI0)
-#define SPI_IMU_ID			AVR32_SPI0_NPCS_0_PIN
 #define SPI_IMU_BAUDRATE    1000000
 
 

@@ -184,6 +184,7 @@ typedef const struct {
 //@{
 #define ONLY_ACK 0x01
 #define MCU_ID 0x02
+#define TEST_ID 0x03
 #define OUTPUT_STATE 0x20
 #define OUTPUT_ALL_OFF 0x21
 #define OUTPUT_ONOFF_INERT 0x22

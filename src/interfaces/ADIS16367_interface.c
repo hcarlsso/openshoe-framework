@@ -25,14 +25,6 @@
 #include <spi.h>
 #include <spi_master.h>
 
-/*
-#define XGYRO_OUT 0x0400
-#define YGYRO_OUT 0x0600
-#define ZGYRO_OUT 0x0800
-#define XACC_OUT 0x0A00
-#define YACC_OUT 0x0C00
-#define ZACC_OUT 0x0E00*/
-
 ///\name IMU commands
 //@{
 #define BURST_READ 0x3E00
@@ -60,12 +52,6 @@ struct spi_device SPI_DEVICE_IMU = {
 
 // Local variables to store imu raw output
 static uint16_t supply;
-static int16_t xgyro;
-static int16_t ygyro;
-static int16_t zgyro;
-static int16_t xacc;
-static int16_t yacc;
-static int16_t zacc;
 static int16_t xtemp;
 static int16_t ytemp;
 static int16_t ztemp;
@@ -78,6 +64,8 @@ static int16_t aux_adc;
  * \f$^circ C\f$. Angels are given in radians.
  */
 //@{
+extern int16_t mimu_data[32][7];
+extern uint32_t ts_u;
 vec3 accelerations_in;			///< \f$[m/s^2]\f$
 vec3 angular_rates_in;			///< \f$[rad/s]\f$
 vec3 imu_temperaturs;			///< \f$[^circ C]\f$
@@ -92,7 +80,21 @@ precision imu_supply_voltage;	///< \f$[V]\f$
  * conf_spi_master.h. The routine selects the IMU SPI for communication and
  * the interface functions will assume that the IMU SPI is still selected.
  */
-void ADIS16367_interface_init(void){	
+void ADIS16367_interface_init(void){
+	// GPIO pins and functions used for the IMU SPI interface
+	static const gpio_map_t SPI_GPIO_MAP = {
+		{IMU_SPI_SCK_PIN,  IMU_SPI_SCK_FUNCTION},
+		{IMU_SPI_MISO_PIN, IMU_SPI_MISO_FUNCTION},
+		{IMU_SPI_MOSI_PIN, IMU_SPI_MOSI_FUNCTION},
+		{IMU_SPI_NPCS_0_PIN, IMU_SPI_NPCS_0_FUNCTION}
+	};
+
+	// Assign GPIOs to SPI.
+	gpio_enable_module(SPI_GPIO_MAP, sizeof(SPI_GPIO_MAP) / sizeof(SPI_GPIO_MAP[0]));
+	
+	// Map the interrupt line to appropriate GPIO pin and function
+	gpio_enable_module_pin(IMU_INTERUPT_PIN,IMU_INTERUPT_FUNCTION);
+	
 	spi_master_init(SPI_IMU);
 	spi_master_setup_device(SPI_IMU, &SPI_DEVICE_IMU, 3, SPI_IMU_BAUDRATE, 0);
 	spi_enable(SPI_IMU);
@@ -102,19 +104,19 @@ void ADIS16367_interface_init(void){
 /// Converts raw (integer) inertial readings to float SI units.
 void convert_inert_readings(void){
 	// Shift out status bits
-	xgyro = xgyro << 2;
-	ygyro = ygyro << 2;
-	zgyro = zgyro << 2;
-	xacc = xacc << 2;
-	yacc = yacc << 2;
-	zacc = zacc << 2;
+	mimu_data[0][0] = mimu_data[0][0] << 2;
+	mimu_data[0][1] = mimu_data[0][1] << 2;
+	mimu_data[0][2] = mimu_data[0][2] << 2;
+	mimu_data[0][3] = mimu_data[0][3] << 2;
+	mimu_data[0][4] = mimu_data[0][4] << 2;
+	mimu_data[0][5] = mimu_data[0][5] << 2;
 	// Convert to float
-	angular_rates_in[0] = GYRO_SCALE * xgyro;
-	angular_rates_in[1] = GYRO_SCALE * ygyro;
-	angular_rates_in[2] = GYRO_SCALE * zgyro;
-	accelerations_in[0] = ACC_SCALE * xacc;
-	accelerations_in[1] = ACC_SCALE * yacc;
-	accelerations_in[2] = ACC_SCALE * zacc;
+	accelerations_in[0] = ACC_SCALE * mimu_data[0][0];
+	accelerations_in[1] = ACC_SCALE * mimu_data[0][1];
+	accelerations_in[2] = ACC_SCALE * mimu_data[0][2];
+	angular_rates_in[0] = GYRO_SCALE * mimu_data[0][3];
+	angular_rates_in[1] = GYRO_SCALE * mimu_data[0][4];
+	angular_rates_in[2] = GYRO_SCALE * mimu_data[0][5];
 }
 
 /// Converts raw (integer) auxiliary data readings to float SI units.
@@ -158,27 +160,27 @@ void imu_burst_read(void){
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	xgyro = spi_get(SPI_IMU);
+	mimu_data[0][3] = spi_get(SPI_IMU);
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	ygyro = spi_get(SPI_IMU);
+	mimu_data[0][4] = spi_get(SPI_IMU);
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	zgyro = spi_get(SPI_IMU);
+	mimu_data[0][5] = spi_get(SPI_IMU);
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	xacc = spi_get(SPI_IMU);
+	mimu_data[0][0] = spi_get(SPI_IMU);
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	yacc = spi_get(SPI_IMU);
+	mimu_data[0][1] = spi_get(SPI_IMU);
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	zacc = spi_get(SPI_IMU);
+	mimu_data[0][2] = spi_get(SPI_IMU);
 	while (!spi_is_tx_ready(SPI_IMU)) {;}
 	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
 	while (!spi_is_rx_ready(SPI_IMU)) {;}
@@ -199,40 +201,6 @@ void imu_burst_read(void){
 	convert_inert_readings();
 	convert_auxiliary_data();
 }
-
-/*
-#warning If this function is used the CONFIG_SPI_MASTER_DELAY_BCT macro must be set to >=9
-// Todo: above
-void imu_read_acc_and_gyro(void){
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,XGYRO_OUT);
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,YGYRO_OUT);
-	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	xgyro = spi_get(SPI_IMU);
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,ZGYRO_OUT);
-	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	ygyro = spi_get(SPI_IMU);
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,XACC_OUT);
-	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	zgyro = spi_get(SPI_IMU);
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,YACC_OUT);
-	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	xacc = spi_get(SPI_IMU);
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,ZACC_OUT);
-	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	yacc = spi_get(SPI_IMU);
-	while (!spi_is_tx_ready(SPI_IMU)) {;}
-	spi_put(SPI_IMU,CONFIG_SPI_MASTER_DUMMY);
-	while (!spi_is_rx_ready(SPI_IMU)) {;}
-	zacc = spi_get(SPI_IMU);
-	
-	convert_inert_readings();
-}*/
 
 
 /*! \brief Initializes the internal IMU gyro calibration routine.

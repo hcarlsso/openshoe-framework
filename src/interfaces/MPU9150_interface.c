@@ -387,10 +387,6 @@ void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1,uint8_
 	I2C_stop();
 }
 
-
-// IMU array data
-int16_t mimu_data[32][7];
-
 void mpu9150_interface_init(void){
 	
 	// Configure IMU pins for I2C communication
@@ -411,14 +407,12 @@ void mpu9150_interface_init(void){
 }
 
 
+// IMU array data
+extern int16_t mimu_data[32][7];
+
 // Buffers for reading data from the IMUs
 uint32_t data_array_port0[128];
 uint32_t data_array_port1[128];
-
-extern uint32_t imu_interrupt_ts;
-extern uint32_t imu_dt;
-
-uint32_t ts_u;
 
 const uint8_t imus0_pos[NR_IMUS_PORTA]={IMU1_PORTA,IMU2_PORTA,IMU3_PORTA,IMU4_PORTA,IMU5_PORTA,IMU6_PORTA,IMU7_PORTA,IMU8_PORTA};
 const uint8_t imus1_pos[NR_IMUS_PORTC]={IMU0_PORTC,IMU9_PORTC,IMU10_PORTC,IMU11_PORTC,IMU12_PORTC,IMU13_PORTC,IMU14_PORTC,IMU15_PORTC,IMU16_PORTC,IMU17_PORTC};
@@ -429,13 +423,6 @@ void mpu9150_read(void)
 	// Read all sensor registers (acc,temp,gyro)
 	burst_read(0x3B,data_array_port0,data_array_port1,14);
 	
-	static uint32_t imu_interrupt_ts_old = 0;
-	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
-	imu_dt = imu_interrupt_ts - imu_interrupt_ts_old;
-	imu_interrupt_ts_old = imu_interrupt_ts;
-	
-	ts_u = imu_interrupt_ts;
-
 	// Transpose 32x32 bit-blocks
 	transpose32(data_array_port0);
 	transpose32(data_array_port0+32);
