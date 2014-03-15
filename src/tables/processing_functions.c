@@ -44,6 +44,7 @@ extern void stepwise_system_reset(void);
 extern void frontend_preproc(void);
 extern void frontend_statdet(void);
 extern void frontend_postproc(void);
+extern void frontend_initial_alignment(void);
 
 ///  \name Processing functions information
 ///  Structs containing information and pointers to functions intended for the process sequence
@@ -64,6 +65,7 @@ static proc_func_info stepwise_system_reset_info = {STEPWISE_SYSTEM_RESET,&stepw
 static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
 static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
 static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
+static proc_func_info frontend_initial_alignment_info = {FRONTEND_INITIAL_ALIGNMENT,&frontend_initial_alignment,0};
 //@}
 
 static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_info,
@@ -80,7 +82,8 @@ static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_
 													   &stepwise_system_reset_info,
 													   &frontend_preproc_info,
 													   &frontend_statdet_info,
-													   &frontend_postproc_info};
+													   &frontend_postproc_info,
+													   &frontend_initial_alignment_info};
 
 // Array containing the processing functions to run
 proc_func_info* processing_functions_by_id[256];
