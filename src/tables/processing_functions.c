@@ -26,56 +26,28 @@
 */
 
 #include "control_tables.h"
+#include "inertial_frontend.h"
+#include "nav_eq.h"
 
-// Externally declared processing functions
-extern void update_imu_data_buffers(void);
-extern void update_imu_data_buffers2(void);
-extern void update_zaru_data_buffers(void);
-extern void initialize_navigation_algorithm(void);
-extern void strapdown_mechanisation_equations(void);
-extern void time_up_data(void);
-extern void ZUPT_detector(void);
-extern void ZARU_detector(void);
-extern void zupt_update(void);
 extern void precision_gyro_bias_null_calibration(void);
-extern void calibrate_accelerometers(void);
-extern void stepwise_system_reset(void);
-
-extern void frontend_preproc(void);
-extern void frontend_statdet(void);
-extern void frontend_postproc(void);
-extern void frontend_initial_alignment(void);
 
 ///  \name Processing functions information
 ///  Structs containing information and pointers to functions intended for the process sequence
 //@{
-static proc_func_info update_imu_data_buffers_info = {UPDATE_BUFFER,&update_imu_data_buffers,0};
-static proc_func_info update_imu_data_buffers2_info = {UPDATE_BUFFER2,&update_imu_data_buffers2,0};
-static proc_func_info update_zaru_data_buffers_info = {UPDATE_ZARU_BUFFER,&update_zaru_data_buffers,0};
-static proc_func_info initialize_navigation_algorithm_info = {INITIAL_ALIGNMENT,&initialize_navigation_algorithm,0};
+static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
+static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
+static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
+static proc_func_info initial_alignment_info = {FRONTEND_INITIAL_ALIGNMENT,&frontend_initial_alignment,0};
 static proc_func_info strapdown_mechanisation_equations_info = {MECHANIZATION,&strapdown_mechanisation_equations,0};
 static proc_func_info time_up_data_info = {TIME_UPDATE,&time_up_data,0};
-static proc_func_info ZUPT_detector_info = {ZUPT_DETECTOR,&ZUPT_detector,0};
-static proc_func_info ZARU_detector_info = {ZARU_DETECTOR,&ZARU_detector,0};
 static proc_func_info zupt_update_info = {ZUPT_UPDATE,&zupt_update,0};
 static proc_func_info precision_gyro_bias_null_calibration_info = {GYRO_CALIBRATION,&precision_gyro_bias_null_calibration,0};
 static proc_func_info calibrate_accelerometers_info = {ACCELEROMETER_CALIBRATION,&calibrate_accelerometers,0};
 static proc_func_info stepwise_system_reset_info = {STEPWISE_SYSTEM_RESET,&stepwise_system_reset,0};
-	
-static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
-static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
-static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
-static proc_func_info frontend_initial_alignment_info = {FRONTEND_INITIAL_ALIGNMENT,&frontend_initial_alignment,0};
 //@}
 
-static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_info,
-													   &update_imu_data_buffers2_info,
-													   &update_zaru_data_buffers_info,
-													   &initialize_navigation_algorithm_info,
-													   &strapdown_mechanisation_equations_info,
+static const proc_func_info* processing_functions[] = {&strapdown_mechanisation_equations_info,
 													   &time_up_data_info,
-													   &ZUPT_detector_info,
-													   &ZARU_detector_info,
 													   &zupt_update_info,
 													   &precision_gyro_bias_null_calibration_info,
 													   &calibrate_accelerometers_info,
@@ -83,7 +55,7 @@ static const proc_func_info* processing_functions[] = {&update_imu_data_buffers_
 													   &frontend_preproc_info,
 													   &frontend_statdet_info,
 													   &frontend_postproc_info,
-													   &frontend_initial_alignment_info};
+													   &initial_alignment_info};
 
 // Array containing the processing functions to run
 proc_func_info* processing_functions_by_id[256];

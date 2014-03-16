@@ -43,9 +43,6 @@ extern quat_vec quaternions;
 extern bool zupt;
 extern bool zaru;
 extern precision dt;
-extern precision Test_statistics;
-extern precision zaru_Test_statistics;
-extern vec3 gyroscope_biases;
 
 // Step-wise dead reckoning data exchange states
 extern vec4 dx;
@@ -55,6 +52,7 @@ extern uint16_t step_counter;
 // System states
 extern uint32_t interrupt_counter;
 extern uint32_t imu_dt;
+extern uint32_t gp_dt;
 
 // "Other" states
 extern vec3 accelerometer_biases;
@@ -82,15 +80,13 @@ static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)
 static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
 static state_t_info zaru_sti = {ZARU_SID, (void*) &zaru, sizeof(bool)};
-static state_t_info test_statistics_sti = {TEST_STATISTICS_SID, (void*) &Test_statistics, sizeof(precision)};
-static state_t_info zaru_test_statistics_sti = {ZARU_TEST_STATISTICS_SID, (void*) &zaru_Test_statistics, sizeof(precision)};
-static state_t_info gyroscope_biases_sti = {GYRO_BIASES, (void*) gyroscope_biases, sizeof(vec3)};
 static state_t_info dt_sti = {DT_SID, (void*) &dt, sizeof(dt)};
 static state_t_info dx_sti = {DX_SID, (void*) dx, sizeof(vec4)};
 static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(mat4sym)};
 static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter, sizeof(uint16_t)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
 static state_t_info imu_dt_sti = {IMU_DT_SID, (void*) &imu_dt, sizeof(uint32_t)};
+static state_t_info gp_dt_sti = {GP_DT_SID, (void*) &gp_dt, sizeof(uint32_t)};
 static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) accelerometer_biases, sizeof(vec3)};
 static state_t_info samsung_id_sti = {SAMSUNG_ID_SID, (void*) &samsung_id, sizeof(uint8_t)};
 static state_t_info imu0_rd_sti = {IMU0_RD_SID, (void*) mimu_data[0], 12};
@@ -180,10 +176,8 @@ const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
 												   &quaternions_sti,
 												   &zupt_sti,
 												   &zaru_sti,
-												   &test_statistics_sti,
-												   &zaru_test_statistics_sti,
-												   &gyroscope_biases_sti,
 												   &dt_sti,
+												   &gp_dt_sti,
 												   &accelerometer_biases_sti,
 												   &samsung_id_sti,
 												   &imu0_rd_sti,

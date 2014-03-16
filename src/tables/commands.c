@@ -244,13 +244,12 @@ void start_zupt_aided_ins(void){
 		// Stop initial alignment
 		empty_process_sequence();
 		// Start ZUPT-aided INS
-		set_elem_in_process_sequence(processing_functions_by_id[UPDATE_BUFFER]->func_p,0);
-		set_elem_in_process_sequence(processing_functions_by_id[ZUPT_DETECTOR]->func_p,1);
-		set_elem_in_process_sequence(processing_functions_by_id[UPDATE_ZARU_BUFFER]->func_p,2);
-		set_elem_in_process_sequence(processing_functions_by_id[ZARU_DETECTOR]->func_p,3);
-		set_elem_in_process_sequence(processing_functions_by_id[MECHANIZATION]->func_p,4);
-		set_elem_in_process_sequence(processing_functions_by_id[TIME_UPDATE]->func_p,5);
-		set_elem_in_process_sequence(processing_functions_by_id[ZUPT_UPDATE]->func_p,6);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+		set_elem_in_process_sequence(processing_functions_by_id[MECHANIZATION]->func_p,3);
+		set_elem_in_process_sequence(processing_functions_by_id[TIME_UPDATE]->func_p,4);
+		set_elem_in_process_sequence(processing_functions_by_id[ZUPT_UPDATE]->func_p,5);
 	}
 }
 void reset_zupt_aided_ins(uint8_t** no_arg){
@@ -258,9 +257,10 @@ void reset_zupt_aided_ins(uint8_t** no_arg){
 	empty_process_sequence();
 	initialize_flag=true;
 	// Start initial alignment
-	set_elem_in_process_sequence(processing_functions_by_id[UPDATE_ZARU_BUFFER]->func_p,0);
-	set_elem_in_process_sequence(processing_functions_by_id[UPDATE_BUFFER]->func_p,1);
-	set_elem_in_process_sequence(processing_functions_by_id[INITIAL_ALIGNMENT]->func_p,2);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_INITIAL_ALIGNMENT]->func_p,3);
 	// Set termination function of initial alignment which will also start INS
 	set_last_process_sequence_element(&start_zupt_aided_ins);
 }
@@ -372,8 +372,10 @@ void reset_swdr_gyrocal(uint8_t** cmd_arg){
 	uint8_t log2_nr_filter_taps = 0;
 	low_pass_filter_setting(log2_nr_filter_taps);
 	// Start initial alignment
-	set_elem_in_process_sequence(processing_functions_by_id[UPDATE_BUFFER]->func_p,0);
-	set_elem_in_process_sequence(processing_functions_by_id[INITIAL_ALIGNMENT]->func_p,1);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_INITIAL_ALIGNMENT]->func_p,3);
 	// Set termination function of initial alignment which will also start INS
 	set_last_process_sequence_element(&start_stepwise_dead_reckoning);
 }

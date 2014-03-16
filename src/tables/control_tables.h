@@ -58,18 +58,12 @@ typedef const struct {
 ///  \name Processing functions IDs
 ///  Macros for processing functions IDs
 //@{
-#define UPDATE_BUFFER 0x04
-#define INITIAL_ALIGNMENT 0x05
 #define MECHANIZATION 0x06
 #define TIME_UPDATE 0x07
-#define ZUPT_DETECTOR 0x08
 #define ZUPT_UPDATE 0x09
 #define GYRO_CALIBRATION 0x10
 #define ACCELEROMETER_CALIBRATION 0x11
 #define STEPWISE_SYSTEM_RESET 0x13
-#define UPDATE_ZARU_BUFFER 0x14
-#define ZARU_DETECTOR 0x15
-#define UPDATE_BUFFER2 0x16
 // Frontend
 #define FRONTEND_PREPROC 0x20
 #define FRONTEND_STATDET 0x21
@@ -97,9 +91,6 @@ typedef const struct {
 #define QUATERNION_SID 0x13
 #define ZUPT_SID 0x14
 #define DT_SID 0x15
-#define TEST_STATISTICS_SID 0x19
-#define ZARU_TEST_STATISTICS_SID 0x1a
-#define GYRO_BIASES 0x1b
 #define ZARU_SID 0x1c
 #define T1S2F 0x1d
 #define T2S2F 0x1e
@@ -110,6 +101,7 @@ typedef const struct {
 // System states
 #define INTERRUPT_COUNTER_SID 0x21
 #define IMU_DT_SID 0x22
+#define GP_DT_SID 0x23
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
 #define SAMSUNG_ID_SID 0x36
