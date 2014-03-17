@@ -28,9 +28,7 @@
 // Interrupt counter (essentially a time stamp)
 extern uint32_t interrupt_counter;
 // Global IMU interrupt (data) time-stamp
-extern uint32_t imu_interrupt_ts;
-// Input variable to Navigation algorithm for time differentials
-extern uint32_t imu_dt;
+extern uint32_t interrupt_ts;
 // Variable that used to signal if an external interrupt occurs.
 extern volatile bool imu_interrupt_flag;
 
@@ -52,7 +50,7 @@ void tc_sample_irq(void)
 	// Clear the interrupt flag. This is a side effect of reading the TC SR.
 	tc_read_sr(ADDRESS_TC, SAMPLE_TC_CHANNEL);
 	//gpio_tgl_gpio_pin(AVR32_PIN_PA08);
-	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
+	interrupt_ts = Get_system_register(AVR32_COUNT);
 	imu_interrupt_flag=true;
 	interrupt_counter++;
 }

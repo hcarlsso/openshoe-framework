@@ -26,4 +26,6 @@
 #define NR_IMUS 4
 #define SDA_PINS ( (1<<IMU0_SDA)|(1<<IMU1_SDA)|(1<<IMU2_SDA)|(1<<IMU3_SDA) )
 
+#define IMU_POS {IMU0_SDA,IMU1_SDA,IMU2_SDA,IMU3_SDA}
+
 #endif /* MIMU22BT_H_ */

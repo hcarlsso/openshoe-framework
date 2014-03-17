@@ -1,61 +1,24 @@
 ﻿/*
  * MPU9150_interface.c
  *
- * Created: 2013-08-13 17:56:13
+ * Created: 2014-03-17 12:18:23
  *  Author: jnil02
  */ 
 
-#include "MPU9150_interface_2_ports.h"
-//#include "i2c_com.h"
+#include "MPU9150_interface.h"
 #include "mpu6150.h"
 #include <stdint.h>
 #include <string.h>
 #include <asf.h>
 
+#if defined(MIMU22BT)
+#   include "MIMU22BT.h"
+#elif defined(MIMU4444)
+#	include "MIMU4444.h"
+#else
+#   include "MIMU22BT.h"
+#endif
 
-#include "MIMU3333.h"
-
-//#define CLK_PORT_NUM  2
-//#define CLK_PIN0 2
-//#define CLK_PIN1 5
-//#define CLK_PINS ((1<<CLK_PIN0)|(1<<CLK_PIN1))
-
-/*Framsida
-SDA9 PC04
-SDA8 PA19
-SDA7 PA16
-SDA6 PA09
-SDA5 PA08
-SDA4 PA07
-SDA3 PA06
-SDA2 PA05
-SDA1 PA04
-
-Baksida
-SDA16 PC18
-SDA17 PC19
-SDA18 PC20
-SDA13 PC02
-SDA14 PC03
-SDA15 PC17
-SDA10 PC05
-SDA11 PC15
-SDA12 PC16*/
-
-
-
-//#define DATA_PORT1 1
-//#define PORT1_IMU0 1
-//#define PORT1_IMU1 0
-//#define DATA_PINS1 ((1<<PORT1_IMU0)|(1<<PORT1_IMU1))
-//#define NR_IMUS_PORT1 2
-
-//#define PORT1_IMU0 3
-//#define PORT1_IMU1 4
-	
-//#define DATA_PORT2  2
-//#define DATA_PINS2 ((1<<2)|(1<<5))
-//#define DATA_PINS2 ((1<<3)|(1<<4))
 
 // Functions pacing I2C bitbanging
 static int32_t last_tick;
@@ -87,7 +50,7 @@ static uint32_t gpio_get_port_value(uint32_t port,uint32_t mask)
 }
 
 // Bit-wise transposition of a 32x32 bit-matrix
-static void transpose32(uint32_t A[32]){
+void transpose32(uint32_t A[32]){
 	int32_t j, k;
 	uint32_t m, t;
 	
@@ -104,9 +67,8 @@ static void transpose32(uint32_t A[32]){
 // Function that initializes the I2C communication pins
 static void I2C_init(void){
 	// Initialize the IMU pins to open-drain outputs
-	gpio_configure_group(CLK_PORT_NUM,CLK_PINS_2PORT,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
-	gpio_configure_group(DATA_PORTA,DATA_PINSA,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
-	gpio_configure_group(DATA_PORTC,DATA_PINSC,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
+	gpio_configure_group(CLK_PORT,CLK_PINS,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
+	gpio_configure_group(SDA_PORT,SDA_PINS,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
 }
 
 // Function that sends the I2C start command
@@ -115,33 +77,30 @@ static void I2C_start(void){
 	start_tick();
 
 	// Make sure all communication lines are in the start state
-//	gpio_set_group_high(CLK_PORT_NUM_NUM,CLK_PINS_2PORT);
+//	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
 //	gpio_set_group_high(DATA_PORT0,DATA_PINS0);
 //	gpio_set_group_high(DATA_PORT1,DATA_PINS1);
 
 	// Now pull the SDA lines low will keeping the SCL high
-	gpio_set_group_low(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_low(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_low(SDA_PORT,SDA_PINS);
 	quater_tick();
 }
 
 static void I2C_start_read(void){
 	
 	// Short delay (1/2 clock cycle)
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	half_tick();
 	
 	// Make sure all communication lines are in the start state
-	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
-	gpio_set_group_high(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_high(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_high(CLK_PORT,CLK_PINS);
+	gpio_set_group_high(SDA_PORT,SDA_PINS);
 	
 	// Short delay (1/4 clock cycle)
 	quater_tick();
 
 	// Now pull the SDA lines low will keeping the SCL high
-	gpio_set_group_low(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_low(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_low(SDA_PORT,SDA_PINS);
 	quater_tick();
 }
 
@@ -149,21 +108,19 @@ static void I2C_start_read(void){
 static void I2C_stop(void)
 {
 	// Pull the SCL lines low
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Pull the SDA lines low
-	gpio_set_group_low(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_low(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_low(SDA_PORT,SDA_PINS);
 	quater_tick();
 
 	// Pull the SCL lines high
-	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_high(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Pull the SDA lines high
-	gpio_set_group_high(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_high(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_high(SDA_PORT,SDA_PINS);
 }
 
 // Function that clocks out a single byte on the I2C bus and that returns ACK (NACK) responds of the sensors
@@ -175,39 +132,36 @@ static void I2C_write_byte(uint8_t data)
 	for (ctr=8;ctr>0;ctr--)
 	{
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		quater_tick();
 
 		// Set SDA 1
 		if ((data>>(ctr-1)) & 0x01)
 		{
-			gpio_set_group_high(DATA_PORTA,DATA_PINSA);
-			gpio_set_group_high(DATA_PORTC,DATA_PINSC);
+			gpio_set_group_high(SDA_PORT,SDA_PINS);
 		}
 		else
 		{
-			gpio_set_group_low(DATA_PORTA,DATA_PINSA);
-			gpio_set_group_low(DATA_PORTC,DATA_PINSC);			
+			gpio_set_group_low(SDA_PORT,SDA_PINS);
 		}
 		quater_tick();
 
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		half_tick();
 	}
 
 	// ACK
 	// Pull clk low
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Set SDA 1
-	gpio_set_group_high(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_high(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_high(SDA_PORT,SDA_PINS);
 	quater_tick();
 
 	// Pull clk high
-	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_high(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Read the state of the SLA lines
@@ -216,11 +170,11 @@ static void I2C_write_byte(uint8_t data)
 	quater_tick();
 
 	// Pull SCL low (gives more even clock at higher rates)
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 }
 
 // Function that reads a single byte on the I2C bus. The input flag signals if a ACK should be read or a NACK outputted.
-static void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_flag){
+static void I2C_read_byte(uint32_t *data_port0,Bool ack_flag){
 	
 	uint8_t ctr;
 	
@@ -228,25 +182,24 @@ static void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_fla
 	for (ctr=0;ctr<8;ctr++)
 	{		
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		half_tick();
 		
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		quater_tick();
-		data_port0[ctr]=gpio_get_port_value(DATA_PORTA,DATA_PINSA);
-		data_port1[ctr]=gpio_get_port_value(DATA_PORTC,DATA_PINSC);
+		data_port0[ctr]=gpio_get_port_value(SDA_PORT,SDA_PINS);
 
 		quater_tick();
 	}
 
 /*	uint32_t tmp0, tmp1;
 	// Pull clk low
-	gpio_set_group_low(CLK_PORT_NUM_NUM,CLK_PINS_2PORT);
+	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
 	half_tick();
 		
 	// Pull clk high
-	gpio_set_group_high(CLK_PORT_NUM_NUM,CLK_PINS_2PORT);
+	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
 	quater_tick();
 	tmp0 = gpio_get_port_value(DATA_PORT0,DATA_PINS0);
 	tmp1 = gpio_get_port_value(DATA_PORT1,DATA_PINS1);
@@ -256,13 +209,13 @@ static void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_fla
 	for (ctr=0;ctr<7;ctr++)
 	{
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
 		data_port0[ctr]=tmp0;
 		data_port1[ctr]=tmp1;
 		half_tick();
 		
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
 		quater_tick();
 		tmp0 = gpio_get_port_value(DATA_PORT0,DATA_PINS0);
 		tmp1 = gpio_get_port_value(DATA_PORT1,DATA_PINS1);
@@ -277,40 +230,37 @@ static void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_fla
 	{
 		// ACK
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		quater_tick();
 
 		// Set SDA 1
-		gpio_set_group_low(DATA_PORTA,DATA_PINSA);
-		gpio_set_group_low(DATA_PORTC,DATA_PINSC);
+		gpio_set_group_low(SDA_PORT,SDA_PINS);
 		quater_tick();
 
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		half_tick();
 	}
 	else
 	{
 		// Send NACK
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		quater_tick();
 
 		// Set SDA 1
-		gpio_set_group_high(DATA_PORTA,DATA_PINSA);
-		gpio_set_group_high(DATA_PORTC,DATA_PINSC);
+		gpio_set_group_high(SDA_PORT,SDA_PINS);
 		quater_tick();
 
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS_2PORT);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		half_tick();
 	}
 
 	// Pull SCL low
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS_2PORT);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	// Release data pins
-	gpio_set_group_high(DATA_PORTA,DATA_PINSA);
-	gpio_set_group_high(DATA_PORTC,DATA_PINSC);
+	gpio_set_group_high(SDA_PORT,SDA_PINS);
 }
 
 //Function thats writes a single byte to the specified register address.
@@ -320,7 +270,7 @@ static void single_byte_write(uint8_t address,uint8_t data)
 	I2C_start();
 
 	// Send device address with write command
-	I2C_write_byte(((MPU6150_ADDRESS_AD0_LOW<<1) & 0xFE));
+	I2C_write_byte(((MPU6150_ADDRESS_AD0_HIGH<<1) & 0xFE));
 
 	// Send register address
 	I2C_write_byte(address);
@@ -333,13 +283,13 @@ static void single_byte_write(uint8_t address,uint8_t data)
 }
 
 //Function that reads a single byte from the specified register address
-static void single_byte_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1)
+static void single_byte_read(uint8_t address,uint32_t *data_port0)
 {
 	// Send I2C start command
 	I2C_start();
 	
 	// Send device address with write command
-	I2C_write_byte(((MPU6150_ADDRESS_AD0_LOW<<1) & 0xFE));
+	I2C_write_byte(((MPU6150_ADDRESS_AD0_HIGH<<1) & 0xFE));
 		
 	// Send register address
 	I2C_write_byte(address);
@@ -348,17 +298,17 @@ static void single_byte_read(uint8_t address,uint32_t *data_port0,uint32_t *data
 	I2C_start_read();
 	
 	// Send device address with read command
-	I2C_write_byte(((MPU6150_ADDRESS_AD0_LOW<<1) | 0x01));
+	I2C_write_byte(((MPU6150_ADDRESS_AD0_HIGH<<1) | 0x01));
 	
 	// Read byte (false=NACK)
-	I2C_read_byte(data_port0,data_port1,false);
+	I2C_read_byte(data_port0,false);
 
 	// Send stop
 	I2C_stop();
 }
 
 //Function that reads multiple bytes in a burst
-static void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1,uint8_t nr_of_bytes)
+static void burst_read(uint8_t address,uint32_t *data_port0,uint8_t nr_of_bytes)
 {
 	uint8_t ctr;
 	
@@ -366,7 +316,7 @@ static void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1
 	I2C_start();
 
 	// Send device address with write command
-	I2C_write_byte(((MPU6150_ADDRESS_AD0_LOW<<1) & 0xFE));
+	I2C_write_byte(((MPU6150_ADDRESS_AD0_HIGH<<1) & 0xFE));
 	
 	// Send register address
 	I2C_write_byte(address);
@@ -375,21 +325,21 @@ static void burst_read(uint8_t address,uint32_t *data_port0,uint32_t *data_port1
 	I2C_start_read();
 	
 	// Send device address with read command
-	I2C_write_byte(((MPU6150_ADDRESS_AD0_LOW<<1) | 0x01));
+	I2C_write_byte(((MPU6150_ADDRESS_AD0_HIGH<<1) | 0x01));
 	
 	// Read bytes (true=ACK)
 	for (ctr=0;ctr<nr_of_bytes-1;ctr++)
 	{
-		I2C_read_byte(data_port0+ctr*8,data_port1+ctr*8,true);
+		I2C_read_byte(data_port0+ctr*8,true);
 	}
 	// Read last byte (false=NACK)
-	I2C_read_byte(data_port0+ctr*8,data_port1+ctr*8,false);
+	I2C_read_byte(data_port0+ctr*8,false);
 	
 	// Send stop
 	I2C_stop();
 }
 
-void mpu9150_2_port_interface_init(void){
+void mpu9150_interface_init(void){
 	
 	// Configure IMU pins for I2C communication
 	I2C_init();
@@ -414,42 +364,28 @@ extern int16_t mimu_data[32][7];
 
 // Buffers for reading data from the IMUs
 static uint32_t data_array_port0[128];
-static uint32_t data_array_port1[128];
 
-static const uint8_t imus0_pos[NR_IMUS_PORTA]={IMU1_PORTA,IMU2_PORTA,IMU3_PORTA,IMU4_PORTA,IMU5_PORTA,IMU6_PORTA,IMU7_PORTA,IMU8_PORTA};
-static const uint8_t imus1_pos[NR_IMUS_PORTC]={IMU0_PORTC,IMU9_PORTC,IMU10_PORTC,IMU11_PORTC,IMU12_PORTC,IMU13_PORTC,IMU14_PORTC,IMU15_PORTC,IMU16_PORTC,IMU17_PORTC};
+static const uint8_t imus0_pos[NR_IMUS]=IMU_POS;
 
 // Read inertial measurements from IMU
-void mpu9150_2_port_read(void)
+void mpu9150_read(void)
 {
 	// Read all sensor registers (acc,temp,gyro)
-	burst_read(0x3B,data_array_port0,data_array_port1,14);
+	burst_read(0x3B,data_array_port0,14);
 	
 	// Transpose 32x32 bit-blocks
 	transpose32(data_array_port0);
 	transpose32(data_array_port0+32);
 	transpose32(data_array_port0+64);
 	transpose32(data_array_port0+96);
-	transpose32(data_array_port1);
-	transpose32(data_array_port1+32);
-	transpose32(data_array_port1+64);
-	transpose32(data_array_port1+96);
 
 	// Copy to data state arrays
 	uint8_t i;
-	for (i=0; i<NR_IMUS_PORTA; i++) {
+	for (i=0; i<NR_IMUS; i++) {
 		memcpy(mimu_data[i],data_array_port0+(32-1)-imus0_pos[i],4);
 		memcpy(mimu_data[i]+2,data_array_port0+(64-1)-imus0_pos[i],2);
 		memcpy(mimu_data[i]+3,data_array_port0+(96-1)-imus0_pos[i],4);
 		memcpy(mimu_data[i]+5,data_array_port0+(128-1)-imus0_pos[i],2);
 		memcpy(mimu_data[i]+6,(uint16_t*)(data_array_port0+(64-1)-imus0_pos[i])+1,2);
-	}
-	uint8_t j;
-	for (j=0; j<NR_IMUS_PORTC; j++) {
-		memcpy(mimu_data[i+j],data_array_port1+(32-1)-imus1_pos[j],4);
-		memcpy(mimu_data[i+j]+2,data_array_port1+(64-1)-imus1_pos[j],2);
-		memcpy(mimu_data[i+j]+3,data_array_port1+(96-1)-imus1_pos[j],4);
-		memcpy(mimu_data[i+j]+5,data_array_port1+(128-1)-imus1_pos[j],2);
-		memcpy(mimu_data[i+j]+6,(uint16_t*)(data_array_port1+(64-1)-imus1_pos[j])+1,2);
 	}
 }

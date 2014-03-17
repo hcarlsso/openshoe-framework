@@ -12,9 +12,7 @@
 // Interrupt counter (essentially a time stamp)
 extern uint32_t interrupt_counter;
 // Global IMU interrupt (data) time-stamp
-extern uint32_t imu_interrupt_ts;
-// Input variable to Navigation algorithm for time differentials
-extern uint32_t imu_dt;
+extern uint32_t interrupt_ts;
 // Variable that used to signal if an external interrupt occurs.
 extern volatile bool imu_interrupt_flag;
 
@@ -50,7 +48,7 @@ void eic_nmi_handler( void )
 	__asm__ __volatile__ ("pushm   r0-r12, lr\n\t");
 	
 	eic_clear_interrupt_line(&AVR32_EIC, IMU_INTERUPT_LINE1);
-	imu_interrupt_ts = Get_system_register(AVR32_COUNT);
+	interrupt_ts = Get_system_register(AVR32_COUNT);
 	imu_interrupt_flag = true;
 	interrupt_counter++;
 	

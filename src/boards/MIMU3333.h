@@ -9,11 +9,11 @@
 #ifndef MIMU3333_H_
 #define MIMU3333_H_
 
-#define LED0 AVR32_PIN_PB01
+//#define LED0 AVR32_PIN_PB01
 
 // IMU pins
-#define CLK_PORT 3
-#define CLK_PINS   ((1<<21)|(1<<27)|(1<<28)|(1<<29)|(1<<30))
+#define CLK_PORT_NUM 3
+#define CLK_PINS_2PORT   ((1<<21)|(1<<27)|(1<<28)|(1<<29)|(1<<30))
 #define DATA_PORTA 0
 #define DATA_PORTC 2
 #define IMU0_PORTC 4
