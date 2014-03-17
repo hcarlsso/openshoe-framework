@@ -20,6 +20,7 @@
 #include "ADIS16367_interface.h"
 #include "conf_spi_master.h"
 #include "nav_types.h"
+#include "classic.h"
 
 #include <gpio.h>
 #include <spi.h>

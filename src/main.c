@@ -71,7 +71,6 @@ int main (void) {
 
 /// Initialize hardware and communication interfaces
 void system_init(void){
-	board_init();
 	sysclk_init();
 	irq_initialize_vectors();
 	cpu_irq_enable();
@@ -80,10 +79,6 @@ void system_init(void){
 	imu_interface_init();
 
 	com_interface_init();
-	
-	#ifdef LED0
-	gpio_set_gpio_pin(LED0);
-	#endif
 }
 
 //! @}

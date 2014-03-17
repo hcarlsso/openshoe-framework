@@ -6,6 +6,7 @@
  */ 
 
 #include "toggle_interrupt.h"
+#include "classic.h"
 #include <asf.h>
 
 // Interrupt counter (essentially a time stamp)

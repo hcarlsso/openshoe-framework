@@ -5,13 +5,22 @@
  *  Author: jnil02
  */ 
 
-#include "MPU9150_interface.h"
+#include "MPU9150_interface_2_ports.h"
 //#include "i2c_com.h"
 #include "mpu6150.h"
 #include <stdint.h>
 #include <string.h>
 #include <asf.h>
 
+#if  defined(MIMU3333)
+#	include "MIMU3333.h"
+#elif defined(MIMU22BT)
+#   include "MIMU22BT.h"
+#elif defined(MIMU4444)
+#	include "MIMU4444.h"
+#else
+#   include "MIMU3333.h"
+#endif
 
 //#define CLK_PORT_NUM  2
 //#define CLK_PIN0 2
@@ -102,7 +111,7 @@ void transpose32(uint32_t A[32]){
 // Function that initializes the I2C communication pins
 void I2C_init(void){
 	// Initialize the IMU pins to open-drain outputs
-	gpio_configure_group(CLK_PORT_NUM,CLK_PINS,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
+	gpio_configure_group(CLK_PORT,CLK_PINS,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
 	gpio_configure_group(DATA_PORTA,DATA_PINSA,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
 	gpio_configure_group(DATA_PORTC,DATA_PINSC,(GPIO_OPEN_DRAIN | GPIO_DIR_OUTPUT));
 }
@@ -126,11 +135,11 @@ void I2C_start(void){
 void I2C_start_read(void){
 	
 	// Short delay (1/2 clock cycle)
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	half_tick();
 	
 	// Make sure all communication lines are in the start state
-	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_high(CLK_PORT,CLK_PINS);
 	gpio_set_group_high(DATA_PORTA,DATA_PINSA);
 	gpio_set_group_high(DATA_PORTC,DATA_PINSC);
 	
@@ -147,7 +156,7 @@ void I2C_start_read(void){
 void I2C_stop(void)
 {
 	// Pull the SCL lines low
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Pull the SDA lines low
@@ -156,7 +165,7 @@ void I2C_stop(void)
 	quater_tick();
 
 	// Pull the SCL lines high
-	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_high(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Pull the SDA lines high
@@ -173,7 +182,7 @@ void I2C_write_byte(uint8_t data)
 	for (ctr=8;ctr>0;ctr--)
 	{
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		quater_tick();
 
 		// Set SDA 1
@@ -190,13 +199,13 @@ void I2C_write_byte(uint8_t data)
 		quater_tick();
 
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		half_tick();
 	}
 
 	// ACK
 	// Pull clk low
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Set SDA 1
@@ -205,7 +214,7 @@ void I2C_write_byte(uint8_t data)
 	quater_tick();
 
 	// Pull clk high
-	gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_high(CLK_PORT,CLK_PINS);
 	quater_tick();
 
 	// Read the state of the SLA lines
@@ -214,7 +223,7 @@ void I2C_write_byte(uint8_t data)
 	quater_tick();
 
 	// Pull SCL low (gives more even clock at higher rates)
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 }
 
 // Function that reads a single byte on the I2C bus. The input flag signals if a ACK should be read or a NACK outputted.
@@ -226,11 +235,11 @@ void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_flag){
 	for (ctr=0;ctr<8;ctr++)
 	{		
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		half_tick();
 		
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		quater_tick();
 		data_port0[ctr]=gpio_get_port_value(DATA_PORTA,DATA_PINSA);
 		data_port1[ctr]=gpio_get_port_value(DATA_PORTC,DATA_PINSC);
@@ -275,7 +284,7 @@ void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_flag){
 	{
 		// ACK
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		quater_tick();
 
 		// Set SDA 1
@@ -284,14 +293,14 @@ void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_flag){
 		quater_tick();
 
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		half_tick();
 	}
 	else
 	{
 		// Send NACK
 		// Pull clk low
-		gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_low(CLK_PORT,CLK_PINS);
 		quater_tick();
 
 		// Set SDA 1
@@ -300,12 +309,12 @@ void I2C_read_byte(uint32_t *data_port0,uint32_t *data_port1,Bool ack_flag){
 		quater_tick();
 
 		// Pull clk high
-		gpio_set_group_high(CLK_PORT_NUM,CLK_PINS);
+		gpio_set_group_high(CLK_PORT,CLK_PINS);
 		half_tick();
 	}
 
 	// Pull SCL low
-	gpio_set_group_low(CLK_PORT_NUM,CLK_PINS);
+	gpio_set_group_low(CLK_PORT,CLK_PINS);
 	// Release data pins
 	gpio_set_group_high(DATA_PORTA,DATA_PINSA);
 	gpio_set_group_high(DATA_PORTC,DATA_PINSC);
