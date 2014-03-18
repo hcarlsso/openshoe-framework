@@ -21,7 +21,7 @@
 
 #include "compiler.h"
 
-void com_interface_init(void);
+void external_interface_init(void);
 
 // These are the two main functions used by the interface.
 void transmit_data(void);

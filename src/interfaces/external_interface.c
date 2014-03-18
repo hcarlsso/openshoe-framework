@@ -15,9 +15,15 @@
 
 // Needed for memcpy
 #include <string.h>
-
+#include <gpio.h>
+#include "usart.h"
+#include "conf_clock.h"
 #include "external_interface.h"
 #include "control_tables.h"
+
+#if defined(MIMU22BT)
+#  include "MIMU22BT.h"
+#endif
 
 // All USB include files (possibly not all needed)
 #include "conf_usb.h"
@@ -77,16 +83,41 @@ static bool  state_output_cond[SID_LIMIT] = {0};
 //@}
 
 /// Initialization function for communication interface
-void com_interface_init(void){
+void external_interface_init(void){
 	// Start usb controller	
 	udc_start();
 	
-	// These initialization functions should be replaced by a code generating script/preprocessors
+	// TODO: These initialization functions should be replaced by a code generating script/preprocessors
 	// They only initialize constant arrays.
 	commands_init();	
 	system_states_init();
 	processing_functions_init();
+	
+#ifdef BT_MODULE
+	gpio_enable_pin_pull_down(BT_PAIRED);
+	
+	static const gpio_map_t USART_GPIO_MAP =
+	{
+		{AVR32_USART1_RXD_0_1_PIN, AVR32_USART1_RXD_0_1_FUNCTION},
+		{AVR32_USART1_TXD_0_1_PIN, AVR32_USART1_TXD_0_1_FUNCTION}
+	};
 
+	// USART options.
+	static const usart_options_t USART_OPTIONS =
+	{
+		.baudrate     = 115200,
+		.charlength   = 8,
+		.paritytype   = USART_NO_PARITY,
+		.stopbits     = USART_1_STOPBIT,
+		.channelmode  = USART_NORMAL_CHMODE
+	};
+	
+	// Assign GPIO to USART.
+	gpio_enable_module(USART_GPIO_MAP, sizeof(USART_GPIO_MAP) / sizeof(USART_GPIO_MAP[0]));
+
+	// Initialize USART in RS232 mode.
+	usart_init_rs232((&AVR32_USART1), &USART_OPTIONS, CLOCK_FREQ);
+#endif
 }
 
 // Define and inline functions for improved readability of code
@@ -163,6 +194,9 @@ static inline void parse_and_execute_command(struct rxtx_buffer* buffer,command_
 	// Execute command response
 	cmd_info->cmd_response(command_arg);}
 
+
+static inline bool is_bluetooth_paired(){
+	return gpio_get_pin_value(BT_PAIRED);}
 
 /*! \brief This functions collect the data which is to be transmitted and stores it in the argument buffer.
 
@@ -242,7 +276,7 @@ void receive_command(void){
 	static command_structure* info_last_command;
 	int rx_nrb_counter = NO_BYTES_RECEIVED_YET;
 	
-	//If USB is attached and data is available, receive data (command)
+	// If USB is attached and data is available, receive data (command)
 	if(is_usb_attached()){
 		while(is_data_available() && receive_limit_not_reached(rx_nrb_counter)){
 			
@@ -286,6 +320,14 @@ void receive_command(void){
 		reset_buffer(&rx_buffer);
 	}
 	// Return if: USB detached, no more data available, or receive-limit reached
+	
+	// Recieve commands over Bluetooth
+	#ifdef BT_MODULE
+	if(is_bluetooth_paired()) {
+		
+	}
+	#endif /* BT_MODULE */
+	
 	return;	
 }
 
@@ -312,7 +354,21 @@ void transmit_data(void){
 		// This does not work cause it will hang if user does not clear his buffers sufficiently fast.
 		// Equivalent but non-blocking function should be written.
 //		udi_cdc_write_buf((int*)tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer);
-	}	
+	}
+	
+#ifdef BT_MODULE
+	static int tmp = 0;
+	if(is_bluetooth_paired()) {
+		gpio_set_pin_high(LED0);
+		tmp++;
+		if(tmp>300){
+			usart_write_line((&AVR32_USART1), "AB");
+			tmp=0;
+		}
+	} else {
+		gpio_set_pin_low(LED0);
+	}
+#endif /* BT_MODULE */
 }
 
 /**

@@ -74,11 +74,12 @@ void system_init(void){
 	sysclk_init();
 	irq_initialize_vectors();
 	cpu_irq_enable();
+	board_init();
 	
 	imu_interrupt_init();
 	imu_interface_init();
 
-	com_interface_init();
+	external_interface_init();
 }
 
 //! @}
