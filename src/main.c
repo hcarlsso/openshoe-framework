@@ -74,6 +74,7 @@ void system_init(void){
 	sysclk_init();
 	irq_initialize_vectors();
 	cpu_irq_enable();
+	INTC_init_interrupts();  //Don't know if this one is needed at all
 	board_init();
 	
 	imu_interface_init();

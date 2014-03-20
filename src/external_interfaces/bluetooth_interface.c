@@ -127,6 +127,11 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	}
 }
 
+volatile int tmp_cnt=0;
+void handle_ack(uint8_t** cmd_arg){
+	tmp_cnt++;
+}
+
 void bt_receive_command(void){
 	static uint8_t rx_buffer_array[RX_BUFFER_SIZE];
 	static struct rxtx_buffer rx_buffer = {rx_buffer_array,rx_buffer_array,rx_buffer_array,0};
@@ -142,6 +147,8 @@ void bt_receive_command(void){
 			increment_counter(rx_nrb_counter);
 			reset_timer(command_tx_timer);
 			
+			// TODO: On wireless we should use a common starting header.
+			
 			// Do we have a potential new header?
 			if(is_new_header(rx_buffer.nrb)){
 				if(is_valid_header(*rx_buffer.write_position)){
@@ -155,6 +162,7 @@ void bt_receive_command(void){
 			// Or a full command?
 			else if(is_end_of_command(rx_buffer.nrb)){
 				if(has_valid_checksum(&rx_buffer)){
+					// TODO: change order ot send_ak/send_nack. If parsing fails due to invalid arguments, we should send nack.
 					send_ak(&rx_buffer);
 					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_BT);
 					}

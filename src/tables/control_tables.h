@@ -175,9 +175,10 @@ typedef const struct {
 ///  \name Command IDs
 ///  Macros for command IDs
 //@{
-#define ONLY_ACK 0x01
-#define MCU_ID 0x02
-#define TEST_ID 0x03
+#define ACK_ID 0x01
+#define NACK_ID 0x02
+#define PING_ID 0x03
+#define MCU_ID 0x04
 #define OUTPUT_STATE 0x20
 #define OUTPUT_ALL_OFF 0x21
 #define OUTPUT_ONOFF_INERT 0x22
@@ -204,10 +205,10 @@ extern uint8_t command_header_table[32];
 extern command_structure* command_info_array[256];
 void commands_init(void);
 
-inline bool is_valid_header(uint8_t header){
+inline static bool is_valid_header(uint8_t header){
 	return command_header_table[header>>3] & (1<<(header & 7));}
 	
-inline command_structure* get_command_info(uint8_t header){
+inline static command_structure* get_command_info(uint8_t header){
 	return command_info_array[header];}
 
 

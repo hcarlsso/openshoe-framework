@@ -145,7 +145,9 @@ void tc_init(volatile avr32_tc_t *tc)
 volatile static avr32_tc_t *tc = ADDRESS_TC;
 
 void timer_interrput_init(void){
+	Disable_global_interrupt();
 	INTC_register_interrupt(&tc_sample_irq, SAMPLE_TC_IRQ, TC_IRQ_PRIORITY);
 	sysclk_enable_peripheral_clock(ADDRESS_TC);
 	tc_init(tc);
+	Enable_global_interrupt();
 }

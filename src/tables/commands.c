@@ -32,7 +32,7 @@
 ///  \name Command response functions
 ///  Functions which are executed in response to commands.  
 //@{
-//void test_algorithm(uint8_t**);
+extern void handle_ack(uint8_t**);
 void output_state(uint8_t**);
 void output_imu_rd(uint8_t**);
 void output_imu_temp(uint8_t**);
@@ -60,9 +60,9 @@ void start_inertial_frontend(uint8_t**);
 ///  \name Command definitions
 ///  Structs containing the information/definitions of the commands.
 //@{
-static command_structure only_ack = {ONLY_ACK,NULL,0,0,{0}};
+static command_structure ack = {ACK_ID,&handle_ack,2,1,{2}};
+static command_structure ping = {PING_ID,NULL,0,0,{0}};
 static command_structure mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
-//static command_structure test_algorithm_id = {TEST_ID,&test_algorithm,12,6,{2,2,2,2,2,2}};
 static command_structure output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
 static command_structure output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
 static command_structure output_onoff_inert = {OUTPUT_ONOFF_INERT,&toggle_inertial_output,1,1,{1}};
@@ -85,7 +85,7 @@ static command_structure mimu_frontend_cmd = {MIMU_FRONTEND,&start_inertial_fron
 //@}
 
 // Arrays/tables to find appropriate commands
-static const command_structure* commands[] = {&only_ack,
+static const command_structure* commands[] = {&ping,
 											  &mcu_id,
 											  &output_onoff_state,
 											  &output_all_off,
@@ -123,21 +123,6 @@ void commands_init(void){
 void get_mcu_serial(uint8_t** arg){
 //	udi_cdc_write_buf((int*)0x80800284,0x80800292-0x80800284);
 }
-
-// extern int16_t mimu_data[32][7];
-// void test_algorithm(uint8_t** cmd_arg){
-// 	mimu_data[0][0]=*((int16_t*)cmd_arg[0]);
-// 	mimu_data[0][1]=*((int16_t*)cmd_arg[1]);
-// 	mimu_data[0][2]=*((int16_t*)cmd_arg[2]);
-// 	mimu_data[0][3]=*((int16_t*)cmd_arg[3]);
-// 	mimu_data[0][4]=*((int16_t*)cmd_arg[4]);
-// 	mimu_data[0][5]=*((int16_t*)cmd_arg[5]);
-// 	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
-// 	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
-// 	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
-// 	set_elem_in_process_sequence(empty_process_sequence,3);
-// 	set_conditional_output(IMU0_RD_SID);
-// }
 
 void output_state(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];

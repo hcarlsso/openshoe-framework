@@ -67,9 +67,7 @@ static void usart_int_handler(void)
 }
 
 void bt_interrupt_init(void){
-	
 	Disable_global_interrupt();
-	INTC_init_interrupts();
 	INTC_register_interrupt(&usart_int_handler, BT_UART_IRQ, AVR32_INTC_INT0);
 	BT_UART.ier = AVR32_USART_IER_RXRDY_MASK;
 	Enable_global_interrupt();
