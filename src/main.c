@@ -76,10 +76,10 @@ void system_init(void){
 	cpu_irq_enable();
 	board_init();
 	
-	imu_interrupt_init();
 	imu_interface_init();
-
 	external_interface_init();
+	
+	interrupt_init();
 }
 
 //! @}

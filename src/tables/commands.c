@@ -140,98 +140,105 @@ void get_mcu_serial(uint8_t** arg){
 // }
 
 void output_state(uint8_t** cmd_arg){
-	uint8_t state_id = cmd_arg[0][0];
-	uint8_t output_divider = cmd_arg[1][0];
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t state_id = cmd_arg[1][0];
+	uint8_t output_divider = cmd_arg[2][0];
 	if(state_info_access_by_id[state_id]){  // Valid state?
-		set_state_output(state_id,output_divider);}}
+		set_state_output(state_id,output_divider,from);}}
 		
 void output_imu_rd(uint8_t** cmd_arg){
 	// TODO: redo this with something like below and a single for loop
 //	uint32_t imu_selector = *((uint32_t*)cmd_arg[0]);
-	uint8_t imu_selector0 = cmd_arg[0][3];
-	uint8_t imu_selector1 = cmd_arg[0][2];
-	uint8_t imu_selector2 = cmd_arg[0][1];
-	uint8_t imu_selector3 = cmd_arg[0][0];
-	uint8_t output_divider = cmd_arg[1][0];
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t imu_selector0 = cmd_arg[1][3];
+	uint8_t imu_selector1 = cmd_arg[1][2];
+	uint8_t imu_selector2 = cmd_arg[1][1];
+	uint8_t imu_selector3 = cmd_arg[1][0];
+	uint8_t output_divider = cmd_arg[2][0];
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector0>>i)&1 )
-			set_state_output(IMU0_RD_SID+i,output_divider);
+			set_state_output(IMU0_RD_SID+i,output_divider,from);
 	}
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector1>>i)&1 )
-		set_state_output(IMU0_RD_SID+i+8,output_divider);
+		set_state_output(IMU0_RD_SID+i+8,output_divider,from);
 	}
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector2>>i)&1 )
-		set_state_output(IMU0_RD_SID+i+16,output_divider);
+		set_state_output(IMU0_RD_SID+i+16,output_divider,from);
 	}
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector3>>i)&1 )
-		set_state_output(IMU0_RD_SID+i+24,output_divider);
+		set_state_output(IMU0_RD_SID+i+24,output_divider,from);
 	}
-	set_state_output(IMU_DT_SID,output_divider);
+	set_state_output(IMU_DT_SID,output_divider,from);
 }
 void output_imu_temp(uint8_t** cmd_arg){
 	// TODO: redo this with something like below and a single for loop
 	//	uint32_t imu_selector = *((uint32_t*)cmd_arg[0]);
-	uint8_t imu_selector0 = cmd_arg[0][3];
-	uint8_t imu_selector1 = cmd_arg[0][2];
-	uint8_t imu_selector2 = cmd_arg[0][1];
-	uint8_t imu_selector3 = cmd_arg[0][0];
-	uint8_t output_divider = cmd_arg[1][0];
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t imu_selector0 = cmd_arg[1][3];
+	uint8_t imu_selector1 = cmd_arg[1][2];
+	uint8_t imu_selector2 = cmd_arg[1][1];
+	uint8_t imu_selector3 = cmd_arg[1][0];
+	uint8_t output_divider = cmd_arg[2][0];
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector0>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i,output_divider);
+		set_state_output(IMU0_TEMP_SID+i,output_divider,from);
 	}
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector1>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i+8,output_divider);
+		set_state_output(IMU0_TEMP_SID+i+8,output_divider,from);
 	}
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector2>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i+16,output_divider);
+		set_state_output(IMU0_TEMP_SID+i+16,output_divider,from);
 	}
 	for (uint8_t i=0;i<8;i++)
 	{
 		if( (imu_selector3>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i+24,output_divider);
+		set_state_output(IMU0_TEMP_SID+i+24,output_divider,from);
 	}
 }
 
 void toggle_inertial_output(uint8_t** cmd_arg){
-	uint8_t output_divider = cmd_arg[0][0];
-	set_state_output(ANGULAR_RATE_SID,output_divider);
-	set_state_output(SPECIFIC_FORCE_SID,output_divider);
-	set_state_output(INTERRUPT_COUNTER_SID,output_divider);
-	set_state_output(IMU_DT_SID,output_divider);}
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t output_divider = cmd_arg[1][0];
+	set_state_output(ANGULAR_RATE_SID,output_divider,from);
+	set_state_output(SPECIFIC_FORCE_SID,output_divider,from);
+	set_state_output(INTERRUPT_COUNTER_SID,output_divider,from);
+	set_state_output(IMU_DT_SID,output_divider,from);}
 
 void position_plus_zupt(uint8_t** cmd_arg){
-	uint8_t output_divider = cmd_arg[0][0];
-	set_state_output(POSITION_SID,output_divider);
-	set_state_output(ZUPT_SID,output_divider);}
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t output_divider = cmd_arg[1][0];
+	set_state_output(POSITION_SID,output_divider,from);
+	set_state_output(ZUPT_SID,output_divider,from);}
 
 void output_navigational_states(uint8_t** cmd_arg){
-	uint8_t output_divider = cmd_arg[0][0];
-	set_state_output(POSITION_SID,output_divider);
-	set_state_output(VELOCITY_SID,output_divider);
-	set_state_output(QUATERNION_SID,output_divider);
-	set_state_output(INTERRUPT_COUNTER_SID,output_divider);}
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t output_divider = cmd_arg[1][0];
+	set_state_output(POSITION_SID,output_divider,from);
+	set_state_output(VELOCITY_SID,output_divider,from);
+	set_state_output(QUATERNION_SID,output_divider,from);
+	set_state_output(INTERRUPT_COUNTER_SID,output_divider,from);}
 
 void turn_off_output(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
 	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++){
-		set_state_output(i,0);}}
+		set_state_output(i,0,from);}}
 
 void processing_onoff(uint8_t** cmd_arg){
-	uint8_t function_id = cmd_arg[0][0];
-	uint8_t onoff    = cmd_arg[1][0];
-	uint8_t array_location = cmd_arg[2][0];	
+	uint8_t function_id = cmd_arg[1][0];
+	uint8_t onoff    = cmd_arg[2][0];
+	uint8_t array_location = cmd_arg[3][0];	
 	processing_function_p process_sequence_elem_value = onoff ? (processing_functions_by_id[function_id]->func_p) : NULL;
 	set_elem_in_process_sequence(process_sequence_elem_value,array_location);
 }
@@ -268,13 +275,14 @@ void reset_zupt_aided_ins(uint8_t** no_arg){
 ///\cond
 extern uint16_t step_counter;
 extern Bool filter_reset_flag;
+uint8_t swdr_via=0;
 ///\endcond
 // If filter has been reset, sets the reset states to be output. Used in process sequence.
 void set_conditional_output_reset(void){
 	if(filter_reset_flag){
-		set_conditional_output(DX_SID);
-		set_conditional_output(DP_SID);
-		set_conditional_output(STEP_COUNTER_SID);
+		set_conditional_output(DX_SID,swdr_via);
+		set_conditional_output(DP_SID,swdr_via);
+		set_conditional_output(STEP_COUNTER_SID,swdr_via);
 	}
 }
 void start_stepwise_dead_reckoning(void){
@@ -294,7 +302,8 @@ void start_stepwise_dead_reckoning(void){
 		set_elem_in_process_sequence(&set_conditional_output_reset,7);
 	}
 }
-void stepwise_dead_reckoning(uint8_t** no_arg){
+void stepwise_dead_reckoning(uint8_t** cmd_arg){
+	swdr_via |= (uint8_t)cmd_arg[0];
 	empty_process_sequence();
 	initialize_flag=true;
 #if defined(OPENSHOE_CLASSIC)
@@ -310,13 +319,14 @@ void stepwise_dead_reckoning(uint8_t** no_arg){
 }
 
 
+uint8_t swdr_via2=0;
 void set_conditional_output_reset_TOR(void){
 	if(filter_reset_flag){
-		set_conditional_output(DX_SID);
-		set_conditional_output(DP_SID);
+		set_conditional_output(DX_SID,swdr_via2);
+		set_conditional_output(DP_SID,swdr_via2);
 //		set_conditional_output(INTERRUPT_COUNTER_SID);
-		set_conditional_output(STEP_COUNTER_SID);
-		set_conditional_output(SAMSUNG_ID_SID);
+		set_conditional_output(STEP_COUNTER_SID,swdr_via2);
+		set_conditional_output(SAMSUNG_ID_SID,swdr_via2);
 	}
 }
 //extern uint16_t step_counter;
@@ -340,7 +350,8 @@ void start_stepwise_dead_reckoning_TOR(void){
 
 uint8_t samsung_id;
 void stepwise_dead_reckoning_TOR(uint8_t** cmd_arg){
-	samsung_id = cmd_arg[0][0];
+	swdr_via2 |= (uint8_t)cmd_arg[0];
+	samsung_id = cmd_arg[1][0];
 	// Stop whatever was going on
 	empty_process_sequence();
 	initialize_flag=true;
@@ -367,7 +378,7 @@ void reset_swdr_gyrocal(uint8_t** cmd_arg){
 	// Stop whatever was going on
 	empty_process_sequence();
 	initialize_flag=true;
-	nr_of_inital_alignment_samples = 100*cmd_arg[0][0];
+	nr_of_inital_alignment_samples = 100*cmd_arg[1][0];
 	// Set filter taps in IMU (since occasionally they seem to reset themselves)
 	uint8_t log2_nr_filter_taps = 0;
 	low_pass_filter_setting(log2_nr_filter_taps);
@@ -409,7 +420,7 @@ void new_calibration_orientation(void){
 extern uint8_t nr_of_calibration_orientations;
 ///\endcond
 void acc_calibration(uint8_t ** cmd_arg){
-	uint8_t nr_orientations = cmd_arg[0][0];
+	uint8_t nr_orientations = cmd_arg[1][0];
 	nr_of_calibration_orientations = nr_orientations;
 	
 	store_and_empty_process_sequence();
@@ -418,22 +429,24 @@ void acc_calibration(uint8_t ** cmd_arg){
 }
 
 void set_low_pass_imu(uint8_t ** cmd_arg){
-	uint8_t log2_nr_filter_taps = cmd_arg[0][0];
+	uint8_t log2_nr_filter_taps = cmd_arg[1][0];
 	if (log2_nr_filter_taps<=4){
 		low_pass_filter_setting(log2_nr_filter_taps);}
 	// Todo: set error state if above does not hold.
 }
 
 void add_sync_output(uint8_t** cmd_arg){
-	uint8_t state_id = cmd_arg[0][0];
-	uint8_t output_divider    = cmd_arg[1][0];
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t state_id = cmd_arg[1][0];
+	uint8_t output_divider    = cmd_arg[2][0];
 	if(state_info_access_by_id[state_id]){  // Valid state?
-		set_state_output(state_id,output_divider);}
-	reset_output_counters();
+		set_state_output(state_id,output_divider,from);}
+	reset_output_counters(from);
 }
 
-void sync_output(uint8_t** no_arg){
-	reset_output_counters();
+void sync_output(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	reset_output_counters(from);
 }
 
 void processing_off(uint8_t** no_arg){

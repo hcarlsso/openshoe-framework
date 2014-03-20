@@ -140,6 +140,6 @@
 
 //! The includes of classes and other headers must be done at the end of this file to avoid compile error
 #include "udi_cdc_conf.h"
-#include "external_interface.h"
+#include "usb_interface.h"
 
 #endif // _CONF_USB_H_

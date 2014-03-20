@@ -11,6 +11,6 @@
 
 #include "timing_control.h"
 
-void imu_interrupt_init(void);
+void interrupt_init(void);
 
 #endif /* IMU_INTERRUPT_H_ */
