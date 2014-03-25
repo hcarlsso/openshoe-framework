@@ -89,11 +89,6 @@ static inline void send_ak(struct rxtx_buffer* buffer){
 	bt_send_buf(ack,4);
 }
 
-static inline void send_nak(void){
-	uint8_t nack[3] = {161,0,161};
-	bt_send_buf(nack,3);
-}
-
 
 #define BT_FIRST_PAYLOAD_BYTE (state_output_header_p+4)
 #define BT_PAYLOAD_SIZE_BYTE (state_output_header_p+3)
@@ -191,9 +186,6 @@ void bt_receive_command(void){
 					if (get_command_header(&rx_buffer) != ACK_ID)
 						send_ak(&rx_buffer);
 					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_BT);
-					}
-				else{
-					send_nak();
 				}
 				reset_buffer(&rx_buffer);
 				continue;}
@@ -205,7 +197,6 @@ void bt_receive_command(void){
 		// Reset buffer if initiated command transmission do not complete within timeout limit
 		if(has_timed_out(command_tx_timer,rx_buffer.nrb)){
 			reset_buffer(&rx_buffer);
-			send_nak();
 		}
 	} else{
 		reset_buffer(&rx_buffer);

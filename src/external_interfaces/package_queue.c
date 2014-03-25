@@ -66,3 +66,11 @@ void remove_package_from_queue(uint16_t package_nr) {
 		pkg_delay_counter = 0;
 	}
 }
+
+void empty_package_queue(void){
+	int i;
+	for (i=0;i<MAX_NR_PACKAGES;i++) {
+		pkg_info[i] = NO_PACKAGE;
+	}
+	oldest_pkg = newest_pkg = 0;
+}

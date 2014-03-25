@@ -24,10 +24,11 @@
 
 // Needed include for definition of command response functions
 #include "external_interface.h"
+#include "bluetooth_interface.h"
 #include "process_sequence.h"
 #include "ADIS16367_interface.h"
 #include "udi_cdc.h"
-
+#include "package_queue.h"
 
 ///  \name Command response functions
 ///  Functions which are executed in response to commands.  
@@ -221,7 +222,10 @@ void output_navigational_states(uint8_t** cmd_arg){
 void turn_off_output(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++){
-		set_state_output(i,0,from);}}
+		set_state_output(i,0,from);}
+	if (from & COMMAND_FROM_BT)
+		empty_package_queue();
+}
 
 void processing_onoff(uint8_t** cmd_arg){
 	uint8_t function_id = cmd_arg[1][0];
