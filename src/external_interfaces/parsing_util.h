@@ -48,6 +48,9 @@ struct rxtx_buffer{
 #define PAYLOAD_SIZE_BYTE (state_output_header_p+1)
 ///\endcond
 
+static inline uint8_t get_command_header(struct rxtx_buffer* buffer_p) {
+	return buffer_p->buffer[0];}
+
 static inline void reset_buffer(struct rxtx_buffer* buffer){
 	buffer->write_position = buffer->buffer;
 	buffer->read_position = buffer->buffer;

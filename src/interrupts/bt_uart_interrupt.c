@@ -14,11 +14,15 @@
 #  include "MIMU22BT.h"
 //#endif
 
-uint8_t uart_rx_buf[256];
+// Most be <=8
+#define LOG2_SIZE_BT_UART_BUF 8
+#define SIZE_BT_UART_BUF (1<<LOG2_SIZE_BT_UART_BUF)
+
+uint8_t uart_rx_buf[SIZE_BT_UART_BUF];
 volatile uint8_t uart_rx_buf_write=0;
 volatile uint8_t uart_rx_buf_read=0;
 
-uint8_t uart_tx_buf[256];
+uint8_t uart_tx_buf[SIZE_BT_UART_BUF];
 volatile uint8_t uart_tx_buf_write=0;
 volatile uint8_t uart_tx_buf_read=0;
 
@@ -29,16 +33,21 @@ bool bt_is_data_available(void) {
 uint8_t bt_get_byte(uint8_t* dest) {
 	if (uart_rx_buf_write!=uart_rx_buf_read) {
 		*dest = uart_rx_buf[uart_rx_buf_read];
-		uart_rx_buf_read++;
+		uart_rx_buf_read = (uart_rx_buf_read+1) & (SIZE_BT_UART_BUF-1);
 		return 1;
 	}
 	return 0;
 }
 
+uint8_t space_in_bt_uart_buf(void){
+	// The -1 is there since we cannot distinguish between full and empty buffer. This way we should not make the buffer completely full.
+	return ( (uart_tx_buf_read-uart_tx_buf_write) & (SIZE_BT_UART_BUF-1) ) - 1;
+}
+
 void bt_send_buf(uint8_t* buf,uint8_t nob) {
 	uint8_t i;
-	for (i=0;i<nob;i++)	uart_tx_buf[uart_tx_buf_write+i]=buf[i];
-	uart_tx_buf_write+=nob;
+	for (i=0;i<nob;i++)	uart_tx_buf[(uart_tx_buf_write+i) & (SIZE_BT_UART_BUF-1)]=buf[i];
+	uart_tx_buf_write = (uart_tx_buf_write+nob) & (SIZE_BT_UART_BUF-1);
 	BT_UART.ier = AVR32_USART_IER_TXRDY_MASK;
 }
 

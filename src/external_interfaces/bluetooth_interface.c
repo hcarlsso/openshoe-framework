@@ -10,7 +10,7 @@
 #include "bluetooth_interface.h"
 #include "parsing_util.h"
 #include "control_tables.h"
-
+#include "package_queue.h"
 #include "bt_uart_interrupt.h"
 #include <usart.h>
 #include "conf_clock.h"
@@ -29,9 +29,11 @@
 
 ///\name State output divider limits
 //@{
-#define MAX_LOG2_DIVIDER 14
-#define MIN_LOG2_DIVIDER 0
+#define MAX_LOG2_DIVIDER 15
+#define MIN_LOG2_DIVIDER 2
 //@}
+
+#define	LOSSY_TRANSMISSION_BIT_MASK 16
 
 ///\name State output control variables
 //@{
@@ -68,7 +70,14 @@ void bt_interface_init(void){
 }
 
 static inline bool is_bluetooth_paired(void){
-return gpio_get_pin_value(BT_PAIRED);}
+	if ( gpio_get_pin_value(BT_PAIRED) ) {
+		gpio_set_pin_high(LED0);
+		return true;
+	} else {
+		gpio_set_pin_low(LED0);
+		return false;
+	}
+}
 
 static inline void send_ak(struct rxtx_buffer* buffer){
 	uint8_t ack[4];
@@ -85,7 +94,13 @@ static inline void send_nak(void){
 	bt_send_buf(nack,3);
 }
 
-static inline void assemble_output_data(struct rxtx_buffer* buffer){
+
+#define BT_FIRST_PAYLOAD_BYTE (state_output_header_p+4)
+#define BT_PAYLOAD_SIZE_BYTE (state_output_header_p+3)
+
+static inline uint16_t assemble_output_data(struct rxtx_buffer* buffer){
+	static uint16_t package_number = 0;
+	
 	// Clear buffer
 	reset_buffer(buffer);
 	
@@ -93,6 +108,9 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	uint8_t* state_output_header_p = buffer->write_position;
 	// Add header for state data output
 	*buffer->write_position = STATE_OUTPUT_HEADER;
+	increment_counter(buffer->write_position);
+	// Leave two blank buffer slot for package number (see below)
+	increment_counter(buffer->write_position);
 	increment_counter(buffer->write_position);
 	// Leave one blank buffer slot for payload size (see below)
 	increment_counter(buffer->write_position);
@@ -114,22 +132,29 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 		}
 	}
 	// If any data was added, add payload size and calculate and add checksum
-	if(FIRST_PAYLOAD_BYTE!=buffer->write_position){
-		*PAYLOAD_SIZE_BYTE=buffer->write_position-FIRST_PAYLOAD_BYTE;
+	if(BT_FIRST_PAYLOAD_BYTE!=buffer->write_position) {
+		package_number++;
+		*(state_output_header_p+1) = (package_number & 0xFF00) >> 8;
+		*(state_output_header_p+2) =  package_number & 0xFF;
+		*BT_PAYLOAD_SIZE_BYTE=buffer->write_position-BT_FIRST_PAYLOAD_BYTE;
 		uint16_t checksum = calc_checksum(state_output_header_p,buffer->write_position-1);
 		//TODO: ensure no buffer overflow occur
 		*buffer->write_position = MSB(checksum);
 		increment_counter(buffer->write_position);
 		*buffer->write_position = LSB(checksum);
-	increment_counter(buffer->write_position);}
-	else {
+		increment_counter(buffer->write_position);
+	} else {
 		buffer->write_position = state_output_header_p;
 	}
+	return package_number;
 }
 
-volatile int tmp_cnt=0;
 void handle_ack(uint8_t** cmd_arg){
-	tmp_cnt++;
+	uint8_t from = (uint8_t)cmd_arg[0];
+	if (from & COMMAND_FROM_BT)	{
+		uint16_t package_number = (cmd_arg[1][0]<<8) | cmd_arg[1][1];
+		remove_package_from_queue(package_number);
+	}
 }
 
 void bt_receive_command(void){
@@ -163,7 +188,8 @@ void bt_receive_command(void){
 			else if(is_end_of_command(rx_buffer.nrb)){
 				if(has_valid_checksum(&rx_buffer)){
 					// TODO: change order ot send_ak/send_nack. If parsing fails due to invalid arguments, we should send nack.
-					send_ak(&rx_buffer);
+					if (get_command_header(&rx_buffer) != ACK_ID)
+						send_ak(&rx_buffer);
 					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_BT);
 					}
 				else{
@@ -187,37 +213,36 @@ void bt_receive_command(void){
 	return;
 }
 
+bool lossy_transmission = false;
+
 void bt_transmit_data(void){
 	static uint8_t tx_buffer_array[TX_BUFFER_SIZE];
 	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,tx_buffer_array,0};
 	//	static uint8_t downsampling_tx_counter = 0;
 
 	if(is_bluetooth_paired()){
-		gpio_set_pin_high(LED0);
 		// Generate output
-		assemble_output_data(&tx_buffer);
+		uint16_t package_number = assemble_output_data(&tx_buffer);
+
 		// Transmit output
-		
-		
 		if (tx_buffer.read_position<tx_buffer.write_position) {
-			bt_send_buf(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position);
-//			udi_cdc_putc(*tx_buffer.read_position);
-//			tx_buffer.read_position++;
+			if (lossy_transmission) {
+				bt_send_buf(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position);
+			} else {
+				add_package_to_queue(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position,package_number);
+			}
 		}
-		
-		
-		// This does not work cause it will hang if user does not clear his buffers sufficiently fast.
-		// Equivalent but non-blocking function should be written.
-		//		udi_cdc_write_buf((int*)tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer);
-	} else {
-		gpio_set_pin_low(LED0);
+		if (!lossy_transmission) {
+			send_package_from_queue();
+		}
 	}
 }
 
 void bt_set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){	
-		if (divider>MIN_LOG2_DIVIDER){
-			uint16_t rate_divider = 1<<(divider-1);
+	if(state_id<=SID_LIMIT){
+		if (divider>=MIN_LOG2_DIVIDER){
+			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
+			lossy_transmission = ! (divider&LOSSY_TRANSMISSION_BIT_MASK);
 			uint16_t min_divider = 1<<(MAX_LOG2_DIVIDER-1);
 			uint16_t min_counter = 1; // 1 (instead of 0) to ensure that ACK and new output does not coincide
 			// Synchronize output with remaining output
@@ -262,4 +287,8 @@ void bt_reset_output_counters(void){
 
 void bt_set_conditional_output(uint8_t state_id){
 	state_output_cond[state_id]=true;
+}
+
+void bt_set_lossy_transmission(bool onoff){
+	lossy_transmission = onoff;
 }

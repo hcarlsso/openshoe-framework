@@ -14,6 +14,7 @@
 
 bool bt_is_data_available(void);
 uint8_t bt_get_byte(uint8_t* dest);
+uint8_t space_in_bt_uart_buf(void);
 void bt_send_buf(uint8_t* buf,uint8_t nob);
 
 void bt_interrupt_init(void);

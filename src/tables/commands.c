@@ -53,7 +53,7 @@ void set_low_pass_imu(uint8_t**);
 void add_sync_output(uint8_t**);
 void sync_output(uint8_t**);
 void processing_off(uint8_t**);
-
+void do_nothing(uint8_t**);
 void start_inertial_frontend(uint8_t**);
 //@}
 
@@ -61,7 +61,7 @@ void start_inertial_frontend(uint8_t**);
 ///  Structs containing the information/definitions of the commands.
 //@{
 static command_structure ack = {ACK_ID,&handle_ack,2,1,{2}};
-static command_structure ping = {PING_ID,NULL,0,0,{0}};
+static command_structure ping = {PING_ID,&do_nothing,0,0,{0}};
 static command_structure mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
 static command_structure output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
 static command_structure output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
@@ -85,7 +85,8 @@ static command_structure mimu_frontend_cmd = {MIMU_FRONTEND,&start_inertial_fron
 //@}
 
 // Arrays/tables to find appropriate commands
-static const command_structure* commands[] = {&ping,
+static const command_structure* commands[] = {&ack,
+											  &ping,
 											  &mcu_id,
 											  &output_onoff_state,
 											  &output_all_off,
@@ -123,6 +124,8 @@ void commands_init(void){
 void get_mcu_serial(uint8_t** arg){
 //	udi_cdc_write_buf((int*)0x80800284,0x80800292-0x80800284);
 }
+
+void do_nothing(uint8_t** arg){;}
 
 void output_state(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
@@ -223,7 +226,7 @@ void turn_off_output(uint8_t** cmd_arg){
 void processing_onoff(uint8_t** cmd_arg){
 	uint8_t function_id = cmd_arg[1][0];
 	uint8_t onoff    = cmd_arg[2][0];
-	uint8_t array_location = cmd_arg[3][0];	
+	uint8_t array_location = cmd_arg[3][0];
 	processing_function_p process_sequence_elem_value = onoff ? (processing_functions_by_id[function_id]->func_p) : NULL;
 	set_elem_in_process_sequence(process_sequence_elem_value,array_location);
 }
@@ -260,14 +263,14 @@ void reset_zupt_aided_ins(uint8_t** no_arg){
 ///\cond
 extern uint16_t step_counter;
 extern Bool filter_reset_flag;
-uint8_t swdr_via=0;
+uint8_t swdr_interface=0;
 ///\endcond
 // If filter has been reset, sets the reset states to be output. Used in process sequence.
 void set_conditional_output_reset(void){
 	if(filter_reset_flag){
-		set_conditional_output(DX_SID,swdr_via);
-		set_conditional_output(DP_SID,swdr_via);
-		set_conditional_output(STEP_COUNTER_SID,swdr_via);
+		set_conditional_output(DX_SID,swdr_interface);
+		set_conditional_output(DP_SID,swdr_interface);
+		set_conditional_output(STEP_COUNTER_SID,swdr_interface);
 	}
 }
 void start_stepwise_dead_reckoning(void){
@@ -276,6 +279,8 @@ void start_stepwise_dead_reckoning(void){
 		empty_process_sequence();
 		// Reset step counter;
 		step_counter=0;
+		// Make sure we have error-resistant transmission
+		set_lossy_transmission(false,swdr_interface);
 		// Start ZUPT-aided INS
 		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
 		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
@@ -288,7 +293,7 @@ void start_stepwise_dead_reckoning(void){
 	}
 }
 void stepwise_dead_reckoning(uint8_t** cmd_arg){
-	swdr_via |= (uint8_t)cmd_arg[0];
+	swdr_interface |= (uint8_t)cmd_arg[0];
 	empty_process_sequence();
 	initialize_flag=true;
 #if defined(OPENSHOE_CLASSIC)

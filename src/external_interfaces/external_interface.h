@@ -20,6 +20,7 @@
 #define EXTERNAL_INTERFACE_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 void external_interface_init(void);
 void transmit_data(void);
@@ -28,6 +29,7 @@ void receive_command(void);
 void set_state_output(uint8_t state_id, uint8_t divider,uint8_t from);
 void reset_output_counters(uint8_t from);
 void set_conditional_output(uint8_t state_id,uint8_t from);
+void set_lossy_transmission(bool onoff,uint8_t from);
 
 #endif /* EXTERNAL_INTERFACE_H_ */
 

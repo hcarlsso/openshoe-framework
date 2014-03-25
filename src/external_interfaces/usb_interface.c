@@ -37,7 +37,7 @@
 ///\name State output divider limits
 //@{
 #define MAX_LOG2_DIVIDER 14
-#define MIN_LOG2_DIVIDER 0
+#define MIN_LOG2_DIVIDER 1
 //@}
 
 // Single transmit buffer
@@ -245,7 +245,7 @@ void usb_transmit_data(void){
 */
 void usb_set_state_output(uint8_t state_id, uint8_t divider){
 	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){	
-		if (divider>MIN_LOG2_DIVIDER){
+		if (divider>=MIN_LOG2_DIVIDER){
 			uint16_t rate_divider = 1<<(divider-1);
 			uint16_t min_divider = 1<<(MAX_LOG2_DIVIDER-1);
 			uint16_t min_counter = 1; // 1 (instead of 0) to ensure that ACK and new output does not coincide
