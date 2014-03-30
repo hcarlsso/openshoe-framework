@@ -14,11 +14,12 @@ typedef struct package_info {
 	uint8_t pkg_size;
 } package_info;
 
-#define LOG2_PACKAGE_BUFFER_SIZE 7
+#define LOG2_PACKAGE_BUFFER_SIZE 9
 #define PACKAGE_BUFFER_SIZE (1<<LOG2_PACKAGE_BUFFER_SIZE)
 #define BUFFER_SIZE_MASK (PACKAGE_BUFFER_SIZE-1)
 #define MAX_NR_PACKAGES (PACKAGE_BUFFER_SIZE>>2)
 #define PACKAGE_INDEX_MASK (MAX_NR_PACKAGES-1)
+// TODO: Below should have a relation to min_log_divider and the sampling frequency
 #define LOG2_RESEND_DELAY 7
 #define RESEND_DELAY (1<<LOG2_RESEND_DELAY)
 const package_info NO_PACKAGE = {0};
