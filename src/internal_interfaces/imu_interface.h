@@ -1,10 +1,8 @@
-﻿/*
- * imu_interface.h
- *
- * Created: 2014-03-12 14:20:57
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef IMU_INTERFACE_H_
 #define IMU_INTERFACE_H_

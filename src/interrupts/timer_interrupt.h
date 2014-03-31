@@ -1,9 +1,8 @@
-﻿/*
- * IncFile1.h
- *
- * Created: 2014-01-14 09:51:08
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 
 #ifndef INCFILE1_H_

@@ -1,10 +1,8 @@
-﻿/*
- * bluetooth_interface.h
- *
- * Created: 2014-03-18 10:11:01
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef BLUETOOTH_INTERFACE_H_
 #define BLUETOOTH_INTERFACE_H_

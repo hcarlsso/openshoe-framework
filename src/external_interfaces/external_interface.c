@@ -1,4 +1,8 @@
 
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include "external_interface.h"
 #include "usb_interface.h"

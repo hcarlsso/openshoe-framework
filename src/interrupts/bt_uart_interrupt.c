@@ -1,10 +1,8 @@
-﻿/*
- * bt_uart_interrupt.c
- *
- * Created: 2014-03-20 09:38:54
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include <usart.h>
 

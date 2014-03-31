@@ -1,9 +1,8 @@
-﻿/*
- * bluetooth_interface.c
- *
- * Created: 2014-03-18 10:11:26
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include <gpio.h>
 #include <string.h>

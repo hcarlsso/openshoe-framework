@@ -1,9 +1,8 @@
-﻿/*
- * MPU9150_interface.c
- *
- * Created: 2014-03-17 12:18:23
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include "MPU9150_interface.h"
 #include "mpu6150.h"

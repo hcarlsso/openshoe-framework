@@ -1,10 +1,8 @@
-﻿/*
- * package_queue.h
- *
- * Created: 2014-03-25 20:18:59
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef PACKAGE_QUEUE_H_
 #define PACKAGE_QUEUE_H_

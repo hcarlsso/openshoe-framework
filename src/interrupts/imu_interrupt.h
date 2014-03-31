@@ -1,10 +1,8 @@
-﻿/*
- * interrupt.h
- *
- * Created: 2014-03-12 11:55:27
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef IMU_INTERRUPT_H_
 #define IMU_INTERRUPT_H_

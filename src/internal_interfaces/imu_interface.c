@@ -1,9 +1,8 @@
-﻿/*
- * imu_interface.c
- *
- * Created: 2014-03-12 14:21:11
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include "imu_interface.h"
 #include <stdint.h>

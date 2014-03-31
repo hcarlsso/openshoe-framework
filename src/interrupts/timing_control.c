@@ -1,9 +1,8 @@
-﻿/*
- * timing_control.c
- *
- * Created: 2014-01-14 14:28:41
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include "timing_control.h"
 #include <compiler.h>

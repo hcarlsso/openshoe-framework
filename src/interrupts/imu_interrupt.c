@@ -1,9 +1,8 @@
-﻿/*
- * interrupt.c
- *
- * Created: 2014-03-12 11:55:11
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include "imu_interrupt.h"
 #include "bt_uart_interrupt.h"

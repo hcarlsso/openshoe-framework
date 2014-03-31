@@ -1,9 +1,8 @@
-﻿/*
- * package_queue.c
- *
- * Created: 2014-03-25 20:19:13
- *  Author: jnil02
- */ 
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #include "package_queue.h"
 #include "bt_uart_interrupt.h"

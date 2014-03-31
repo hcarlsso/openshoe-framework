@@ -1,10 +1,8 @@
-﻿/*
- * toggle_interrupt.h
- *
- * Created: 2014-01-14 11:48:35
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef TOGGLE_INTERRUPT_H_
 #define TOGGLE_INTERRUPT_H_

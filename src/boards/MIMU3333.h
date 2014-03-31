@@ -1,10 +1,8 @@
-﻿/*
- * MIMU3333.h
- *
- * Created: 2014-03-17 09:35:33
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef MIMU3333_H_
 #define MIMU3333_H_

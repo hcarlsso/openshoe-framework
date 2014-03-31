@@ -1,10 +1,8 @@
-﻿/*
- * bt_uart_interrupt.h
- *
- * Created: 2014-03-20 09:39:15
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef BT_UART_INTERRUPT_H_
 #define BT_UART_INTERRUPT_H_

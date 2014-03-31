@@ -1,10 +1,8 @@
-﻿/*
- * parsing_util.h
- *
- * Created: 2014-03-18 13:46:50
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef PARSING_UTIL_H_
 #define PARSING_UTIL_H_

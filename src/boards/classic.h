@@ -1,10 +1,8 @@
-﻿/*
- * OS1.h
- *
- * Created: 2014-03-17 09:35:11
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef CLASSIC_H_
 #define CLASSIC_H_

@@ -1,10 +1,8 @@
-﻿/*
- * MIMU22BT.h
- *
- * Created: 2014-03-17 09:36:31
- *  Author: jnil02
- */ 
-
+﻿
+/** \file
+	\authors John-Olof Nilsson
+	\copyright Copyright (c) 2014 OpenShoe, Cre­ative Com­mons Attri­bu­tion 4.0 License
+*/
 
 #ifndef MIMU22BT_H_
 #define MIMU22BT_H_
