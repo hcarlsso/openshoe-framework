@@ -272,8 +272,7 @@ void usb_set_state_output(uint8_t state_id, uint8_t divider){
 			state_output_rate_divider[state_id] = 0;
 			state_output_rate_counter[state_id] = 0;
 		}
-	}	
-	// TODO: Set some error state if the above does not hold
+	}
 }
 
 /**

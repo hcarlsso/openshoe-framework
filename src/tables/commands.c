@@ -390,7 +390,6 @@ void set_low_pass_imu(uint8_t ** cmd_arg){
 	uint8_t log2_nr_filter_taps = cmd_arg[1][0];
 	if (log2_nr_filter_taps<=4){
 		low_pass_filter_setting(log2_nr_filter_taps);}
-	// Todo: set error state if above does not hold.
 }
 
 void add_sync_output(uint8_t** cmd_arg){
