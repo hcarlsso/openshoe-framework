@@ -136,64 +136,28 @@ void output_state(uint8_t** cmd_arg){
 		set_state_output(state_id,output_divider,from);}}
 		
 void output_imu_rd(uint8_t** cmd_arg){
-	// TODO: redo this with something like below and a single for loop
-//	uint32_t imu_selector = *((uint32_t*)cmd_arg[0]);
 	uint8_t from = (uint8_t)cmd_arg[0];
-	uint8_t imu_selector0 = cmd_arg[1][3];
-	uint8_t imu_selector1 = cmd_arg[1][2];
-	uint8_t imu_selector2 = cmd_arg[1][1];
-	uint8_t imu_selector3 = cmd_arg[1][0];
+	uint32_t imu_selector = cmd_arg[1][0]<<24;
+	imu_selector |= cmd_arg[1][1]<<16;
+	imu_selector |= cmd_arg[1][2]<<8;
+	imu_selector |= cmd_arg[1][3];
 	uint8_t output_divider = cmd_arg[2][0];
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector0>>i)&1 )
-			set_state_output(IMU0_RD_SID+i,output_divider,from);
-	}
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector1>>i)&1 )
-		set_state_output(IMU0_RD_SID+i+8,output_divider,from);
-	}
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector2>>i)&1 )
-		set_state_output(IMU0_RD_SID+i+16,output_divider,from);
-	}
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector3>>i)&1 )
-		set_state_output(IMU0_RD_SID+i+24,output_divider,from);
+	for (uint8_t i=0;i<32;i++) {
+		if( (imu_selector>>i)&1 )
+		set_state_output(IMU0_RD_SID+i,output_divider,from);
 	}
 	set_state_output(IMU_DT_SID,output_divider,from);
 }
 void output_imu_temp(uint8_t** cmd_arg){
-	// TODO: redo this with something like below and a single for loop
-	//	uint32_t imu_selector = *((uint32_t*)cmd_arg[0]);
 	uint8_t from = (uint8_t)cmd_arg[0];
-	uint8_t imu_selector0 = cmd_arg[1][3];
-	uint8_t imu_selector1 = cmd_arg[1][2];
-	uint8_t imu_selector2 = cmd_arg[1][1];
-	uint8_t imu_selector3 = cmd_arg[1][0];
+	uint32_t imu_selector = cmd_arg[1][0]<<24;
+	imu_selector |= cmd_arg[1][1]<<16;
+	imu_selector |= cmd_arg[1][2]<<8;
+	imu_selector |= cmd_arg[1][3];
 	uint8_t output_divider = cmd_arg[2][0];
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector0>>i)&1 )
+	for (uint8_t i=0;i<32;i++) {
+		if( (imu_selector>>i)&1 )
 		set_state_output(IMU0_TEMP_SID+i,output_divider,from);
-	}
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector1>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i+8,output_divider,from);
-	}
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector2>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i+16,output_divider,from);
-	}
-	for (uint8_t i=0;i<8;i++)
-	{
-		if( (imu_selector3>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i+24,output_divider,from);
 	}
 }
 
