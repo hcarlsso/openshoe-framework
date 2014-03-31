@@ -29,7 +29,7 @@
 ///\name Buffer settings
 //@{
 #define RX_BUFFER_SIZE 20
-#define TX_BUFFER_SIZE 255
+#define TX_BUFFER_SIZE 512
 #define SINGLE_TX_BUFFER_SIZE 10
 #define MAX_RX_NRB 10
 //@}
