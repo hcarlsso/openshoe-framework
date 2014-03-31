@@ -302,6 +302,7 @@
       <Value>../src/interrupts</Value>
       <Value>../src/boards</Value>
       <Value>../src/external_interfaces</Value>
+      <Value>../src/process_sequence</Value>
     </ListValues>
   </avr32gcc.compiler.directories.IncludePaths>
   <avr32gcc.compiler.optimization.level>Optimize (-O1)</avr32gcc.compiler.optimization.level>
@@ -711,19 +712,19 @@
     <Compile Include="src\main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\process_sequence.c">
+    <Compile Include="src\process_sequence\processing_functions.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\process_sequence.h">
+    <Compile Include="src\process_sequence\process_sequence.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\process_sequence\process_sequence.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\tables\commands.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\tables\control_tables.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\tables\processing_functions.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\tables\system_states.c">
@@ -770,6 +771,7 @@
     <Folder Include="src\internal_interfaces\" />
     <Folder Include="src\interrupts\" />
     <Folder Include="src\boards" />
+    <Folder Include="src\process_sequence" />
     <Folder Include="src\tables" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\AvrGCC32.targets" />
