@@ -104,7 +104,6 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	
 	// Copy one time transmit data to buffer
 	if(single_tx_buffer.write_position!=single_tx_buffer.buffer){
-		//TODO: ensure no buffer overflow occur
 		memcpy(buffer->write_position,single_tx_buffer.buffer,single_tx_buffer.write_position-single_tx_buffer.buffer);
 		buffer->write_position+=single_tx_buffer.write_position-single_tx_buffer.buffer;
 		reset_buffer(&single_tx_buffer);
@@ -127,10 +126,11 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 			// The counter counts down since then the comparison at each procedure call can be done with a constant (0)
 			state_output_rate_counter[i]--;
 		}
-		if (state_output_cond[i]){
-			//TODO: ensure no buffer overflow occur
-			memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
-			buffer->write_position+=state_info_access_by_id[i]->state_size;
+		if(state_output_cond[i]){
+			if (buffer->write_position-buffer->buffer+state_info_access_by_id[i]->state_size <= TX_BUFFER_SIZE-CHECKSUM_BYTES) {
+				memcpy(buffer->write_position,state_info_access_by_id[i]->state_p,state_info_access_by_id[i]->state_size);
+				buffer->write_position+=state_info_access_by_id[i]->state_size;
+			}
 			state_output_cond[i]=false;
 		}
 	}
@@ -138,7 +138,6 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	if(FIRST_PAYLOAD_BYTE!=buffer->write_position){
 		*PAYLOAD_SIZE_BYTE=buffer->write_position-FIRST_PAYLOAD_BYTE;
 		uint16_t checksum = calc_checksum(state_output_header_p,buffer->write_position-1);
-		//TODO: ensure no buffer overflow occur
 		*buffer->write_position = MSB(checksum);
 		increment_counter(buffer->write_position);
 		*buffer->write_position = LSB(checksum);
