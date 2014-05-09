@@ -21,9 +21,9 @@
 
 // Functions pacing I2C bitbanging
 static int32_t last_tick;
-#define QUATER_CC_COUNT 57
-// TODO: define this based on CPU freq and desired sampling rate
-// 115 gives ~100kHz (with 48MHz clock)
+#define QUATER_CC_COUNT 35
+// I2C bus speed is approximately CLOCK_FREQ/QUATER_CC_COUNT * 220 [kHz]
+// 35 gives 400kHz
 __always_inline static void start_tick(void){
 	last_tick = Get_system_register(AVR32_COUNT);
 }
