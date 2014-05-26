@@ -361,30 +361,30 @@ void mpu9150_interface_init(void){
 // IMU array data
 extern int16_t mimu_data[32][7];
 
-// Buffers for reading data from the IMUs
-static uint32_t data_array_port0[128];
-
-static const uint8_t imus0_pos[NR_IMUS]=IMU_POS;
+// Buffers for reading data (128 bits) from the IMUs
+static uint32_t data_matrix[128];
+// Map of the I/O-pin positions of the IMUs
+static const uint8_t imu_map[NR_IMUS]=IMU_POS;
 
 // Read inertial measurements from IMU
 void mpu9150_read(void)
 {
 	// Read all sensor registers (acc,temp,gyro)
-	burst_read(0x3B,data_array_port0,14);
+	burst_read(0x3B,data_matrix,14);
 	
 	// Transpose 32x32 bit-blocks
-	transpose32(data_array_port0);
-	transpose32(data_array_port0+32);
-	transpose32(data_array_port0+64);
-	transpose32(data_array_port0+96);
+	transpose32(data_matrix);
+	transpose32(data_matrix+32);
+	transpose32(data_matrix+64);
+	transpose32(data_matrix+96);
 
 	// Copy to data state arrays
 	uint8_t i;
 	for (i=0; i<NR_IMUS; i++) {
-		memcpy(mimu_data[i],data_array_port0+(32-1)-imus0_pos[i],4);
-		memcpy(mimu_data[i]+2,data_array_port0+(64-1)-imus0_pos[i],2);
-		memcpy(mimu_data[i]+3,data_array_port0+(96-1)-imus0_pos[i],4);
-		memcpy(mimu_data[i]+5,data_array_port0+(128-1)-imus0_pos[i],2);
-		memcpy(mimu_data[i]+6,(uint16_t*)(data_array_port0+(64-1)-imus0_pos[i])+1,2);
+		memcpy(mimu_data[i],data_matrix+(32-1)-imu_map[i],4);
+		memcpy(mimu_data[i]+2,data_matrix+(64-1)-imu_map[i],2);
+		memcpy(mimu_data[i]+3,data_matrix+(96-1)-imu_map[i],4);
+		memcpy(mimu_data[i]+5,data_matrix+(128-1)-imu_map[i],2);
+		memcpy(mimu_data[i]+6,(uint16_t*)(data_matrix+(64-1)-imu_map[i])+1,2);
 	}
 }

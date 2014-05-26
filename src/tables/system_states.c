@@ -61,6 +61,7 @@ extern uint8_t samsung_id;
 // IMU register states
 // The matrix is split up into 32 stats for the user to access (one for each IMU, see below)
 extern int16_t mimu_data[32][7];
+extern uint32_t ts_u;
 ///\endcond
 
 ///  \name External state information
@@ -84,6 +85,7 @@ static state_t_info dt_sti = {DT_SID, (void*) &dt, sizeof(dt)};
 static state_t_info dx_sti = {DX_SID, (void*) dx, sizeof(vec4)};
 static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(mat4sym)};
 static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter, sizeof(uint16_t)};
+static state_t_info imu_ts_sti = {IMU_TS_SID, (void*) &ts_u, sizeof(ts_u)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
 static state_t_info imu_dt_sti = {IMU_DT_SID, (void*) &imu_dt, sizeof(uint32_t)};
 static state_t_info gp_dt_sti = {GP_DT_SID, (void*) &gp_dt, sizeof(uint32_t)};
@@ -157,7 +159,8 @@ static state_t_info imu31_temp_sti = {IMU31_TEMP_SID, (void*) &mimu_data[31][6],
 //@}
 	
 // Array of state data type struct pointers
-const static state_t_info* state_struct_array[] = {&interrupt_counter_sti,
+const static state_t_info* state_struct_array[] = {&imu_ts_sti,
+												   &interrupt_counter_sti,
 	                                               &imu_dt_sti,
 												   &specific_force_sti,
 												   &angular_rate_sti,

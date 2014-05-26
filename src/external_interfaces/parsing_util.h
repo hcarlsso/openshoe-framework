@@ -15,7 +15,7 @@
 // Macros for improved readability. Excluded from doxygen.
 #define CHECKSUM_BYTES 2
 #define HEADER_BYTES 1
-#define MAX_COMMAND_ARGS 10
+#define MAX_COMMAND_ARGS 255
 #define NO_EXPECTED_BYTES 0
 #define SINGLE_BYTE_EXPECTED 1
 #define COM_TIMEOUT_LIMIT 200000000
@@ -39,7 +39,7 @@ struct rxtx_buffer{
 #define reset_timer(timer) ((timer) = Get_system_register(AVR32_COUNT))
 #define is_new_header(exp_nrb) ((exp_nrb) == NO_EXPECTED_BYTES)
 #define is_end_of_command(exp_nrb) (exp_nrb) == SINGLE_BYTE_EXPECTED
-#define has_timed_out(timeout_counter, exp_nrb) ((timeout_counter) + COM_TIMEOUT_LIMIT < Get_system_register(AVR32_COUNT) && (exp_nrb) > 0)
+#define has_timed_out(timeout_counter, exp_nrb) (Get_system_register(AVR32_COUNT) - (timeout_counter) > COM_TIMEOUT_LIMIT && (exp_nrb) > 0)
 #define increment_counter(counter) ((counter)++)
 #define decrement_counter(counter) ((counter)--)
 #define FIRST_PAYLOAD_BYTE (state_output_header_p+2)

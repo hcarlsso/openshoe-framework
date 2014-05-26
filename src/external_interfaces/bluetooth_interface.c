@@ -20,7 +20,7 @@
 
 ///\name Buffer settings
 //@{
-#define RX_BUFFER_SIZE 20
+#define RX_BUFFER_SIZE 256
 #define TX_BUFFER_SIZE 255
 #define SINGLE_TX_BUFFER_SIZE 10
 #define MAX_RX_NRB 10
@@ -229,7 +229,7 @@ void bt_transmit_data(void){
 }
 
 void bt_set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT){
+	if(state_info_access_by_id[state_id] && state_id<=SID_LIMIT){
 		if (divider>=MIN_LOG2_DIVIDER){
 			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
 			lossy_transmission = ! (divider&LOSSY_TRANSMISSION_BIT_MASK);
@@ -275,7 +275,8 @@ void bt_reset_output_counters(void){
 }
 
 void bt_set_conditional_output(uint8_t state_id){
-	state_output_cond[state_id]=true;
+	if(state_info_access_by_id[state_id])
+		state_output_cond[state_id]=true;
 }
 
 void bt_set_lossy_transmission(bool onoff){

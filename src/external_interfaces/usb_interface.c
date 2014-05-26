@@ -28,7 +28,7 @@
 
 ///\name Buffer settings
 //@{
-#define RX_BUFFER_SIZE 20
+#define RX_BUFFER_SIZE 512
 #define TX_BUFFER_SIZE 512
 #define SINGLE_TX_BUFFER_SIZE 10
 #define MAX_RX_NRB 10
@@ -159,7 +159,7 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 void usb_receive_command(void){
 	static uint8_t rx_buffer_array[RX_BUFFER_SIZE];
 	static struct rxtx_buffer rx_buffer = {rx_buffer_array,rx_buffer_array,rx_buffer_array,0};
-	static int command_tx_timer;
+	static uint32_t command_tx_timer;
 	static command_structure* info_last_command;
 	int rx_nrb_counter = NO_BYTES_RECEIVED_YET;
 	
@@ -243,9 +243,10 @@ void usb_transmit_data(void){
 	divider is within the allowable range.
 */
 void usb_set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT && divider<=MAX_LOG2_DIVIDER){	
+	if(state_info_access_by_id[state_id] && state_id<=SID_LIMIT){ // && divider<=MAX_LOG2_DIVIDER){	
 		if (divider>=MIN_LOG2_DIVIDER){
-			uint16_t rate_divider = 1<<(divider-1);
+			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
+//			uint16_t rate_divider = 1<<(divider-1);
 			uint16_t min_divider = 1<<(MAX_LOG2_DIVIDER-1);
 			uint16_t min_counter = 1; // 1 (instead of 0) to ensure that ACK and new output does not coincide
 			// Synchronize output with remaining output
@@ -288,7 +289,8 @@ void usb_reset_output_counters(void){
 }
 
 void usb_set_conditional_output(uint8_t state_id){
-	state_output_cond[state_id]=true;
+	if(state_info_access_by_id[state_id])
+		state_output_cond[state_id]=true;
 }
 
 

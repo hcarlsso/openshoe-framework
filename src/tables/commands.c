@@ -21,6 +21,7 @@
 ///	@{
 
 #include "control_tables.h"
+#include <string.h>
 
 // Needed include for definition of command response functions
 #include "external_interface.h"
@@ -30,15 +31,36 @@
 #include "udi_cdc.h"
 #include "package_queue.h"
 
+#if defined(OPENSHOE_CLASSIC)
+#  define NR_IMU_RD 6
+#  include "classic.h"
+#elif defined(MIMU3333)
+#  define NR_IMU_RD 108
+#  include "MIMU3333.h"
+#elif defined(MIMU4444)
+#  define NR_IMU_RD 192
+#  include "MIMU4444.h"
+#elif defined(MIMU22BT)
+#  define NR_IMU_RD 24
+#  include "MIMU22BT.h"
+#endif
+
+#define NR_DEBUG_PROC 8
+#define NR_DEBUG_OUTPUT 5
+
+#define MREPEAT_ARG_CONST(narg,size) size,
+
 ///  \name Command response functions
 ///  Functions which are executed in response to commands.  
 //@{
 extern void handle_ack(uint8_t**);
+void get_mcu_serial(uint8_t**);
+void input_imu_rd(uint8_t**);
+void setup_debug_processing(uint8_t**);
 void output_state(uint8_t**);
 void output_imu_rd(uint8_t**);
 void output_imu_temp(uint8_t**);
 void turn_off_output(uint8_t**);
-void get_mcu_serial(uint8_t**);
 void toggle_inertial_output(uint8_t**);
 void position_plus_zupt(uint8_t**);
 void output_navigational_states(uint8_t**);
@@ -64,6 +86,8 @@ void start_inertial_frontend(uint8_t**);
 static command_structure ack = {ACK_ID,&handle_ack,2,1,{2}};
 static command_structure ping = {PING_ID,&do_nothing,0,0,{0}};
 static command_structure mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
+static command_structure input_imu_rd_cmd = {INPUT_IMU_RD,&input_imu_rd,4+NR_IMUS*6*sizeof(int16_t),NR_IMUS+1,{4,MREPEAT(NR_IMUS, MREPEAT_ARG_CONST, 12)}};
+static command_structure setup_debug_proc_cmd = {SETUP_DEBUG_PROC,&setup_debug_processing,NR_DEBUG_PROC+NR_DEBUG_OUTPUT,2,{NR_DEBUG_PROC,NR_DEBUG_OUTPUT}};
 static command_structure output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
 static command_structure output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
 static command_structure output_onoff_inert = {OUTPUT_ONOFF_INERT,&toggle_inertial_output,1,1,{1}};
@@ -89,6 +113,8 @@ static command_structure mimu_frontend_cmd = {MIMU_FRONTEND,&start_inertial_fron
 static const command_structure* commands[] = {&ack,
 											  &ping,
 											  &mcu_id,
+											  &input_imu_rd_cmd,
+											  &setup_debug_proc_cmd,
 											  &output_onoff_state,
 											  &output_all_off,
 											  &output_onoff_inert,
@@ -127,11 +153,47 @@ void get_mcu_serial(uint8_t** arg){
 }
 
 void do_nothing(uint8_t** arg){;}
+	
+void input_imu_rd(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	// Sets time stamp and imu_rd (raw data) states
+	memcpy(state_info_access_by_id[IMU_TS_SID]->state_p,cmd_arg[1],state_info_access_by_id[IMU_TS_SID]->state_size);
+	for (int i=0; i<NR_IMUS; i++)
+		memcpy(state_info_access_by_id[IMU0_RD_SID+i]->state_p,cmd_arg[i+2],state_info_access_by_id[IMU0_RD_SID+i]->state_size);
+	// Restores process sequence which has presumably been setup by setup_debug_processing(..)
+	// TODO: Make sure some debug processing has been setup
+	restore_process_sequence();
+	// Sets one-time output of up to 4 states
+	// TODO: remove this (better to get the data through a separate call, the value of the states should not change without processing anyway)
+// 	set_conditional_output(cmd_arg[NR_IMUS+2][0],from);
+// 	set_conditional_output(cmd_arg[NR_IMUS+2][1],from);
+// 	set_conditional_output(cmd_arg[NR_IMUS+2][2],from);
+// 	set_conditional_output(cmd_arg[NR_IMUS+2][3],from);
+}
+
+uint8_t debug_output[NR_DEBUG_OUTPUT];
+uint8_t debug_from;
+void set_debug_output(void){
+	for(int i=0;i<NR_DEBUG_OUTPUT;i++)
+		set_conditional_output(debug_output[i],debug_from);
+}
+void setup_debug_processing(uint8_t** cmd_arg){
+	debug_from = (uint8_t)cmd_arg[0];
+	empty_process_sequence();
+	for (int i=0; i<NR_DEBUG_PROC; i++)
+		set_elem_in_process_sequence_by_id(cmd_arg[1][i],i);
+	for (int i=0; i<NR_DEBUG_OUTPUT; i++)
+		debug_output[i]=cmd_arg[2][i];
+	set_elem_in_process_sequence(&set_debug_output,NR_DEBUG_PROC);
+	set_last_process_sequence_element(&store_and_empty_process_sequence);
+	store_and_empty_process_sequence();
+}
 
 void output_state(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t state_id = cmd_arg[1][0];
 	uint8_t output_divider = cmd_arg[2][0];
+	// TODO: remove if-statement. This is now checked in set_state_output
 	if(state_info_access_by_id[state_id]){  // Valid state?
 		set_state_output(state_id,output_divider,from);}}
 		
@@ -146,7 +208,7 @@ void output_imu_rd(uint8_t** cmd_arg){
 		if( (imu_selector>>i)&1 )
 		set_state_output(IMU0_RD_SID+i,output_divider,from);
 	}
-	set_state_output(IMU_DT_SID,output_divider,from);
+	set_state_output(IMU_TS_SID,output_divider,from);
 }
 void output_imu_temp(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
@@ -250,6 +312,7 @@ void start_stepwise_dead_reckoning(void){
 		// Make sure we have error-resistant transmission
 		set_lossy_transmission(false,swdr_interface);
 		// Start ZUPT-aided INS
+		// TODO: change to set_elem_in_process_sequence_by_id
 		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
 		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
 		set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);

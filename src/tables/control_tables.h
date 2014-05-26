@@ -99,6 +99,7 @@ typedef const struct {
 #define DP_SID 0x17
 #define STEP_COUNTER_SID 0x18
 // System states
+#define IMU_TS_SID 0x20
 #define INTERRUPT_COUNTER_SID 0x21
 #define IMU_DT_SID 0x22
 #define GP_DT_SID 0x23
@@ -179,11 +180,16 @@ typedef const struct {
 #define NACK_ID 0x02
 #define PING_ID 0x03
 #define MCU_ID 0x04
+#define INPUT_IMU_RD 0x05
+#define SETUP_DEBUG_PROC 0x06
 #define OUTPUT_STATE 0x20
 #define OUTPUT_ALL_OFF 0x21
 #define OUTPUT_ONOFF_INERT 0x22
 #define OUTPUT_POSITION_PLUS_ZUPT 0x23
 #define OUTPUT_NAVIGATIONAL_STATES 0x24
+#define ADD_SYNC_OUTPUT 0x25
+#define SYNC_OUTPUT 0x26
+#define PROCESSING_OFF 0x27
 #define OUTPUT_IMU_RD 0x28
 #define OUTPUT_IMU_TEMP 0x29
 #define PROCESSING_FUNCTION_ONOFF 0x30
@@ -192,11 +198,8 @@ typedef const struct {
 #define ACC_CALIBRATION_INIT 0x12
 #define SET_LOWPASS_FILTER_IMU 0x13
 #define STEPWISE_DEAD_RECKONING 0x14
-#define STEPWISE_DEAD_RECKONING_TOR 0x17
 #define RESET_SWDR_GYROCAL 0x15
-#define ADD_SYNC_OUTPUT 0x25
-#define SYNC_OUTPUT 0x26
-#define PROCESSING_OFF 0x27
+#define STEPWISE_DEAD_RECKONING_TOR 0x17
 #define MIMU_FRONTEND 0x31
 //@}
 

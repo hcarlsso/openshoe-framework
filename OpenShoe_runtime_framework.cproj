@@ -15,8 +15,7 @@
     <Language>C</Language>
     <ToolchainName>com.Atmel.AVRGCC32.C</ToolchainName>
     <ToolchainFlavour>Native</ToolchainFlavour>
-    <avrtool>
-    </avrtool>
+    <avrtool>com.atmel.avrdbg.tool.avrdragon</avrtool>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>

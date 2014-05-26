@@ -17,6 +17,7 @@
 //@{
 
 #include "process_sequence.h"
+#include "control_tables.h"
 
 /// Process sequence
 static processing_function_p process_sequence[PROCESS_SEQUENCE_SIZE] = {NULL};	
@@ -80,6 +81,11 @@ void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem
 	if(elem_nr<PROCESS_SEQUENCE_SIZE){
 		process_sequence[elem_nr] = elem_value;
 	}
+}
+
+void set_elem_in_process_sequence_by_id(uint8_t proc_func_id, uint8_t elem_nr){
+	if(processing_functions_by_id[proc_func_id] && elem_nr<PROCESS_SEQUENCE_SIZE)
+		process_sequence[elem_nr] = processing_functions_by_id[proc_func_id]->func_p;
 }
 
 //@}
