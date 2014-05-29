@@ -94,6 +94,7 @@ typedef const struct {
 #define ZARU_SID 0x1c
 #define T1S2F 0x1d
 #define T2S2F 0x1e
+#define P_SID 0x19
 // Step-wise dead reckoning data exchange states
 #define DX_SID 0x16
 #define DP_SID 0x17

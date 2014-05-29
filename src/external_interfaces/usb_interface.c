@@ -36,7 +36,7 @@
 
 ///\name State output divider limits
 //@{
-#define MAX_LOG2_DIVIDER 14
+#define MAX_LOG2_DIVIDER 15
 #define MIN_LOG2_DIVIDER 1
 //@}
 
@@ -245,6 +245,7 @@ void usb_transmit_data(void){
 void usb_set_state_output(uint8_t state_id, uint8_t divider){
 	if(state_info_access_by_id[state_id] && state_id<=SID_LIMIT){ // && divider<=MAX_LOG2_DIVIDER){	
 		if (divider>=MIN_LOG2_DIVIDER){
+			// TODO: change &MAX_LOG2_DIVIDER. Only works if it's a power of two minus 1.
 			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
 //			uint16_t rate_divider = 1<<(divider-1);
 			uint16_t min_divider = 1<<(MAX_LOG2_DIVIDER-1);

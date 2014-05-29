@@ -29,20 +29,22 @@ extern vec3 accelerations_in;
 extern vec3 angular_rates_in;
 extern vec3 imu_temperaturs;
 extern precision imu_supply_voltage;
-// Frontend states
+extern precision dt;
+
+// Front-end variables
 extern inert_int32 u_new;
 extern inert_int32 u_int_k;
 extern inert_float u_k;
 extern uint32_t T1s2f;
 extern uint32_t T2s2f;
+extern bool zupt;
+extern bool zaru;
 	
 // Filtering states
 extern vec3 position;
 extern vec3 velocity;
 extern quat_vec quaternions;
-extern bool zupt;
-extern bool zaru;
-extern precision dt;
+extern mat9sym cov_vector;
 
 // Step-wise dead reckoning data exchange states
 extern vec4 dx;
@@ -79,6 +81,7 @@ static state_t_info T2s2f_sti = {T2S2F, (void*) &T2s2f, sizeof(uint32_t)};
 static state_t_info position_sti = {POSITION_SID, (void*) position, sizeof(vec3)};
 static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)};
 static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
+static state_t_info P_sti = {P_SID, (void*) cov_vector, sizeof(cov_vector)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
 static state_t_info zaru_sti = {ZARU_SID, (void*) &zaru, sizeof(bool)};
 static state_t_info dt_sti = {DT_SID, (void*) &dt, sizeof(dt)};
@@ -177,6 +180,7 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &step_counter_sti,
 								 	               &velocity_sti,
 												   &quaternions_sti,
+												   &P_sti,
 												   &zupt_sti,
 												   &zaru_sti,
 												   &dt_sti,
