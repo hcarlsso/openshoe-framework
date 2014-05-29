@@ -41,10 +41,10 @@ extern bool zupt;
 extern bool zaru;
 	
 // Filtering states
-extern vec3 position;
-extern vec3 velocity;
-extern quat_vec quaternions;
-extern mat9sym cov_vector;
+extern vec3 pos;
+extern vec3 vel;
+extern quat_vec quat;
+extern mat9sym P;
 
 // Step-wise dead reckoning data exchange states
 extern vec4 dx;
@@ -53,7 +53,6 @@ extern uint16_t step_counter;
 
 // System states
 extern uint32_t interrupt_counter;
-extern uint32_t imu_dt;
 extern uint32_t gp_dt;
 
 // "Other" states
@@ -78,10 +77,10 @@ static state_t_info u_int_k_sti = {U_INT_K_SID, (void*) &u_int_k, sizeof(inert_i
 static state_t_info u_k_sti = {U_K_SID, (void*) &u_k, sizeof(inert_float)};
 static state_t_info T1s2f_sti = {T1S2F, (void*) &T1s2f, sizeof(uint32_t)};
 static state_t_info T2s2f_sti = {T2S2F, (void*) &T2s2f, sizeof(uint32_t)};
-static state_t_info position_sti = {POSITION_SID, (void*) position, sizeof(vec3)};
-static state_t_info velocity_sti = {VELOCITY_SID, (void*) velocity, sizeof(vec3)};
-static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quaternions, sizeof(quat_vec)};
-static state_t_info P_sti = {P_SID, (void*) cov_vector, sizeof(cov_vector)};
+static state_t_info position_sti = {POSITION_SID, (void*) pos, sizeof(vec3)};
+static state_t_info velocity_sti = {VELOCITY_SID, (void*) vel, sizeof(vec3)};
+static state_t_info quaternions_sti = {QUATERNION_SID, (void*) quat, sizeof(quat_vec)};
+static state_t_info P_sti = {P_SID, (void*) P, sizeof(P)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(bool)};
 static state_t_info zaru_sti = {ZARU_SID, (void*) &zaru, sizeof(bool)};
 static state_t_info dt_sti = {DT_SID, (void*) &dt, sizeof(dt)};
@@ -90,7 +89,6 @@ static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(mat4sym)};
 static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter, sizeof(uint16_t)};
 static state_t_info imu_ts_sti = {IMU_TS_SID, (void*) &ts_u, sizeof(ts_u)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
-static state_t_info imu_dt_sti = {IMU_DT_SID, (void*) &imu_dt, sizeof(uint32_t)};
 static state_t_info gp_dt_sti = {GP_DT_SID, (void*) &gp_dt, sizeof(uint32_t)};
 static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) accelerometer_biases, sizeof(vec3)};
 static state_t_info samsung_id_sti = {SAMSUNG_ID_SID, (void*) &samsung_id, sizeof(uint8_t)};
@@ -164,7 +162,6 @@ static state_t_info imu31_temp_sti = {IMU31_TEMP_SID, (void*) &mimu_data[31][6],
 // Array of state data type struct pointers
 const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &interrupt_counter_sti,
-	                                               &imu_dt_sti,
 												   &specific_force_sti,
 												   &angular_rate_sti,
 												   &imu_temperaturs_sti,

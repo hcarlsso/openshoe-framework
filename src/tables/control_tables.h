@@ -102,7 +102,6 @@ typedef const struct {
 // System states
 #define IMU_TS_SID 0x20
 #define INTERRUPT_COUNTER_SID 0x21
-#define IMU_DT_SID 0x22
 #define GP_DT_SID 0x23
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35

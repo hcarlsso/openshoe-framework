@@ -229,7 +229,7 @@ void toggle_inertial_output(uint8_t** cmd_arg){
 	set_state_output(ANGULAR_RATE_SID,output_divider,from);
 	set_state_output(SPECIFIC_FORCE_SID,output_divider,from);
 	set_state_output(INTERRUPT_COUNTER_SID,output_divider,from);
-	set_state_output(IMU_DT_SID,output_divider,from);}
+	set_state_output(IMU_TS_SID,output_divider,from);}
 
 void position_plus_zupt(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
