@@ -68,6 +68,7 @@ extern uint32_t ts_u;
 ///  \name External state information
 ///  Structs containing information and pointers to the externally accessible system states.
 //@{
+// TODO: change such that it's sizeof(variable) rather than sizeof(type)
 static state_t_info specific_force_sti = {SPECIFIC_FORCE_SID, (void*) accelerations_in, sizeof(vec3)};
 static state_t_info angular_rate_sti = {ANGULAR_RATE_SID, (void*) angular_rates_in, sizeof(vec3)};
 static state_t_info imu_temperaturs_sti = {IMU_TEMPERATURS_SID, (void*) imu_temperaturs, sizeof(vec3)};

@@ -393,13 +393,13 @@ void stepwise_dead_reckoning_TOR(uint8_t** cmd_arg){
 
 
 ///\cond
-extern uint32_t nr_of_inital_alignment_samples;
+//extern uint32_t nr_of_inital_alignment_samples;
 ///\endcond
 void reset_swdr_gyrocal(uint8_t** cmd_arg){
 	// Stop whatever was going on
 	empty_process_sequence();
 	initialize_flag=true;
-	nr_of_inital_alignment_samples = 100*cmd_arg[1][0];
+//	nr_of_inital_alignment_samples = 100*cmd_arg[1][0];
 	// Set filter taps in IMU (since occasionally they seem to reset themselves)
 	uint8_t log2_nr_filter_taps = 0;
 	low_pass_filter_setting(log2_nr_filter_taps);
