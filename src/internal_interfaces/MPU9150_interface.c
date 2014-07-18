@@ -346,9 +346,8 @@ void mpu9150_interface_init(void){
 	// Wake up the devices and set the x-axis gyroscope as the reference oscillator
 	single_byte_write(MPU6150_RA_PWR_MGMT_1,0x01);
 
-	// Set the bandwidth of the sensors to 100 Hz (OBS we should sample with at least 200 Hz then). According to the data sheet
-	// this seems to set the internal sample rate of the sensors to 1kHz.l
-	single_byte_write(MPU6150_RA_CONFIG,0x02);
+	// Set the bandwidth of the sensors to 260/256 Hz.
+	single_byte_write(MPU6150_RA_CONFIG,0x00);
 
 	// Set the accelerometer scale ranges to max (+-16g) (FS_SEL=3)
 	single_byte_write(MPU6150_RA_ACCEL_CONFIG,0x18);
