@@ -229,48 +229,21 @@ void bt_transmit_data(void){
 }
 
 void bt_set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_info_access_by_id[state_id] && state_id<=SID_LIMIT){
+	if(state_id<=SID_LIMIT && state_info_access_by_id[state_id]){
 		if (divider>=MIN_LOG2_DIVIDER){
 			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
-			lossy_transmission = ! (divider&LOSSY_TRANSMISSION_BIT_MASK);
-			uint16_t min_divider = 1<<(MAX_LOG2_DIVIDER-1);
-			uint16_t min_counter = 1; // 1 (instead of 0) to ensure that ACK and new output does not coincide
-			// Synchronize output with remaining output
-			// TODO: Test if this works!!! (could be a problem with output_imu_rd (would take to long time)?)
-/*			if (rate_divider>1)
-			{
-				min_counter = 0xFFFF - 0xFFFF%rate_divider;
-				for(int i=0;i<SID_LIMIT;i++)
-				{
-					if(state_output_rate_divider[i] && state_output_rate_divider[i]=<min_divider){
-						if (state_output_rate_counter[i]<min_counter)
-						{
-							min_counter=state_output_rate_counter[i];
-							min_divider=state_output_rate_divider[i];
-						}
-					}
-				}
-				min_counter = min_counter%rate_divider;
-			}*/
+			uint16_t rate_divider_reminder_mask = rate_divider - 1;
+			uint16_t min_counter = 0;
+			if (rate_divider>1)
+				for(int i=0;i<SID_LIMIT;i++) // Synchronize output with remaining output
+					if(state_output_rate_divider[i])
+						min_counter = max(min_counter,state_output_rate_counter[i]&rate_divider_reminder_mask);
 			state_output_rate_divider[state_id] = rate_divider;
 			state_output_rate_counter[state_id] = min_counter;
 		} else {
 			state_output_rate_divider[state_id] = 0;
 			state_output_rate_counter[state_id] = 0;
 		}
-	}
-}
-
-/**
-	\brief Reset the output counter such that the output become synchronized.
-	
-	\details Resets all output counters to zero. Since the output rate dividers
-	will always be a power of two. This mean that all outputs will be
-	synchronized independent of their dividers.
-*/
-void bt_reset_output_counters(void){
-	for(int i=0;i<SID_LIMIT;i++){
-		state_output_rate_counter[i] = 0;
 	}
 }
 

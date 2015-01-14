@@ -71,7 +71,6 @@ void stepwise_dead_reckoning(uint8_t**);
 void stepwise_dead_reckoning_TOR(uint8_t**);
 void reset_swdr_gyrocal(uint8_t**);
 void gyro_self_calibration(uint8_t**);
-void acc_calibration(uint8_t**);
 void set_low_pass_imu(uint8_t**);
 void add_sync_output(uint8_t**);
 void sync_output(uint8_t**);
@@ -101,7 +100,6 @@ static command_structure stepwise_dead_reckoning_cmd = {STEPWISE_DEAD_RECKONING,
 static command_structure stepwise_dead_reckoning_TOR_cmd = {STEPWISE_DEAD_RECKONING_TOR,&stepwise_dead_reckoning_TOR,1,1,{1}};
 static command_structure reset_swdr_gyrocal_cmd = {RESET_SWDR_GYROCAL,&reset_swdr_gyrocal,1,1,{1}};
 static command_structure gyro_calibration_cmd = {GYRO_CALIBRATION_INIT,&gyro_self_calibration,0,0,{0}};
-static command_structure acc_calibration_cmd = {ACC_CALIBRATION_INIT,&acc_calibration,1,1,{1}};
 static command_structure set_low_pass_imu_cmd = {SET_LOWPASS_FILTER_IMU,&set_low_pass_imu,1,1,{1}};
 static command_structure add_sync_output_cmd = {ADD_SYNC_OUTPUT,&add_sync_output,2,2,{1,1}};
 static command_structure sync_output_cmd = {SYNC_OUTPUT,&sync_output,0,0,{0}};
@@ -128,7 +126,6 @@ static const command_structure* commands[] = {&ack,
 											  &stepwise_dead_reckoning_TOR_cmd,
 											  &reset_swdr_gyrocal_cmd,
 											  &gyro_calibration_cmd,
-											  &acc_calibration_cmd,
 											  &set_low_pass_imu_cmd,
 											  &add_sync_output_cmd,
 											  &sync_output_cmd,
@@ -148,8 +145,9 @@ void commands_init(void){
 		command_info_array[commands[i]->header] = commands[i];}
 }
 
-void get_mcu_serial(uint8_t** arg){
-//	udi_cdc_write_buf((int*)0x80800284,0x80800292-0x80800284);
+void get_mcu_serial(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	set_conditional_output(MCU_ID_SID,from);
 }
 
 void do_nothing(uint8_t** arg){;}
@@ -161,14 +159,7 @@ void input_imu_rd(uint8_t** cmd_arg){
 	for (int i=0; i<NR_IMUS; i++)
 		memcpy(state_info_access_by_id[IMU0_RD_SID+i]->state_p,cmd_arg[i+2],state_info_access_by_id[IMU0_RD_SID+i]->state_size);
 	// Restores process sequence which has presumably been setup by setup_debug_processing(..)
-	// TODO: Make sure some debug processing has been setup
 	restore_process_sequence();
-	// Sets one-time output of up to 4 states
-	// TODO: remove this (better to get the data through a separate call, the value of the states should not change without processing anyway)
-// 	set_conditional_output(cmd_arg[NR_IMUS+2][0],from);
-// 	set_conditional_output(cmd_arg[NR_IMUS+2][1],from);
-// 	set_conditional_output(cmd_arg[NR_IMUS+2][2],from);
-// 	set_conditional_output(cmd_arg[NR_IMUS+2][3],from);
 }
 
 uint8_t debug_output[NR_DEBUG_OUTPUT];
@@ -189,13 +180,21 @@ void setup_debug_processing(uint8_t** cmd_arg){
 	store_and_empty_process_sequence();
 }
 
+#define OUTPUT_DIVIDER_MASK 0x0F
+#define OUTPUT_PULL_MASK    0x20
+#define OUTPUT_LOSSY_MASK   0x10
 void output_state(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t state_id = cmd_arg[1][0];
-	uint8_t output_divider = cmd_arg[2][0];
-	// TODO: remove if-statement. This is now checked in set_state_output
-	if(state_info_access_by_id[state_id]){  // Valid state?
-		set_state_output(state_id,output_divider,from);}}
+	uint8_t mode_select = cmd_arg[2][0];
+	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
+	if (mode_select & OUTPUT_PULL_MASK)	{
+		set_conditional_output(state_id,from);
+	} else {
+		uint8_t output_divider = mode_select & OUTPUT_DIVIDER_MASK;
+		set_state_output(state_id,output_divider,from);
+	}
+}
 		
 void output_imu_rd(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
@@ -418,55 +417,24 @@ void gyro_self_calibration(uint8_t** no_arg){
 	set_last_process_sequence_element(&restore_process_sequence);
 }
 	
-///\cond
-extern Bool new_orientation_flag;
-extern Bool acc_calibration_finished_flag;
-///\endcond
-void new_calibration_orientation(void){
-	if(acc_calibration_finished_flag){
-		acc_calibration_finished_flag = false;
-		restore_process_sequence();
-		udi_cdc_putc(103);
-		//TODO: Send out acknowledgment that calibration was successful
-	}
-	if(new_orientation_flag==true){
-		new_orientation_flag = false;
-		//TODO: Send out request for new orientation position
-		empty_process_sequence();
-		udi_cdc_putc(102);
-	}
-}
-
-///\cond
-extern uint8_t nr_of_calibration_orientations;
-///\endcond
-void acc_calibration(uint8_t ** cmd_arg){
-	uint8_t nr_orientations = cmd_arg[1][0];
-	nr_of_calibration_orientations = nr_orientations;
-	
-	store_and_empty_process_sequence();
-	set_elem_in_process_sequence(processing_functions_by_id[ACCELEROMETER_CALIBRATION]->func_p,0);
-	set_last_process_sequence_element(&new_calibration_orientation);
-}
-
 void set_low_pass_imu(uint8_t ** cmd_arg){
 	uint8_t log2_nr_filter_taps = cmd_arg[1][0];
 	if (log2_nr_filter_taps<=4){
 		low_pass_filter_setting(log2_nr_filter_taps);}
 }
 
+//TODO: Remove these functions and commands. Synchronization is automatic now.
 void add_sync_output(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t state_id = cmd_arg[1][0];
 	uint8_t output_divider    = cmd_arg[2][0];
 	if(state_info_access_by_id[state_id]){  // Valid state?
 		set_state_output(state_id,output_divider,from);}
-	reset_output_counters(from);
+//	reset_output_counters(from);
 }
-
 void sync_output(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
-	reset_output_counters(from);
+//	reset_output_counters(from);
 }
 
 void processing_off(uint8_t** no_arg){

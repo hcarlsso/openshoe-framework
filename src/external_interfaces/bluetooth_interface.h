@@ -18,7 +18,6 @@ void bt_receive_command(void);
 void bt_transmit_data(void);
 
 void bt_set_state_output(uint8_t state_id, uint8_t divider);
-void bt_reset_output_counters(void);
 void bt_set_conditional_output(uint8_t state_id);
 void bt_set_lossy_transmission(bool onoff);
 

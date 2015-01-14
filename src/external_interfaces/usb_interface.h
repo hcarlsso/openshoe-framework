@@ -17,7 +17,6 @@ void usb_transmit_data(void);
 void usb_receive_command(void);
 
 void usb_set_state_output(uint8_t state_id, uint8_t divider);
-void usb_reset_output_counters(void);
 void usb_set_conditional_output(uint8_t state_id);
 
 

@@ -106,6 +106,7 @@ typedef const struct {
 // "Other" states
 #define ACCELEROMETER_BIASES_SID 0x35
 #define SAMSUNG_ID_SID 0x36
+#define MCU_ID_SID 0x37
 // MIMU raw register states
 #define IMU0_RD_SID 0x40
 #define IMU1_RD_SID (IMU0_RD_SID+1)

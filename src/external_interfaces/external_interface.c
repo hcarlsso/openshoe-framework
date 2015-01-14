@@ -52,13 +52,6 @@ void set_state_output(uint8_t state_id, uint8_t divider,uint8_t from){
 	#endif
 	
 }
-void reset_output_counters(uint8_t from){
-	if (from & COMMAND_FROM_USB) usb_reset_output_counters();
-	
-	#ifdef BT_MODULE
-	if (from & COMMAND_FROM_BT) bt_reset_output_counters();
-	#endif
-}
 void set_conditional_output(uint8_t state_id,uint8_t from){
 	if (from & COMMAND_FROM_USB) usb_set_conditional_output(state_id);
 	

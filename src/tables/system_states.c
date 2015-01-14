@@ -56,8 +56,8 @@ extern uint32_t interrupt_counter;
 extern uint32_t gp_dt;
 
 // "Other" states
-extern vec3 accelerometer_biases;
 extern uint8_t samsung_id;
+// the mcu_id is accessed via an absolute address
 
 // IMU register states
 // The matrix is split up into 32 stats for the user to access (one for each IMU, see below)
@@ -91,8 +91,8 @@ static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter,
 static state_t_info imu_ts_sti = {IMU_TS_SID, (void*) &ts_u, sizeof(ts_u)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(uint32_t)};
 static state_t_info gp_dt_sti = {GP_DT_SID, (void*) &gp_dt, sizeof(uint32_t)};
-static state_t_info accelerometer_biases_sti = {ACCELEROMETER_BIASES_SID, (void*) accelerometer_biases, sizeof(vec3)};
 static state_t_info samsung_id_sti = {SAMSUNG_ID_SID, (void*) &samsung_id, sizeof(uint8_t)};
+static state_t_info mcu_id_sti = {MCU_ID_SID, (void*) 0x80800284, 0x80800292-0x80800284+1};
 static state_t_info imu0_rd_sti = {IMU0_RD_SID, (void*) mimu_data[0], 12};
 static state_t_info imu1_rd_sti = {IMU1_RD_SID, (void*) mimu_data[1], 12};
 static state_t_info imu2_rd_sti = {IMU2_RD_SID, (void*) mimu_data[2], 12};
@@ -183,8 +183,8 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &zaru_sti,
 												   &dt_sti,
 												   &gp_dt_sti,
-												   &accelerometer_biases_sti,
 												   &samsung_id_sti,
+												   &mcu_id_sti,
 												   &imu0_rd_sti,
 												   &imu1_rd_sti,
 												   &imu2_rd_sti,
