@@ -46,7 +46,7 @@
 #endif
 
 #define NR_DEBUG_PROC 8
-#define NR_DEBUG_OUTPUT 5
+#define NR_DEBUG_OUTPUT 8
 
 #define MREPEAT_ARG_CONST(narg,size) size,
 
@@ -54,87 +54,69 @@
 ///  Functions which are executed in response to commands.  
 //@{
 extern void handle_ack(uint8_t**);
+void do_nothing(uint8_t**);
 void get_mcu_serial(uint8_t**);
 void input_imu_rd(uint8_t**);
 void setup_debug_processing(uint8_t**);
 void output_state(uint8_t**);
+void output_multiple_states(uint8_t**);
 void output_imu_rd(uint8_t**);
-void output_imu_temp(uint8_t**);
 void turn_off_output(uint8_t**);
-void toggle_inertial_output(uint8_t**);
-void position_plus_zupt(uint8_t**);
-void output_navigational_states(uint8_t**);
 void processing_onoff(uint8_t**);
+void set_mult_proc(uint8_t**);
 void reset_zupt_aided_ins(uint8_t**);
 void reset_zupt_aided_ins2(uint8_t**);
 void stepwise_dead_reckoning(uint8_t**);
 void stepwise_dead_reckoning_TOR(uint8_t**);
-void reset_swdr_gyrocal(uint8_t**);
-void gyro_self_calibration(uint8_t**);
-void set_low_pass_imu(uint8_t**);
-void add_sync_output(uint8_t**);
-void sync_output(uint8_t**);
 void processing_off(uint8_t**);
-void do_nothing(uint8_t**);
 void start_inertial_frontend(uint8_t**);
+void normal_imu(uint8_t**);
+void normal_imu_with_bias_est(uint8_t**);
 //@}
 
 ///  \name Command definitions
 ///  Structs containing the information/definitions of the commands.
 //@{
-static command_structure ack = {ACK_ID,&handle_ack,2,1,{2}};
-static command_structure ping = {PING_ID,&do_nothing,0,0,{0}};
-static command_structure mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
-static command_structure input_imu_rd_cmd = {INPUT_IMU_RD,&input_imu_rd,4+NR_IMUS*6*sizeof(int16_t),NR_IMUS+1,{4,MREPEAT(NR_IMUS, MREPEAT_ARG_CONST, 12)}};
-static command_structure setup_debug_proc_cmd = {SETUP_DEBUG_PROC,&setup_debug_processing,NR_DEBUG_PROC+NR_DEBUG_OUTPUT,2,{NR_DEBUG_PROC,NR_DEBUG_OUTPUT}};
-static command_structure output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
-static command_structure output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
-static command_structure output_onoff_inert = {OUTPUT_ONOFF_INERT,&toggle_inertial_output,1,1,{1}};
-static command_structure output_position_plus_zupt = {OUTPUT_POSITION_PLUS_ZUPT,&position_plus_zupt,1,1,{1}};
-static command_structure output_navigational_states_cmd = {OUTPUT_NAVIGATIONAL_STATES,&output_navigational_states,1,1,{1}};
-static command_structure output_onoff_imu_rd = {OUTPUT_IMU_RD,&output_imu_rd,5,2,{4,1}};
-static command_structure output_onoff_imu_temp = {OUTPUT_IMU_TEMP,&output_imu_temp,5,2,{4,1}};
-static command_structure processing_function_onoff = {PROCESSING_FUNCTION_ONOFF,&processing_onoff,3,3,{1,1,1}};
-static command_structure reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_aided_ins,0,0,{0}};
-static command_structure stepwise_dead_reckoning_cmd = {STEPWISE_DEAD_RECKONING,&stepwise_dead_reckoning,0,0,{0}};
-static command_structure stepwise_dead_reckoning_TOR_cmd = {STEPWISE_DEAD_RECKONING_TOR,&stepwise_dead_reckoning_TOR,1,1,{1}};
-static command_structure reset_swdr_gyrocal_cmd = {RESET_SWDR_GYROCAL,&reset_swdr_gyrocal,1,1,{1}};
-static command_structure gyro_calibration_cmd = {GYRO_CALIBRATION_INIT,&gyro_self_calibration,0,0,{0}};
-static command_structure set_low_pass_imu_cmd = {SET_LOWPASS_FILTER_IMU,&set_low_pass_imu,1,1,{1}};
-static command_structure add_sync_output_cmd = {ADD_SYNC_OUTPUT,&add_sync_output,2,2,{1,1}};
-static command_structure sync_output_cmd = {SYNC_OUTPUT,&sync_output,0,0,{0}};
-static command_structure processing_off_cmd = {PROCESSING_OFF,&processing_off,0,0,{0}};
-static command_structure mimu_frontend_cmd = {MIMU_FRONTEND,&start_inertial_frontend,0,0,{0}};
+static command_info ack = {ACK_ID,&handle_ack,2,1,{2}};
+static command_info ping = {PING_ID,&do_nothing,0,0,{0}};
+static command_info mcu_id = {MCU_ID,&get_mcu_serial,0,0,{0}};
+static command_info input_imu_rd_cmd = {INPUT_IMU_RD,&input_imu_rd,4+NR_IMUS*6*sizeof(int16_t),NR_IMUS+1,{4,MREPEAT(NR_IMUS, MREPEAT_ARG_CONST, 12)}};
+static command_info setup_debug_proc_cmd = {SETUP_DEBUG_PROC,&setup_debug_processing,NR_DEBUG_PROC+NR_DEBUG_OUTPUT+1,2,{NR_DEBUG_PROC,NR_DEBUG_OUTPUT,1}};
+static command_info output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
+static command_info output_multiple_states_cmd = {OUTPUT_MULTIPLE_STATES,&output_multiple_states,9,9,{1,1,1,1,1,1,1,1,1}};
+static command_info output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
+static command_info output_onoff_imu_rd = {OUTPUT_IMU_RD,&output_imu_rd,5,2,{4,1}};
+static command_info processing_function_onoff = {RUN_PROC,&processing_onoff,2,2,{1,1}};
+static command_info run_mult_proc_cmd = {RUN_MULT_PROC,&set_mult_proc,8,8,{1,1,1,1,1,1,1,1}};
+static command_info reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_aided_ins,0,0,{0}};
+static command_info stepwise_dead_reckoning_cmd = {STEPWISE_DEAD_RECKONING,&stepwise_dead_reckoning,0,0,{0}};
+static command_info stepwise_dead_reckoning_TOR_cmd = {STEPWISE_DEAD_RECKONING_TOR,&stepwise_dead_reckoning_TOR,1,1,{1}};
+static command_info processing_off_cmd = {PROCESSING_OFF,&processing_off,0,0,{0}};
+static command_info mimu_frontend_cmd = {MIMU_FRONTEND,&start_inertial_frontend,0,0,{0}};
+static command_info normal_imu_cmd = {NORMAL_IMU,&normal_imu,1,1,{1}};
+static command_info normal_imu_with_bias_est_cmd = {NORMAL_IMU_WITH_BIAS_EST,&normal_imu_with_bias_est,1,1,{1}};
 //@}
 
 // Arrays/tables to find appropriate commands
-static const command_structure* commands[] = {&ack,
+static const command_info* commands[] = {&ack,
 											  &ping,
 											  &mcu_id,
 											  &input_imu_rd_cmd,
 											  &setup_debug_proc_cmd,
 											  &output_onoff_state,
 											  &output_all_off,
-											  &output_onoff_inert,
-											  &output_position_plus_zupt,
-											  &output_navigational_states_cmd,
+											  &output_multiple_states_cmd,
 											  &output_onoff_imu_rd,
-											  &output_onoff_imu_temp,
 											  &processing_function_onoff,
 											  &reset_system_cmd,
 											  &stepwise_dead_reckoning_cmd,
 											  &stepwise_dead_reckoning_TOR_cmd,
-											  &reset_swdr_gyrocal_cmd,
-											  &gyro_calibration_cmd,
-											  &set_low_pass_imu_cmd,
-											  &add_sync_output_cmd,
-											  &sync_output_cmd,
 											  &processing_off_cmd,
 											  &mimu_frontend_cmd};
 												  
 // Arrays/tables for commands
 uint8_t command_header_table[32]={0};
-command_structure* command_info_array[256]={NULL};
+command_info* command_info_array[256]={NULL};
 												  
 void commands_init(void){
 	// Initialize tables
@@ -153,7 +135,6 @@ void get_mcu_serial(uint8_t** cmd_arg){
 void do_nothing(uint8_t** arg){;}
 	
 void input_imu_rd(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
 	// Sets time stamp and imu_rd (raw data) states
 	memcpy(state_info_access_by_id[IMU_TS_SID]->state_p,cmd_arg[1],state_info_access_by_id[IMU_TS_SID]->state_size);
 	for (int i=0; i<NR_IMUS; i++)
@@ -163,18 +144,18 @@ void input_imu_rd(uint8_t** cmd_arg){
 }
 
 uint8_t debug_output[NR_DEBUG_OUTPUT];
-uint8_t debug_from;
+uint8_t debug_output_to;
 void set_debug_output(void){
 	for(int i=0;i<NR_DEBUG_OUTPUT;i++)
-		set_conditional_output(debug_output[i],debug_from);
+		set_conditional_output(debug_output[i],debug_output_to);
 }
 void setup_debug_processing(uint8_t** cmd_arg){
-	debug_from = (uint8_t)cmd_arg[0];
 	empty_process_sequence();
 	for (int i=0; i<NR_DEBUG_PROC; i++)
 		set_elem_in_process_sequence_by_id(cmd_arg[1][i],i);
 	for (int i=0; i<NR_DEBUG_OUTPUT; i++)
 		debug_output[i]=cmd_arg[2][i];
+	debug_output_to = cmd_arg[3][0];
 	set_elem_in_process_sequence(&set_debug_output,NR_DEBUG_PROC);
 	set_last_process_sequence_element(&store_and_empty_process_sequence);
 	store_and_empty_process_sequence();
@@ -188,76 +169,76 @@ void output_state(uint8_t** cmd_arg){
 	uint8_t state_id = cmd_arg[1][0];
 	uint8_t mode_select = cmd_arg[2][0];
 	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
-	if (mode_select & OUTPUT_PULL_MASK)	{
+	if (mode_select & OUTPUT_PULL_MASK)
 		set_conditional_output(state_id,from);
-	} else {
-		uint8_t output_divider = mode_select & OUTPUT_DIVIDER_MASK;
-		set_state_output(state_id,output_divider,from);
-	}
+	else
+		set_state_output(state_id,mode_select & OUTPUT_DIVIDER_MASK,from);
 }
-		
+void output_multiple_states(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t mode_select = cmd_arg[9][0];
+	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
+	if (mode_select & OUTPUT_PULL_MASK)
+		for (int i=1;i<=9;i++)
+			set_conditional_output(cmd_arg[i][0],from);
+	else
+		for (int i=1;i<=9;i++)
+			set_state_output(cmd_arg[i][0],mode_select & OUTPUT_DIVIDER_MASK,from);
+}
+
+void turn_off_output(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++){
+	set_state_output(i,0,from);}
+	if (from & COMMAND_FROM_BT)
+	empty_package_queue();
+}
+
+#define OUTPUT_INERTIAL_MASK 0x40
+#define OUTPUT_TEMP_MASK 0x80
 void output_imu_rd(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint32_t imu_selector = cmd_arg[1][0]<<24;
 	imu_selector |= cmd_arg[1][1]<<16;
 	imu_selector |= cmd_arg[1][2]<<8;
 	imu_selector |= cmd_arg[1][3];
-	uint8_t output_divider = cmd_arg[2][0];
-	for (uint8_t i=0;i<32;i++) {
-		if( (imu_selector>>i)&1 )
-		set_state_output(IMU0_RD_SID+i,output_divider,from);
+	uint8_t mode_select = cmd_arg[2][0];
+	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
+	if (mode_select & OUTPUT_PULL_MASK)	{
+		for (uint8_t i=0;i<32;i++) {
+			if( (imu_selector>>i)&1 ){
+				if (mode_select & OUTPUT_INERTIAL_MASK)
+					set_conditional_output(IMU0_RD_SID+i,from);
+				if (mode_select & OUTPUT_TEMP_MASK)
+					set_conditional_output(IMU0_TEMP_SID+i,from);
+			}
+		}
+	} else {
+		uint8_t output_divider = mode_select & OUTPUT_DIVIDER_MASK;
+		for (uint8_t i=0;i<32;i++) {
+			if( (imu_selector>>i)&1 ){
+				if (mode_select & OUTPUT_INERTIAL_MASK)
+					set_state_output(IMU0_RD_SID+i,output_divider,from);
+				if (mode_select & OUTPUT_TEMP_MASK)
+					set_state_output(IMU0_TEMP_SID+i,output_divider,from);
+			}
+		}
 	}
-	set_state_output(IMU_TS_SID,output_divider,from);
-}
-void output_imu_temp(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	uint32_t imu_selector = cmd_arg[1][0]<<24;
-	imu_selector |= cmd_arg[1][1]<<16;
-	imu_selector |= cmd_arg[1][2]<<8;
-	imu_selector |= cmd_arg[1][3];
-	uint8_t output_divider = cmd_arg[2][0];
-	for (uint8_t i=0;i<32;i++) {
-		if( (imu_selector>>i)&1 )
-		set_state_output(IMU0_TEMP_SID+i,output_divider,from);
-	}
-}
-
-void toggle_inertial_output(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	uint8_t output_divider = cmd_arg[1][0];
-	set_state_output(ANGULAR_RATE_SID,output_divider,from);
-	set_state_output(SPECIFIC_FORCE_SID,output_divider,from);
-	set_state_output(INTERRUPT_COUNTER_SID,output_divider,from);
-	set_state_output(IMU_TS_SID,output_divider,from);}
-
-void position_plus_zupt(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	uint8_t output_divider = cmd_arg[1][0];
-	set_state_output(POSITION_SID,output_divider,from);
-	set_state_output(ZUPT_SID,output_divider,from);}
-
-void output_navigational_states(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	uint8_t output_divider = cmd_arg[1][0];
-	set_state_output(POSITION_SID,output_divider,from);
-	set_state_output(VELOCITY_SID,output_divider,from);
-	set_state_output(QUATERNION_SID,output_divider,from);
-	set_state_output(INTERRUPT_COUNTER_SID,output_divider,from);}
-
-void turn_off_output(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++){
-		set_state_output(i,0,from);}
-	if (from & COMMAND_FROM_BT)
-		empty_package_queue();
+	set_state_output(IMU_TS_SID,mode_select & OUTPUT_DIVIDER_MASK,from);
 }
 
 void processing_onoff(uint8_t** cmd_arg){
 	uint8_t function_id = cmd_arg[1][0];
-	uint8_t onoff    = cmd_arg[2][0];
-	uint8_t array_location = cmd_arg[3][0];
-	processing_function_p process_sequence_elem_value = onoff ? (processing_functions_by_id[function_id]->func_p) : NULL;
-	set_elem_in_process_sequence(process_sequence_elem_value,array_location);
+	uint8_t array_location = cmd_arg[2][0];
+	set_elem_in_process_sequence_by_id(function_id,array_location);
+}
+void set_mult_proc(uint8_t**){
+	uint8_t function_id = cmd_arg[1][0];
+	for(int i=1;i<=8;i++)
+		set_elem_in_process_sequence_by_id(cmd_arg[i][0],i-1);
+}
+void processing_off(uint8_t** no_arg){
+	empty_process_sequence();
 }
 
 ///\cond
@@ -351,7 +332,7 @@ void set_conditional_output_reset_TOR(void){
 }
 //extern uint16_t step_counter;
 void start_stepwise_dead_reckoning_TOR(void){
-	if(initialize_flag==false){
+		if(initialize_flag==false){
 		// Stop initial alignment
 		empty_process_sequence();
 		// Reset step counter;
@@ -389,59 +370,6 @@ void stepwise_dead_reckoning_TOR(uint8_t** cmd_arg){
 	set_last_process_sequence_element(&start_stepwise_dead_reckoning_TOR);
 }
 
-
-
-///\cond
-//extern uint32_t nr_of_inital_alignment_samples;
-///\endcond
-void reset_swdr_gyrocal(uint8_t** cmd_arg){
-	// Stop whatever was going on
-	empty_process_sequence();
-	initialize_flag=true;
-//	nr_of_inital_alignment_samples = 100*cmd_arg[1][0];
-	// Set filter taps in IMU (since occasionally they seem to reset themselves)
-	uint8_t log2_nr_filter_taps = 0;
-	low_pass_filter_setting(log2_nr_filter_taps);
-	// Start initial alignment
-	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
-	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
-	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
-	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_INITIAL_ALIGNMENT]->func_p,3);
-	// Set termination function of initial alignment which will also start INS
-	set_last_process_sequence_element(&start_stepwise_dead_reckoning);
-}
-
-void gyro_self_calibration(uint8_t** no_arg){
-	store_and_empty_process_sequence();
-	set_elem_in_process_sequence(processing_functions_by_id[GYRO_CALIBRATION]->func_p,0);
-	set_last_process_sequence_element(&restore_process_sequence);
-}
-	
-void set_low_pass_imu(uint8_t ** cmd_arg){
-	uint8_t log2_nr_filter_taps = cmd_arg[1][0];
-	if (log2_nr_filter_taps<=4){
-		low_pass_filter_setting(log2_nr_filter_taps);}
-}
-
-//TODO: Remove these functions and commands. Synchronization is automatic now.
-void add_sync_output(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	uint8_t state_id = cmd_arg[1][0];
-	uint8_t output_divider    = cmd_arg[2][0];
-	if(state_info_access_by_id[state_id]){  // Valid state?
-		set_state_output(state_id,output_divider,from);}
-//	reset_output_counters(from);
-}
-void sync_output(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-//	reset_output_counters(from);
-}
-
-void processing_off(uint8_t** no_arg){
-	// Stop whatever was going on
-	empty_process_sequence();
-}
-
 void start_inertial_frontend(uint8_t** no_arg){
 	empty_process_sequence();
 	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
@@ -449,4 +377,27 @@ void start_inertial_frontend(uint8_t** no_arg){
 	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
 }
 
+
+void normal_imu(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t mode_select = cmd_arg[1][0];
+	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
+	if (mode_select & OUTPUT_PULL_MASK)
+		set_conditional_output(U_K_SID,from);
+	else
+		set_state_output(U_K_SID,mode_select & OUTPUT_DIVIDER_MASK,from);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+}
+void normal_imu_with_bias_est(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint8_t mode_select = cmd_arg[1][0];
+	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
+	if (mode_select & OUTPUT_PULL_MASK)
+		set_conditional_output(U_K_SID,from);
+	else
+		set_state_output(U_K_SID,mode_select & OUTPUT_DIVIDER_MASK,from);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_STATDET]->func_p,1);
+	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_POSTPROC]->func_p,2);
+}
 //@}

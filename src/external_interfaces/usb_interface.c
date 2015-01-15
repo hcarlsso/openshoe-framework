@@ -160,7 +160,7 @@ void usb_receive_command(void){
 	static uint8_t rx_buffer_array[RX_BUFFER_SIZE];
 	static struct rxtx_buffer rx_buffer = {rx_buffer_array,rx_buffer_array,rx_buffer_array,0};
 	static uint32_t command_tx_timer;
-	static command_structure* info_last_command;
+	static command_info* info_last_command;
 	int rx_nrb_counter = NO_BYTES_RECEIVED_YET;
 	
 	// If USB is attached and data is available, receive data (command)
@@ -250,8 +250,8 @@ void usb_set_state_output(uint8_t state_id, uint8_t divider){
 			uint16_t min_counter = 0;
 			if (rate_divider>1)
 			for(int i=0;i<SID_LIMIT;i++) // Synchronize output with remaining output
-			if(state_output_rate_divider[i])
-			min_counter = max(min_counter,state_output_rate_counter[i]&rate_divider_reminder_mask);
+				if(state_output_rate_divider[i])
+					min_counter = max(min_counter,state_output_rate_counter[i]&rate_divider_reminder_mask);
 			state_output_rate_divider[state_id] = rate_divider;
 			state_output_rate_counter[state_id] = min_counter;
 			} else {

@@ -155,7 +155,7 @@ void bt_receive_command(void){
 	static uint8_t rx_buffer_array[RX_BUFFER_SIZE];
 	static struct rxtx_buffer rx_buffer = {rx_buffer_array,rx_buffer_array,rx_buffer_array,0};
 	static int command_tx_timer;
-	static command_structure* info_last_command;
+	static command_info* info_last_command;
 	int rx_nrb_counter = NO_BYTES_RECEIVED_YET;
 	
 	// If Bluetooth paired and data is available, receive data (command)

@@ -83,9 +83,9 @@ void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem
 	}
 }
 
-void set_elem_in_process_sequence_by_id(uint8_t proc_func_id, uint8_t elem_nr){
-	if(processing_functions_by_id[proc_func_id] && elem_nr<PROCESS_SEQUENCE_SIZE)
-		process_sequence[elem_nr] = processing_functions_by_id[proc_func_id]->func_p;
+void set_elem_in_process_sequence_by_id(uint8_t id, uint8_t elem_nr){
+	if(elem_nr<PROCESS_SEQUENCE_SIZE)
+		process_sequence[elem_nr] = processing_functions_by_id[id] ? processing_functions_by_id[id]->func_p : NULL;
 }
 
 //@}

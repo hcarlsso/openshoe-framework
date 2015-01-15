@@ -54,10 +54,10 @@ static inline void reset_buffer(struct rxtx_buffer* buffer){
 	buffer->read_position = buffer->buffer;
 buffer->nrb = NO_INITIATED_TRANSMISSION;}
 
-static inline int get_payload_size(command_structure* cmd_info){
+static inline int get_payload_size(command_info* cmd_info){
 return cmd_info->nrb_payload;}
 
-static inline int get_expected_nrb(command_structure* cmd_info){
+static inline int get_expected_nrb(command_info* cmd_info){
 return get_payload_size(cmd_info) + CHECKSUM_BYTES;}
 
 /// Calculates the 16-bit sum of all bytes between arguments.
@@ -72,7 +72,7 @@ static inline bool has_valid_checksum(struct rxtx_buffer* buffer){
 	uint16_t checksum = calc_checksum(buffer->buffer,buffer->write_position-CHECKSUM_BYTES);
 return (MSB(checksum)==*(buffer->write_position-1) && LSB(checksum)==*buffer->write_position);}
 
-static inline void parse_and_execute_command(struct rxtx_buffer* buffer,command_structure* cmd_info,uint8_t gp_arg){
+static inline void parse_and_execute_command(struct rxtx_buffer* buffer,command_info* cmd_info,uint8_t gp_arg){
 	static uint8_t* command_arg[MAX_COMMAND_ARGS+1];
 	command_arg[0] = gp_arg;
 	uint8_t* arg_p = buffer->buffer+1;

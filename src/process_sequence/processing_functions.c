@@ -59,6 +59,6 @@ static const proc_func_info* processing_functions[] = {&strapdown_mechanisation_
 proc_func_info* processing_functions_by_id[256];
 
 void processing_functions_init(void){
-	for(int i = 0;i<(sizeof(processing_functions)/sizeof(processing_functions[0])); i++){
-		processing_functions_by_id[processing_functions[i]->id] = processing_functions[i];}
+	for(int i = 0;i<(sizeof(processing_functions)/sizeof(processing_functions[0])); i++)
+		processing_functions_by_id[processing_functions[i]->id] = processing_functions[i];
 }

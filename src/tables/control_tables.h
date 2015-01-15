@@ -38,7 +38,7 @@ typedef const struct {
 	uint8_t nrb_payload;
 	uint8_t nr_fields;
 	uint8_t field_widths[];
-} command_structure;
+} command_info;
 
 /// Information struct for processing functions
 typedef const struct {
@@ -181,38 +181,32 @@ typedef const struct {
 #define NACK_ID 0x02
 #define PING_ID 0x03
 #define MCU_ID 0x04
-#define INPUT_IMU_RD 0x05
-#define SETUP_DEBUG_PROC 0x06
+#define SETUP_DEBUG_PROC 0x10
+#define INPUT_IMU_RD 0x11
 #define OUTPUT_STATE 0x20
-#define OUTPUT_ALL_OFF 0x21
-#define OUTPUT_ONOFF_INERT 0x22
-#define OUTPUT_POSITION_PLUS_ZUPT 0x23
-#define OUTPUT_NAVIGATIONAL_STATES 0x24
-#define ADD_SYNC_OUTPUT 0x25
-#define SYNC_OUTPUT 0x26
-#define PROCESSING_OFF 0x27
+#define OUTPUT_MULTIPLE_STATES 0x21
+#define OUTPUT_ALL_OFF 0x22
 #define OUTPUT_IMU_RD 0x28
-#define OUTPUT_IMU_TEMP 0x29
-#define PROCESSING_FUNCTION_ONOFF 0x30
-#define RESET_ZUPT_AIDED_INS 0x10
-#define GYRO_CALIBRATION_INIT 0x11
-#define ACC_CALIBRATION_INIT 0x12
-#define SET_LOWPASS_FILTER_IMU 0x13
-#define STEPWISE_DEAD_RECKONING 0x14
-#define RESET_SWDR_GYROCAL 0x15
+#define RUN_PROC 0x30
+#define RUN_MULT_PROC 0x31
+#define PROCESSING_OFF 0x32
+#define RESET_ZUPT_AIDED_INS 0x33
+#define STEPWISE_DEAD_RECKONING 0x34
+#define MIMU_FRONTEND 0x35
+#define NORMAL_IMU 0x40
+#define NORMAL_IMU_WITH_BIAS_EST 0x41
 #define STEPWISE_DEAD_RECKONING_TOR 0x17
-#define MIMU_FRONTEND 0x31
 //@}
 
 // Global variables used to access command information
 extern uint8_t command_header_table[32];
-extern command_structure* command_info_array[256];
+extern command_info* command_info_array[256];
 void commands_init(void);
 
 inline static bool is_valid_header(uint8_t header){
 	return command_header_table[header>>3] & (1<<(header & 7));}
 	
-inline static command_structure* get_command_info(uint8_t header){
+inline static command_info* get_command_info(uint8_t header){
 	return command_info_array[header];}
 
 
