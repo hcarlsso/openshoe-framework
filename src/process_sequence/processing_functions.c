@@ -29,7 +29,6 @@
 #include "inertial_frontend.h"
 #include "nav_eq.h"
 
-extern void precision_gyro_bias_null_calibration(void);
 
 ///  \name Processing functions information
 ///  Structs containing information and pointers to functions intended for the process sequence
@@ -41,14 +40,12 @@ static proc_func_info initial_alignment_info = {FRONTEND_INITIAL_ALIGNMENT,&fron
 static proc_func_info strapdown_mechanisation_equations_info = {MECHANIZATION,&strapdown_mechanisation_equations,0};
 static proc_func_info time_up_data_info = {TIME_UPDATE,&time_up_data,0};
 static proc_func_info zupt_update_info = {ZUPT_UPDATE,&zupt_update,0};
-static proc_func_info precision_gyro_bias_null_calibration_info = {GYRO_CALIBRATION,&precision_gyro_bias_null_calibration,0};
 static proc_func_info stepwise_system_reset_info = {STEPWISE_SYSTEM_RESET,&stepwise_system_reset,0};
 //@}
 
 static const proc_func_info* processing_functions[] = {&strapdown_mechanisation_equations_info,
 													   &time_up_data_info,
 													   &zupt_update_info,
-													   &precision_gyro_bias_null_calibration_info,
 													   &stepwise_system_reset_info,
 													   &frontend_preproc_info,
 													   &frontend_statdet_info,

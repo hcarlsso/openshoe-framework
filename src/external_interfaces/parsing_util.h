@@ -42,8 +42,8 @@ struct rxtx_buffer{
 #define has_timed_out(timeout_counter, exp_nrb) (Get_system_register(AVR32_COUNT) - (timeout_counter) > COM_TIMEOUT_LIMIT && (exp_nrb) > 0)
 #define increment_counter(counter) ((counter)++)
 #define decrement_counter(counter) ((counter)--)
-#define FIRST_PAYLOAD_BYTE (state_output_header_p+2)
-#define PAYLOAD_SIZE_BYTE (state_output_header_p+1)
+#define FIRST_PAYLOAD_BYTE (state_output_header_p+4)
+#define PAYLOAD_SIZE_BYTE (state_output_header_p+3)
 ///\endcond
 
 static inline uint8_t get_command_header(struct rxtx_buffer* buffer_p) {

@@ -27,7 +27,6 @@
 #include "external_interface.h"
 #include "bluetooth_interface.h"
 #include "process_sequence.h"
-#include "ADIS16367_interface.h"
 #include "udi_cdc.h"
 #include "package_queue.h"
 
@@ -62,7 +61,7 @@ void output_state(uint8_t**);
 void output_multiple_states(uint8_t**);
 void output_imu_rd(uint8_t**);
 void turn_off_output(uint8_t**);
-void processing_onoff(uint8_t**);
+void set_proc(uint8_t**);
 void set_mult_proc(uint8_t**);
 void reset_zupt_aided_ins(uint8_t**);
 void reset_zupt_aided_ins2(uint8_t**);
@@ -86,7 +85,7 @@ static command_info output_onoff_state = {OUTPUT_STATE,&output_state,2,2,{1,1}};
 static command_info output_multiple_states_cmd = {OUTPUT_MULTIPLE_STATES,&output_multiple_states,9,9,{1,1,1,1,1,1,1,1,1}};
 static command_info output_all_off = {OUTPUT_ALL_OFF,&turn_off_output,0,0,{0}};
 static command_info output_onoff_imu_rd = {OUTPUT_IMU_RD,&output_imu_rd,5,2,{4,1}};
-static command_info processing_function_onoff = {RUN_PROC,&processing_onoff,2,2,{1,1}};
+static command_info processing_function_onoff = {RUN_PROC,&set_proc,2,2,{1,1}};
 static command_info run_mult_proc_cmd = {RUN_MULT_PROC,&set_mult_proc,8,8,{1,1,1,1,1,1,1,1}};
 static command_info reset_system_cmd = {RESET_ZUPT_AIDED_INS,&reset_zupt_aided_ins,0,0,{0}};
 static command_info stepwise_dead_reckoning_cmd = {STEPWISE_DEAD_RECKONING,&stepwise_dead_reckoning,0,0,{0}};
@@ -227,13 +226,12 @@ void output_imu_rd(uint8_t** cmd_arg){
 	set_state_output(IMU_TS_SID,mode_select & OUTPUT_DIVIDER_MASK,from);
 }
 
-void processing_onoff(uint8_t** cmd_arg){
+void set_proc(uint8_t** cmd_arg){
 	uint8_t function_id = cmd_arg[1][0];
 	uint8_t array_location = cmd_arg[2][0];
 	set_elem_in_process_sequence_by_id(function_id,array_location);
 }
-void set_mult_proc(uint8_t**){
-	uint8_t function_id = cmd_arg[1][0];
+void set_mult_proc(uint8_t** cmd_arg){
 	for(int i=1;i<=8;i++)
 		set_elem_in_process_sequence_by_id(cmd_arg[i][0],i-1);
 }

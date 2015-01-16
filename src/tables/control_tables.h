@@ -77,36 +77,31 @@ typedef const struct {
 // Maximum value of state ID (255)
 #define SID_LIMIT 0xFF
 // State IDs
-// IMU measurements
-#define SPECIFIC_FORCE_SID 0x01
-#define ANGULAR_RATE_SID 0x02
-#define IMU_TEMPERATURS_SID 0x03
-#define IMU_SUPPLY_VOLTAGE_SID 0x04
-#define U_NEW_SID 0x05
-#define U_INT_K_SID 0x06
-#define U_K_SID 0x07
-// Filtering states
-#define POSITION_SID 0x11
-#define VELOCITY_SID 0x12
-#define QUATERNION_SID 0x13
-#define ZUPT_SID 0x14
-#define DT_SID 0x15
-#define ZARU_SID 0x1c
-#define T1S2F 0x1d
-#define T2S2F 0x1e
-#define P_SID 0x19
-// Step-wise dead reckoning data exchange states
-#define DX_SID 0x16
-#define DP_SID 0x17
-#define STEP_COUNTER_SID 0x18
 // System states
-#define IMU_TS_SID 0x20
-#define INTERRUPT_COUNTER_SID 0x21
-#define GP_DT_SID 0x23
-// "Other" states
-#define ACCELEROMETER_BIASES_SID 0x35
-#define SAMSUNG_ID_SID 0x36
-#define MCU_ID_SID 0x37
+#define IMU_TS_SID 0x01
+#define INTERRUPT_COUNTER_SID 0x02
+#define GP_DT_SID 0x03
+#define MCU_ID_SID 0x04
+#define SAMSUNG_ID_SID 0x05
+// Inertial frontend states
+#define U_NEW_SID 0x10
+#define U_INT_K_SID 0x11
+#define T_INT_K_SID 0x12
+#define U_K_SID 0x13
+#define DT_SID 0x14
+#define T1S2F 0x15
+#define T2S2F 0x16
+#define ZUPT_SID 0x17
+#define ZARU_SID 0x18
+// Filtering states
+#define POSITION_SID 0x20
+#define VELOCITY_SID 0x21
+#define QUATERNION_SID 0x22
+#define P_SID 0x23
+// Step-wise dead reckoning data exchange states
+#define DX_SID 0x30
+#define DP_SID 0x31
+#define STEP_COUNTER_SID 0x32
 // MIMU raw register states
 #define IMU0_RD_SID 0x40
 #define IMU1_RD_SID (IMU0_RD_SID+1)
@@ -178,7 +173,6 @@ typedef const struct {
 ///  Macros for command IDs
 //@{
 #define ACK_ID 0x01
-#define NACK_ID 0x02
 #define PING_ID 0x03
 #define MCU_ID 0x04
 #define SETUP_DEBUG_PROC 0x10

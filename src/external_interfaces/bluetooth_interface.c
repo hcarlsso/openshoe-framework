@@ -88,7 +88,7 @@ static inline void send_ak(struct rxtx_buffer* buffer){
 	bt_send_buf(ack,4);
 }
 
-
+// TODO: Remove these. Both USB and BT uses the same now.
 #define BT_FIRST_PAYLOAD_BYTE (state_output_header_p+4)
 #define BT_PAYLOAD_SIZE_BYTE (state_output_header_p+3)
 

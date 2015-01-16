@@ -7,9 +7,12 @@
 #ifndef TIMING_CONTROL_H_
 #define TIMING_CONTROL_H_
 
+#include <stdint.h>
+
+extern uint32_t interrupt_counter;
+extern uint32_t gp_dt;
 
 void wait_for_interrupt(void);
-
 void within_time_limit(void);
 
 

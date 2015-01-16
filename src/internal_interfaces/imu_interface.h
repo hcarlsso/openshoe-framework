@@ -7,6 +7,11 @@
 #ifndef IMU_INTERFACE_H_
 #define IMU_INTERFACE_H_
 
+#include <stdint.h>
+
+extern int16_t mimu_data[32][7];
+extern uint32_t ts_u;
+
 void imu_interface_init(void);
 void imu_read(void);
 

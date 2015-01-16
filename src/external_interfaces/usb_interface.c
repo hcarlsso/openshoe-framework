@@ -99,6 +99,8 @@ static inline void send_nak(void){
 	@param[in]  state_output_rate_counter	Array for keeping track of when to output data next
 */
 static inline void assemble_output_data(struct rxtx_buffer* buffer){
+	static uint16_t package_number = 0;
+	
 	// Clear buffer
 	reset_buffer(buffer);
 	
@@ -113,6 +115,9 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	uint8_t* state_output_header_p = buffer->write_position;
 	// Add header for state data output
 	*buffer->write_position = STATE_OUTPUT_HEADER;
+	increment_counter(buffer->write_position);
+	// Leave two blank buffer slot for package number (see below)
+	increment_counter(buffer->write_position);
 	increment_counter(buffer->write_position);
 	// Leave one blank buffer slot for payload size (see below)
 	increment_counter(buffer->write_position);
@@ -136,6 +141,9 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	}
 	// If any data was added, add payload size and calculate and add checksum
 	if(FIRST_PAYLOAD_BYTE!=buffer->write_position){
+		package_number++;
+		*(state_output_header_p+1) = (package_number & 0xFF00) >> 8;
+		*(state_output_header_p+2) =  package_number & 0xFF;
 		*PAYLOAD_SIZE_BYTE=buffer->write_position-FIRST_PAYLOAD_BYTE;
 		uint16_t checksum = calc_checksum(state_output_header_p,buffer->write_position-1);
 		*buffer->write_position = MSB(checksum);
