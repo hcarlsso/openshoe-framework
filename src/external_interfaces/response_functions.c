@@ -40,6 +40,16 @@ void setup_debug_processing(uint8_t** cmd_arg){
 	set_elem_in_process_sequence_by_id(STORE_AND_EMPTY_PROC_SEQU,NR_DEBUG_PROC+1);
 	store_and_empty_process_sequence();
 }
+static void check_size_and_set_state(uint8_t size,uint8_t** cmd_arg){
+	if(get_state_size(cmd_arg[1][0])<=size)
+	set_state(cmd_arg[1][0],cmd_arg[2]);
+}
+void set_state_max_1byte(uint8_t** cmd_arg){ check_size_and_set_state(1,cmd_arg); }
+void set_state_max_4bytes(uint8_t** cmd_arg){ check_size_and_set_state(4,cmd_arg); }
+void set_state_max_12bytes(uint8_t** cmd_arg){ check_size_and_set_state(12,cmd_arg); }
+void set_state_max_24bytes(uint8_t** cmd_arg){ check_size_and_set_state(24,cmd_arg); }
+void set_state_max_48bytes(uint8_t** cmd_arg){ check_size_and_set_state(48,cmd_arg); }
+void set_state_max_254bytes(uint8_t** cmd_arg){ check_size_and_set_state(254,cmd_arg); }
 
 #define OUTPUT_LOSSY_MASK   0x10
 void output_state(uint8_t** cmd_arg){
@@ -63,6 +73,12 @@ void all_output_off(uint8_t** cmd_arg){
 	set_state_output(i,0,from);}
 	if (from & COMMAND_FROM_BT)
 		empty_package_queue();
+}
+void state_if_setup_resp(uint8_t** cmd_arg){
+	state_output_if_setup(cmd_arg[1][0],(uint8_t)cmd_arg[0],cmd_arg[2][0],cmd_arg[3]);
+}
+void state_if_add_state(uint8_t** cmd_arg){
+	state_output_if_state_add(cmd_arg[1][0],cmd_arg[2][0]);
 }
 
 #define OUTPUT_INERTIAL_MASK 0x40
@@ -97,6 +113,9 @@ void set_mult_proc(uint8_t** cmd_arg){
 }
 void all_proc_off(uint8_t** no_arg){
 	empty_process_sequence();
+}
+void restore_proc_if_setup(uint8_t** cmd_arg){
+	restor_proc_sequ_if_setup(cmd_arg[1][0]);
 }
 
 void zupt_aided_ins(uint8_t** no_arg){

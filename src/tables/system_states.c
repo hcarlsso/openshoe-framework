@@ -275,5 +275,11 @@ void* get_state_p(uint8_t state_id){
 	return NULL;
 }
 
+uint8_t get_state_size(uint8_t state_id){
+	if(state_info_access_by_id[state_id])
+		return state_info_access_by_id[state_id]->state_size;
+	return 0;
+}
+
 
 //@}

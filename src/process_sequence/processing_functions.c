@@ -40,6 +40,7 @@ static proc_func_info restore_proc_sequ_info = {RESTORE_PROC_SEQU,&restore_proce
 static proc_func_info state_output_if_info = {STATE_OUTPUT_IF,&state_output_if,0};
 static proc_func_info restore_proc_sequ_if_info = {RESTORE_PROC_SEQU_IF,&restor_proc_sequ_if,0};
 static proc_func_info state_output_once_if_info = {STATE_OUTPUT_ONCE_IF,&state_output_once_if,0};
+static proc_func_info empty_process_sequence_info = {EMPTY_PROCESS_SEQUENCE,&empty_process_sequence,0};
 static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
 static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
 static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
@@ -55,6 +56,7 @@ static const proc_func_info* processing_functions[] = {&store_and_empty_proc_seq
 													   &state_output_if_info,
 													   &restore_proc_sequ_if_info,
 													   &state_output_once_if_info,
+													   &empty_process_sequence_info,
 													   &strapdown_mechanisation_equations_info,
 													   &time_up_data_info,
 													   &zupt_update_info,

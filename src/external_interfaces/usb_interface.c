@@ -31,7 +31,7 @@
 #define RX_BUFFER_SIZE 512
 #define TX_BUFFER_SIZE 512
 #define SINGLE_TX_BUFFER_SIZE 10
-#define MAX_RX_NRB 10
+#define MAX_RX_NRB 50
 //@}
 
 ///\name State output divider limits

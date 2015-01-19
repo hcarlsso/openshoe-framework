@@ -63,6 +63,8 @@ typedef const struct {
 #define STATE_OUTPUT_IF 0x03
 #define RESTORE_PROC_SEQU_IF 0x04
 #define STATE_OUTPUT_ONCE_IF 0x05
+#define EMPTY_PROCESS_SEQUENCE 0x30
+
 #define MECHANIZATION 0x06
 #define TIME_UPDATE 0x07
 #define ZUPT_UPDATE 0x09
@@ -185,13 +187,22 @@ typedef const struct {
 #define MCU_ID 0x04
 #define SETUP_DEBUG_PROC 0x10
 #define INPUT_IMU_RD 0x11
+#define SET_STATE_1 0x12
+#define SET_STATE_4 0x13
+#define SET_STATE_12 0x14
+#define SET_STATE_24 0x15
+#define SET_STATE_48 0x16
+#define SET_STATE_254 0x18
 #define OUTPUT_STATE 0x20
 #define OUTPUT_MULTIPLE_STATES 0x21
 #define OUTPUT_ALL_OFF 0x22
+#define STATE_IF_SETUP 0x23
+#define STATE_IF_ADD 0x24
 #define OUTPUT_IMU_RD 0x28
 #define RUN_PROC 0x30
 #define RUN_MULT_PROC 0x31
 #define ALL_PROC_OFF 0x32
+#define RESET_PROC_SETUP 0x36
 #define RESET_ZUPT_AIDED_INS 0x33
 #define STEPWISE_DEAD_RECKONING 0x34
 #define MIMU_FRONTEND 0x35
@@ -222,6 +233,7 @@ extern state_t_info* state_info_access_by_id[SID_LIMIT];
 void system_states_init(void);
 void set_state(uint8_t state_id,void* value);
 void* get_state_p(uint8_t state_id);
+uint8_t get_state_size(uint8_t state_id);
 
 #endif /* CONTROL_TABLES_H_ */
 
