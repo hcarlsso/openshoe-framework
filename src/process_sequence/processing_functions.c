@@ -28,11 +28,18 @@
 #include "control_tables.h"
 #include "inertial_frontend.h"
 #include "nav_eq.h"
+#include "process_sequence.h"
+#include "response_util.h"
 
 
 ///  \name Processing functions information
 ///  Structs containing information and pointers to functions intended for the process sequence
 //@{
+static proc_func_info store_and_empty_proc_sequ_info = {STORE_AND_EMPTY_PROC_SEQU,&store_and_empty_process_sequence,0};
+static proc_func_info restore_proc_sequ_info = {RESTORE_PROC_SEQU,&restore_process_sequence,0};
+static proc_func_info state_output_if_info = {STATE_OUTPUT_IF,&state_output_if,0};
+static proc_func_info restore_proc_sequ_if_info = {RESTORE_PROC_SEQU_IF,&restor_proc_sequ_if,0};
+static proc_func_info state_output_once_if_info = {STATE_OUTPUT_ONCE_IF,&state_output_once_if,0};
 static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
 static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
 static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
@@ -43,7 +50,12 @@ static proc_func_info zupt_update_info = {ZUPT_UPDATE,&zupt_update,0};
 static proc_func_info stepwise_system_reset_info = {STEPWISE_SYSTEM_RESET,&stepwise_system_reset,0};
 //@}
 
-static const proc_func_info* processing_functions[] = {&strapdown_mechanisation_equations_info,
+static const proc_func_info* processing_functions[] = {&store_and_empty_proc_sequ_info,
+													   &restore_proc_sequ_info,
+													   &state_output_if_info,
+													   &restore_proc_sequ_if_info,
+													   &state_output_once_if_info,
+													   &strapdown_mechanisation_equations_info,
 													   &time_up_data_info,
 													   &zupt_update_info,
 													   &stepwise_system_reset_info,

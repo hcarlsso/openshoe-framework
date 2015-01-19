@@ -631,6 +631,12 @@
     <Compile Include="src\external_interfaces\bluetooth_interface.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\external_interfaces\response_util.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\external_interfaces\response_util.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\external_interfaces\external_interface.c">
       <SubType>compile</SubType>
     </Compile>
@@ -644,6 +650,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\external_interfaces\parsing_util.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\external_interfaces\response_functions.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\external_interfaces\response_functions.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\external_interfaces\usb_interface.c">

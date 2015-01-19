@@ -21,6 +21,9 @@
 	@{
 */
 
+#include <stdint.h>
+#include <string.h>
+
 #include "control_tables.h"
 
 ///\cond
@@ -92,6 +95,8 @@ static state_t_info pos_sti = {POSITION_SID, (void*) pos, sizeof(pos)};
 static state_t_info vel_sti = {VELOCITY_SID, (void*) vel, sizeof(vel)};
 static state_t_info quat_sti = {QUATERNION_SID, (void*) quat, sizeof(quat)};
 static state_t_info P_sti = {P_SID, (void*) P, sizeof(P)};
+static state_t_info init_done_sti = {INIT_DONE_SID, (void*) &init_done, sizeof(init_done)};
+static state_t_info filter_reset_flag_sti = {FILTER_RESET_FLAG_SID, (void*) &filter_reset_flag, sizeof(filter_reset_flag)};
 static state_t_info dx_sti = {DX_SID, (void*) dx, sizeof(dx)};
 static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(dP)};
 static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter, sizeof(step_counter)};
@@ -178,6 +183,8 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 								 	               &vel_sti,
 												   &quat_sti,
 												   &P_sti,
+												   &init_done_sti,
+												   &filter_reset_flag_sti,
 												   &zupt_sti,
 												   &zaru_sti,
 												   &dt_sti,
@@ -255,7 +262,18 @@ state_t_info* state_info_access_by_id[SID_LIMIT];
 void system_states_init(void){
 	for(int i = 0;i<(sizeof(state_struct_array)/sizeof(state_struct_array[0])); i++){
 		state_info_access_by_id[state_struct_array[i]->id] = state_struct_array[i];}
-}	
+}
+
+void set_state(uint8_t state_id,void* value){
+	if(state_info_access_by_id[state_id])
+		memcpy(state_info_access_by_id[state_id]->state_p,value,state_info_access_by_id[state_id]->state_size);
+}
+
+void* get_state_p(uint8_t state_id){
+	if(state_info_access_by_id[state_id])
+		return state_info_access_by_id[state_id]->state_p;
+	return NULL;
+}
 
 
 //@}

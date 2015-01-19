@@ -58,6 +58,11 @@ typedef const struct {
 ///  \name Processing functions IDs
 ///  Macros for processing functions IDs
 //@{
+#define STORE_AND_EMPTY_PROC_SEQU 0x01
+#define RESTORE_PROC_SEQU 0x02
+#define STATE_OUTPUT_IF 0x03
+#define RESTORE_PROC_SEQU_IF 0x04
+#define STATE_OUTPUT_ONCE_IF 0x05
 #define MECHANIZATION 0x06
 #define TIME_UPDATE 0x07
 #define ZUPT_UPDATE 0x09
@@ -76,6 +81,7 @@ typedef const struct {
 //@{
 // Maximum value of state ID (255)
 #define SID_LIMIT 0xFF
+#define NOSTATE_SID 0x00
 // State IDs
 // System states
 #define IMU_TS_SID 0x01
@@ -98,6 +104,8 @@ typedef const struct {
 #define VELOCITY_SID 0x21
 #define QUATERNION_SID 0x22
 #define P_SID 0x23
+#define INIT_DONE_SID 0x24
+#define	FILTER_RESET_FLAG_SID 0x25
 // Step-wise dead reckoning data exchange states
 #define DX_SID 0x30
 #define DP_SID 0x31
@@ -183,7 +191,7 @@ typedef const struct {
 #define OUTPUT_IMU_RD 0x28
 #define RUN_PROC 0x30
 #define RUN_MULT_PROC 0x31
-#define PROCESSING_OFF 0x32
+#define ALL_PROC_OFF 0x32
 #define RESET_ZUPT_AIDED_INS 0x33
 #define STEPWISE_DEAD_RECKONING 0x34
 #define MIMU_FRONTEND 0x35
@@ -212,7 +220,8 @@ void processing_functions_init(void);
 // Global variables used to access information about states
 extern state_t_info* state_info_access_by_id[SID_LIMIT];
 void system_states_init(void);
-
+void set_state(uint8_t state_id,void* value);
+void* get_state_p(uint8_t state_id);
 
 #endif /* CONTROL_TABLES_H_ */
 
