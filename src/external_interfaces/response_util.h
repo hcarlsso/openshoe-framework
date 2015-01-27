@@ -17,11 +17,12 @@
 
 void state_output(uint8_t from,uint8_t mode,uint8_t state_id);
 
-void state_output_if_setup(uint8_t flag_state_id,uint8_t from,uint8_t mode,uint8_t state_ids[8]);
+void state_output_if_setup(uint8_t flag_state_id,uint8_t from,uint8_t mode,uint8_t* state_ids,uint32_t wait_cycles);
 void state_output_if_state_add(uint8_t state_id,uint8_t place);
 void state_output_if(void);
 void state_output_once_if(void);
 void state_output_once_force(void);
+void state_output_if_counter(void);
 
 void restor_proc_sequ_if_setup(uint8_t flag_state_id);
 void restor_proc_sequ_if(void);

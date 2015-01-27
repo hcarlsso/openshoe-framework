@@ -10,7 +10,7 @@
 
 #if defined(OPENSHOE_CLASSIC)
 #include "toggle_interrupt.h"
-#elif defined(MIMU3333) || defined(MIMU22BT) || defined(MIMU4444)
+#elif defined(MIMU3333) || defined(MIMU22BT) || defined(MIMU4444) || defined(MIMU4444BT)
 #include "timer_interrupt.h"
 #endif
 
@@ -24,7 +24,7 @@ void interrupt_init(void){
 	
 	#if defined(OPENSHOE_CLASSIC)
 	toggle_interrupt_init();
-	#elif defined(MIMU3333) || defined(MIMU22BT) || defined(MIMU4444)
+	#elif defined(MIMU3333) || defined(MIMU22BT) || defined(MIMU4444) || defined(MIMU4444BT)
 	timer_interrput_init();
 	#endif
 }

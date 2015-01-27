@@ -5,6 +5,7 @@
 */
 
 #include "timer_interrupt.h"
+#include "timing_control.h"
 #include <asf.h>
 
 
@@ -24,10 +25,6 @@
 //********************************************************//
 
 
-// Interrupt counter (essentially a time stamp)
-extern uint32_t interrupt_counter;
-// Global IMU interrupt (data) time-stamp
-extern uint32_t interrupt_ts;
 // Variable that used to signal if an external interrupt occurs.
 extern volatile bool imu_interrupt_flag;
 

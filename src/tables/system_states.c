@@ -29,49 +29,13 @@
 ///\cond
 // Front-end variables
 #include "inertial_frontend.h"
-// gives
-/*
-extern inert_int32 u_new;
-extern inert_int32 u_int_k;
-extern uint32_t t_int_k;
-extern inert_float u_k;
-extern precision dt_k;
-extern uint32_t T1s2f;
-extern uint32_t T2s2f;
-extern bool zupt;
-extern bool zaru;
-*/
-
 #include "nav_eq.h"
-// gives
-/*
-extern vec3 pos;
-extern vec3 vel;
-extern quat_vec quat;
-extern mat9sym P;
-extern vec4 dx;
-extern mat4sym dP;
-extern uint16_t step_counter;
-*/
-
 #include "timing_control.h"
-// gives
-/*
-extern uint32_t interrupt_counter;
-extern uint32_t gp_dt;
-*/
+#include "imu_interface.h"
 
 // "Other" states
-extern uint8_t samsung_id;
-// the mcu_id is accessed via an absolute address
+extern uint8_t gp_id;
 
-// IMU register states
-#include "imu_interface.h"
-// gives
-/*
-extern int16_t mimu_data[32][7];
-extern uint32_t ts_u;
-*/
 ///\endcond
 
 ///  \name External state information
@@ -81,7 +45,7 @@ static state_t_info imu_ts_sti = {IMU_TS_SID, (void*) &ts_u, sizeof(ts_u)};
 static state_t_info interrupt_counter_sti = {INTERRUPT_COUNTER_SID, (void*) &interrupt_counter, sizeof(interrupt_counter)};
 static state_t_info gp_dt_sti = {GP_DT_SID, (void*) &gp_dt, sizeof(gp_dt)};
 static state_t_info mcu_id_sti = {MCU_ID_SID, (void*) 0x80800284, 0x80800292-0x80800284+1};
-static state_t_info samsung_id_sti = {SAMSUNG_ID_SID, (void*) &samsung_id, sizeof(samsung_id)};
+static state_t_info gp_id_sti = {GP_ID_SID, (void*) &gp_id, sizeof(gp_id)};
 static state_t_info u_new_sti = {U_NEW_SID, (void*) &u_new, sizeof(u_new)};
 static state_t_info u_int_k_sti = {U_INT_K_SID, (void*) &u_int_k, sizeof(u_int_k)};
 static state_t_info t_int_k_sti = {T_INT_K_SID, (void*) &t_int_k, sizeof(t_int_k)};
@@ -96,10 +60,10 @@ static state_t_info vel_sti = {VELOCITY_SID, (void*) vel, sizeof(vel)};
 static state_t_info quat_sti = {QUATERNION_SID, (void*) quat, sizeof(quat)};
 static state_t_info P_sti = {P_SID, (void*) P, sizeof(P)};
 static state_t_info init_done_sti = {INIT_DONE_SID, (void*) &init_done, sizeof(init_done)};
-static state_t_info filter_reset_flag_sti = {FILTER_RESET_FLAG_SID, (void*) &filter_reset_flag, sizeof(filter_reset_flag)};
 static state_t_info dx_sti = {DX_SID, (void*) dx, sizeof(dx)};
 static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(dP)};
 static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter, sizeof(step_counter)};
+static state_t_info filter_reset_flag_sti = {FILTER_RESET_FLAG_SID, (void*) &filter_reset_flag, sizeof(filter_reset_flag)};
 static state_t_info imu0_rd_sti = {IMU0_RD_SID, (void*) mimu_data[0], 12};
 static state_t_info imu1_rd_sti = {IMU1_RD_SID, (void*) mimu_data[1], 12};
 static state_t_info imu2_rd_sti = {IMU2_RD_SID, (void*) mimu_data[2], 12};
@@ -170,27 +134,27 @@ static state_t_info imu31_temp_sti = {IMU31_TEMP_SID, (void*) &mimu_data[31][6],
 // Array of state data type struct pointers
 const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &interrupt_counter_sti,
+												   &dt_sti,
+												   &gp_dt_sti,
+												   &gp_id_sti,
+												   &mcu_id_sti,
 												   &u_new_sti,
 												   &u_int_k_sti,
 												   &t_int_k_sti,
 												   &u_k_sti,
 												   &T1s2f_sti,
 												   &T2s2f_sti,
+												   &zupt_sti,
+												   &zaru_sti,
 												   &pos_sti,
-												   &dx_sti,
-												   &dP_sti,
-												   &step_counter_sti,
 								 	               &vel_sti,
 												   &quat_sti,
 												   &P_sti,
 												   &init_done_sti,
+												   &dx_sti,
+												   &dP_sti,
+												   &step_counter_sti,
 												   &filter_reset_flag_sti,
-												   &zupt_sti,
-												   &zaru_sti,
-												   &dt_sti,
-												   &gp_dt_sti,
-												   &samsung_id_sti,
-												   &mcu_id_sti,
 												   &imu0_rd_sti,
 												   &imu1_rd_sti,
 												   &imu2_rd_sti,

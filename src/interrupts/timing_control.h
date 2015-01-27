@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 extern uint32_t interrupt_counter;
+extern uint32_t interrupt_ts;
 extern uint32_t gp_dt;
 
 void wait_for_interrupt(void);

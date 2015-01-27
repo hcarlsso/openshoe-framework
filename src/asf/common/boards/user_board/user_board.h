@@ -13,14 +13,14 @@
 #define BOARD_OSC0_STARTUP_US   2000
 #define BOARD_OSC0_IS_XTAL      true
 
-#if   defined(OPENSHOE_CLASSIC)
-#  include "classic.h"
-#elif defined(MIMU3333)
+#if defined(MIMU3333)
 #  include "MIMU3333.h"
 #elif defined(MIMU4444)
 #  include "MIMU4444.h"
 #elif defined(MIMU22BT)
 #  include "MIMU22BT.h"
+#elif defined(MIMU4444BT)
+#  include "MIMU4444BT.h"
 #else
 #  error No known board specified
 #endif

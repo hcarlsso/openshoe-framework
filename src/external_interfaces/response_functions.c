@@ -31,7 +31,7 @@ void input_imu_rd(uint8_t** cmd_arg){
 
 void setup_debug_processing(uint8_t** cmd_arg){
 	empty_process_sequence();
-	state_output_if_setup(NOSTATE_SID,cmd_arg[3][0],OUTPUT_PULL_MASK,NULL);
+	state_output_if_setup(NOSTATE_SID,cmd_arg[3][0],OUTPUT_PULL_MASK,NULL,0);
 	for (int i=0; i<NR_DEBUG_PROC; i++)
 		set_elem_in_process_sequence_by_id(cmd_arg[1][i],i);
 	for (int i=0; i<NR_DEBUG_OUTPUT; i++)
@@ -63,19 +63,21 @@ void output_multiple_states(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t mode_select = cmd_arg[9][0];
 	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
-	for (int i=1;i<=9;i++)
+	for (int i=1;i<=8;i++)
 		state_output(from,mode_select,cmd_arg[i][0]);
 }
 
 void all_output_off(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
-	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++){
-	set_state_output(i,0,from);}
+	for(uint8_t i = 0; i<max(SID_LIMIT,0xFF); i++)
+		set_state_output(i,0,from);
+	uint8_t tmp[8] = {0,0,0,0,0,0,0,0};
+	state_output_if_setup(NOSTATE_SID,0,0,tmp,0);
 	if (from & COMMAND_FROM_BT)
 		empty_package_queue();
 }
 void state_if_setup_resp(uint8_t** cmd_arg){
-	state_output_if_setup(cmd_arg[1][0],(uint8_t)cmd_arg[0],cmd_arg[2][0],cmd_arg[3]);
+	state_output_if_setup(cmd_arg[1][0],(uint8_t)cmd_arg[0],cmd_arg[2][0],cmd_arg[3],0);
 }
 void state_if_add_state(uint8_t** cmd_arg){
 	state_output_if_state_add(cmd_arg[1][0],cmd_arg[2][0]);
@@ -162,7 +164,7 @@ void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	set_elem_in_process_sequence_by_id(TIME_UPDATE,5);
 	set_elem_in_process_sequence_by_id(ZUPT_UPDATE,6);
 	// Setup conditional (reset) output
-	state_output_if_setup(FILTER_RESET_FLAG_SID,from,OUTPUT_PULL_MASK,NULL);
+	state_output_if_setup(FILTER_RESET_FLAG_SID,from,OUTPUT_PULL_MASK,NULL,0);
 	state_output_if_state_add(DX_SID,0);
 	state_output_if_state_add(DP_SID,1);
 	state_output_if_state_add(STEP_COUNTER_SID,2);
@@ -181,11 +183,11 @@ void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	set_elem_in_process_sequence_by_id(RESTORE_PROC_SEQU_IF,4);
 }
 
-uint8_t samsung_id;
+uint8_t gp_id;
 void stepwise_dead_reckoning_TOR(uint8_t** cmd_arg){
-	set_state(SAMSUNG_ID_SID,(void*)cmd_arg[1]);
+	set_state(GP_ID_SID,(void*)cmd_arg[1]);
 	stepwise_dead_reckoning(cmd_arg);
-	state_output_if_state_add(SAMSUNG_ID_SID,3);
+	state_output_if_state_add(GP_ID_SID,3);
 }
 
 void start_inertial_frontend(uint8_t** no_arg){
@@ -199,23 +201,24 @@ void normal_imu(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t mode_select = cmd_arg[1][0];
 	all_output_off(cmd_arg);
+	empty_process_sequence();
 	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
 	state_output(from,mode_select,IMU_TS_SID);
 	state_output(from,mode_select,U_K_SID);
-	empty_process_sequence();
 	set_elem_in_process_sequence_by_id(FRONTEND_PREPROC,0);
 }
 void normal_imu_with_bias_est(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t mode_select = cmd_arg[1][0];
 	all_output_off(cmd_arg);
-	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
-	state_output(from,mode_select,IMU_TS_SID);
-	state_output(from,mode_select,U_K_SID);
 	empty_process_sequence();
+	set_lossy_transmission(!(mode_select & OUTPUT_LOSSY_MASK),from);
+	state_output_if_setup(NOSTATE_SID,from,mode_select,NULL,128); // Wait until buffers have filled up
+	state_output_if_state_add(IMU_TS_SID,0);
+	state_output_if_state_add(U_K_SID,1);
+	set_elem_in_process_sequence_by_id(STATE_OUTPUT_IF_COUNTER,3);
 	set_elem_in_process_sequence_by_id(FRONTEND_PREPROC,0);
 	set_elem_in_process_sequence_by_id(FRONTEND_STATDET,1);
 	set_elem_in_process_sequence_by_id(FRONTEND_POSTPROC,2);
-	// TODO: Wait until buffers are filled up.
 }
 //@}

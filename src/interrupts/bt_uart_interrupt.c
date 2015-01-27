@@ -8,21 +8,25 @@
 
 #include "bt_uart_interrupt.h"
 
-//#if defined(MIMU22BT)
+#if defined(MIMU22BT)
 #  include "MIMU22BT.h"
-//#endif
+#elif defined(MIMU4444BT)
+#  include "MIMU4444BT.h"
+#else
+#  include "MIMU22BT.h"
+#endif
 
 // Most be <=8
-#define LOG2_SIZE_BT_UART_BUF 8
+#define LOG2_SIZE_BT_UART_BUF 9
 #define SIZE_BT_UART_BUF (1<<LOG2_SIZE_BT_UART_BUF)
 
 uint8_t uart_rx_buf[SIZE_BT_UART_BUF];
-volatile uint8_t uart_rx_buf_write=0;
-volatile uint8_t uart_rx_buf_read=0;
+volatile uint32_t uart_rx_buf_write=0;
+volatile uint32_t uart_rx_buf_read=0;
 
 uint8_t uart_tx_buf[SIZE_BT_UART_BUF];
-volatile uint8_t uart_tx_buf_write=0;
-volatile uint8_t uart_tx_buf_read=0;
+volatile uint32_t uart_tx_buf_write=0;
+volatile uint32_t uart_tx_buf_read=0;
 
 bool bt_is_data_available(void) {
 	return uart_rx_buf_write!=uart_rx_buf_read;
@@ -42,9 +46,11 @@ uint8_t space_in_bt_uart_buf(void){
 	return ( (uart_tx_buf_read-uart_tx_buf_write) & (SIZE_BT_UART_BUF-1) ) - 1;
 }
 
-void bt_send_buf(uint8_t* buf,uint8_t nob) {
-	uint8_t i;
-	for (i=0;i<nob;i++)	uart_tx_buf[(uart_tx_buf_write+i) & (SIZE_BT_UART_BUF-1)]=buf[i];
+//TODO: Change to int such that larger buffers can be used
+//TODO: Prevent overwriting and return number of written bytes (zero or all?)
+void bt_send_buf(uint8_t* buf,uint32_t nob) {
+	for (uint32_t i=0;i<nob;i++)
+		uart_tx_buf[(uart_tx_buf_write+i) & (SIZE_BT_UART_BUF-1)]=buf[i];
 	uart_tx_buf_write = (uart_tx_buf_write+nob) & (SIZE_BT_UART_BUF-1);
 	BT_UART.ier = AVR32_USART_IER_TXRDY_MASK;
 }
@@ -63,11 +69,13 @@ static void usart_int_handler(void)
 	if (BT_UART.csr & AVR32_USART_CSR_RXRDY_MASK) { // Something HAS BEEN read
 		uart_rx_buf[uart_rx_buf_write] = (uint8_t) ( (BT_UART.rhr & AVR32_USART_RHR_RXCHR_MASK) >> AVR32_USART_RHR_RXCHR_OFFSET );
 		uart_rx_buf_write++;
+		uart_rx_buf_write &= (SIZE_BT_UART_BUF-1);
 	}
 	if (BT_UART.csr & BT_UART.imr & AVR32_USART_CSR_TXRDY_MASK) { // Something CAN be sent
 		if (uart_tx_buf_read!=uart_tx_buf_write) {  // Something should be sent
 			BT_UART.thr = ( (int) uart_tx_buf[uart_tx_buf_read] << AVR32_USART_THR_TXCHR_OFFSET) & AVR32_USART_THR_TXCHR_MASK;
 			uart_tx_buf_read++;
+			uart_tx_buf_read &= (SIZE_BT_UART_BUF-1);
 		}
 		if (uart_tx_buf_read==uart_tx_buf_write) BT_UART.idr = AVR32_USART_IER_TXRDY_MASK;
 	}

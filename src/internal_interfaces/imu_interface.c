@@ -12,7 +12,7 @@
 #  include "ADIS16367_interface.h"
 #elif defined(MIMU3333)
 #  include "MPU9150_interface_2_ports.h"
-#elif defined(MIMU4444) || defined(MIMU22BT)
+#elif defined(MIMU4444) || defined(MIMU22BT) || defined(MIMU4444BT)
 #  include "MPU9150_interface.h"
 #endif
 
@@ -21,7 +21,7 @@ void imu_interface_init(void){
 	ADIS16367_interface_init();
 	#elif defined(MIMU3333)
 	mpu9150_2_port_interface_init();
-	#elif defined(MIMU4444) || defined(MIMU22BT)
+	#elif defined(MIMU4444) || defined(MIMU22BT) || defined(MIMU4444BT)
 	mpu9150_interface_init();
 	#endif
 }
@@ -36,7 +36,7 @@ void imu_read(void){
 	imu_burst_read();
 	#elif defined(MIMU3333)
 	mpu9150_2_port_read();
-	#elif defined(MIMU4444) || defined(MIMU22BT)
+	#elif defined(MIMU4444) || defined(MIMU22BT) || defined(MIMU4444BT)
 	mpu9150_read();
 	#endif
 }

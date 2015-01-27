@@ -17,6 +17,8 @@
 #  include "MIMU4444.h"
 #elif defined(MIMU22BT)
 #  include "MIMU22BT.h"
+#elif defined(MIMU4444BT)
+#  include "MIMU4444BT.h"
 #endif
 
 #define NR_DEBUG_PROC 8

@@ -14,6 +14,8 @@
 #   include "MIMU22BT.h"
 #elif defined(MIMU4444)
 #	include "MIMU4444.h"
+#elif defined(MIMU4444BT)
+#  include "MIMU4444BT.h"
 #else
 #   include "MIMU22BT.h"
 #endif

@@ -60,22 +60,22 @@ typedef const struct {
 //@{
 #define STORE_AND_EMPTY_PROC_SEQU 0x01
 #define RESTORE_PROC_SEQU 0x02
-#define STATE_OUTPUT_IF 0x03
+#define EMPTY_PROCESS_SEQUENCE 0x03
 #define RESTORE_PROC_SEQU_IF 0x04
-#define STATE_OUTPUT_ONCE_IF 0x05
-#define EMPTY_PROCESS_SEQUENCE 0x30
+#define STATE_OUTPUT_IF 0x05
+#define STATE_OUTPUT_ONCE_IF 0x06
+#define STATE_OUTPUT_IF_COUNTER 0x07
 
-#define MECHANIZATION 0x06
-#define TIME_UPDATE 0x07
-#define ZUPT_UPDATE 0x09
-#define GYRO_CALIBRATION 0x10
-#define ACCELEROMETER_CALIBRATION 0x11
-#define STEPWISE_SYSTEM_RESET 0x13
-// Frontend
-#define FRONTEND_PREPROC 0x20
-#define FRONTEND_STATDET 0x21
-#define FRONTEND_POSTPROC 0x22
+#define FRONTEND_PREPROC 0x10
+#define FRONTEND_STATDET 0x11
+#define FRONTEND_POSTPROC 0x12
+
+#define MECHANIZATION 0x20
+#define TIME_UPDATE 0x21
+#define ZUPT_UPDATE 0x22
 #define FRONTEND_INITIAL_ALIGNMENT 0x23
+#define STEPWISE_SYSTEM_RESET 0x24
+
 //@}
 
 ///  \name External state IDs
@@ -90,7 +90,7 @@ typedef const struct {
 #define INTERRUPT_COUNTER_SID 0x02
 #define GP_DT_SID 0x03
 #define MCU_ID_SID 0x04
-#define SAMSUNG_ID_SID 0x05
+#define GP_ID_SID 0x05
 // Inertial frontend states
 #define U_NEW_SID 0x10
 #define U_INT_K_SID 0x11
@@ -107,11 +107,11 @@ typedef const struct {
 #define QUATERNION_SID 0x22
 #define P_SID 0x23
 #define INIT_DONE_SID 0x24
-#define	FILTER_RESET_FLAG_SID 0x25
 // Step-wise dead reckoning data exchange states
 #define DX_SID 0x30
 #define DP_SID 0x31
 #define STEP_COUNTER_SID 0x32
+#define	FILTER_RESET_FLAG_SID 0x33
 // MIMU raw register states
 #define IMU0_RD_SID 0x40
 #define IMU1_RD_SID (IMU0_RD_SID+1)
@@ -197,12 +197,13 @@ typedef const struct {
 #define OUTPUT_MULTIPLE_STATES 0x21
 #define OUTPUT_ALL_OFF 0x22
 #define STATE_IF_SETUP 0x23
-#define STATE_IF_ADD 0x24
 #define OUTPUT_IMU_RD 0x28
 #define RUN_PROC 0x30
 #define RUN_MULT_PROC 0x31
 #define ALL_PROC_OFF 0x32
 #define RESET_PROC_SETUP 0x36
+#define STORE_AND_EMPTY_CMD_ID 0x37
+#define RESTORE_PROC_SEQU_CMD_ID 0x38
 #define RESET_ZUPT_AIDED_INS 0x33
 #define STEPWISE_DEAD_RECKONING 0x34
 #define MIMU_FRONTEND 0x35

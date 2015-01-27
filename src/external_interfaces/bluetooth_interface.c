@@ -14,16 +14,20 @@
 #include <usart.h>
 #include "conf_clock.h"
 
-//#if defined(MIMU22BT)
+#if defined(MIMU22BT)
 #  include "MIMU22BT.h"
-//#endif
+#elif defined(MIMU4444BT)
+#  include "MIMU4444BT.h"
+#else
+#  include "MIMU22BT.h"
+#endif
 
 ///\name Buffer settings
 //@{
-#define RX_BUFFER_SIZE 256
-#define TX_BUFFER_SIZE 255
+#define RX_BUFFER_SIZE 512
+#define TX_BUFFER_SIZE 512
 #define SINGLE_TX_BUFFER_SIZE 10
-#define MAX_RX_NRB 10
+#define MAX_RX_NRB 50
 //@}
 
 ///\name State output divider limits
