@@ -65,7 +65,6 @@ static command_info store_and_empty_cmd = {STORE_AND_EMPTY_CMD_ID,(void (*)(uint
 static command_info restore_proc_sequ_cmd = {RESTORE_PROC_SEQU_CMD_ID,(void (*)(uint8_t**)) &restore_process_sequence,0,0,{0}};
 static command_info reset_system_cmd = {RESET_ZUPT_AIDED_INS,&zupt_aided_ins,0,0,{0}};
 static command_info stepwise_dead_reckoning_cmd = {STEPWISE_DEAD_RECKONING,&stepwise_dead_reckoning,0,0,{0}};
-static command_info stepwise_dead_reckoning_TOR_cmd = {STEPWISE_DEAD_RECKONING_TOR,&stepwise_dead_reckoning_TOR,1,1,{1}};
 static command_info mimu_frontend_cmd = {MIMU_FRONTEND,&start_inertial_frontend,0,0,{0}};
 static command_info normal_imu_cmd = {NORMAL_IMU,&normal_imu,1,1,{1}};
 static command_info normal_imu_with_bias_est_cmd = {NORMAL_IMU_WITH_BIAS_EST,&normal_imu_with_bias_est,1,1,{1}};
@@ -96,7 +95,6 @@ static const command_info* commands[] = {&ack,
 										 &restore_proc_sequ_cmd,
 										 &reset_system_cmd,
 										 &stepwise_dead_reckoning_cmd,
-										 &stepwise_dead_reckoning_TOR_cmd,
 										 &mimu_frontend_cmd,
 										 &normal_imu_cmd,
 										 &normal_imu_with_bias_est_cmd};

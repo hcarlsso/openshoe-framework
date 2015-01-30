@@ -51,7 +51,6 @@ void restore_proc_if_setup(uint8_t** cmd_arg);
 void zupt_aided_ins(uint8_t**);
 void reset_zupt_aided_ins2(uint8_t**);
 void stepwise_dead_reckoning(uint8_t**);
-void stepwise_dead_reckoning_TOR(uint8_t**);
 void start_inertial_frontend(uint8_t**);
 void normal_imu(uint8_t**);
 void normal_imu_with_bias_est(uint8_t**);

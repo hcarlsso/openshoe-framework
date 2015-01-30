@@ -33,8 +33,8 @@
 #include "timing_control.h"
 #include "imu_interface.h"
 
-// "Other" states
-extern uint8_t gp_id;
+// General purpose ID
+uint8_t gp_id;
 
 ///\endcond
 

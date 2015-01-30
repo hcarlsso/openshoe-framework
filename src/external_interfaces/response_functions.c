@@ -183,13 +183,6 @@ void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	set_elem_in_process_sequence_by_id(RESTORE_PROC_SEQU_IF,4);
 }
 
-uint8_t gp_id;
-void stepwise_dead_reckoning_TOR(uint8_t** cmd_arg){
-	set_state(GP_ID_SID,(void*)cmd_arg[1]);
-	stepwise_dead_reckoning(cmd_arg);
-	state_output_if_state_add(GP_ID_SID,3);
-}
-
 void start_inertial_frontend(uint8_t** no_arg){
 	empty_process_sequence();
 	set_elem_in_process_sequence(processing_functions_by_id[FRONTEND_PREPROC]->func_p,0);

@@ -192,7 +192,7 @@ typedef const struct {
 #define SET_STATE_12 0x14
 #define SET_STATE_24 0x15
 #define SET_STATE_48 0x16
-#define SET_STATE_254 0x18
+#define SET_STATE_254 0x17
 #define OUTPUT_STATE 0x20
 #define OUTPUT_MULTIPLE_STATES 0x21
 #define OUTPUT_ALL_OFF 0x22
@@ -209,7 +209,6 @@ typedef const struct {
 #define MIMU_FRONTEND 0x35
 #define NORMAL_IMU 0x40
 #define NORMAL_IMU_WITH_BIAS_EST 0x41
-#define STEPWISE_DEAD_RECKONING_TOR 0x17
 //@}
 
 // Global variables used to access command information

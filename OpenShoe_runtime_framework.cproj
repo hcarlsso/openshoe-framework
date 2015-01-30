@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>6.1</ProjectVersion>
     <ProjectGuid>{3d344bc8-ff75-4a36-8463-9b0ffae2451c}</ProjectGuid>
-    <avrdevice>AT32UC3C0512C</avrdevice>
+    <avrdevice>AT32UC3C2512C</avrdevice>
     <avrdeviceseries>uc3c</avrdeviceseries>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
     <AvrGccProjectExtensions />
@@ -15,7 +15,8 @@
     <Language>C</Language>
     <ToolchainName>com.Atmel.AVRGCC32.C</ToolchainName>
     <ToolchainFlavour>Native</ToolchainFlavour>
-    <avrtool>com.atmel.avrdbg.tool.avrdragon</avrtool>
+    <avrtool>
+    </avrtool>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
