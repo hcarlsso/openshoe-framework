@@ -28,7 +28,7 @@ void receive_command(void);
 
 void set_state_output(uint8_t state_id, uint8_t divider,uint8_t from);
 void set_conditional_output(uint8_t state_id,uint8_t from);
-void set_lossy_transmission(bool onoff,uint8_t from);
+void set_lossless_transmission(bool onoff,uint8_t from);
 
 #endif /* EXTERNAL_INTERFACE_H_ */
 

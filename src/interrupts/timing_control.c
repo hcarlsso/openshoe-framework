@@ -32,7 +32,7 @@ void wait_for_interrupt(void){
 }
 
 /// Checks that the main loop has finished before next interrupt
-void within_time_limit(void){
+void end_of_main_loop(void){
 	gp_dt = Get_system_register(AVR32_COUNT) - gp_t;
 	if (imu_interrupt_flag!=false){
 		// Todo: Set some error state

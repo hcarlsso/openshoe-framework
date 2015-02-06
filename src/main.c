@@ -50,9 +50,6 @@ int main (void) {
 		// Check if interrupt has occurred
 		wait_for_interrupt();
 		
-		// Read data from IMU
-		imu_read();
-		
 		// Check if any command has been sent and respond accordingly
 		receive_command();
 
@@ -62,8 +59,8 @@ int main (void) {
 		// Transmit requested data to user
 		transmit_data();
 		
-		// Ensure the loop was finished within time limit
-		within_time_limit();
+		// Whatever need to be done at the end of the loop
+		end_of_main_loop();
 	}
 	
 }
@@ -79,6 +76,7 @@ void system_init(void){
 	
 	imu_interface_init();
 	external_interface_init();
+	process_sequence_init();
 	
 	interrupt_init();
 }

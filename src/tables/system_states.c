@@ -224,23 +224,24 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 state_t_info* state_info_access_by_id[SID_LIMIT];
 
 void system_states_init(void){
-	for(int i = 0;i<(sizeof(state_struct_array)/sizeof(state_struct_array[0])); i++){
-		state_info_access_by_id[state_struct_array[i]->id] = state_struct_array[i];}
+	for(int i = 0;i<(sizeof(state_struct_array)/sizeof(state_struct_array[0])); i++)
+		if(state_struct_array[i]->id<SID_LIMIT)
+			state_info_access_by_id[state_struct_array[i]->id] = state_struct_array[i];
 }
 
 void set_state(uint8_t state_id,void* value){
-	if(state_info_access_by_id[state_id])
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		memcpy(state_info_access_by_id[state_id]->state_p,value,state_info_access_by_id[state_id]->state_size);
 }
 
 void* get_state_p(uint8_t state_id){
-	if(state_info_access_by_id[state_id])
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		return state_info_access_by_id[state_id]->state_p;
 	return NULL;
 }
 
 uint8_t get_state_size(uint8_t state_id){
-	if(state_info_access_by_id[state_id])
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		return state_info_access_by_id[state_id]->state_size;
 	return 0;
 }

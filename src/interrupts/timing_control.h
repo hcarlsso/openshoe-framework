@@ -14,7 +14,7 @@ extern uint32_t interrupt_ts;
 extern uint32_t gp_dt;
 
 void wait_for_interrupt(void);
-void within_time_limit(void);
+void end_of_main_loop(void);
 
 
 #endif /* TIMING_CONTROL_H_ */

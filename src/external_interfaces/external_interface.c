@@ -59,12 +59,12 @@ void set_conditional_output(uint8_t state_id,uint8_t from){
 	if (from & COMMAND_FROM_BT) bt_set_conditional_output(state_id);
 	#endif
 }
-void set_lossy_transmission(bool onoff,uint8_t from){
+void set_lossless_transmission(bool onoff,uint8_t from){
 	if (from & COMMAND_FROM_USB) {
 		// NOT IMPLEMENTED FOR USB
 	}
 	
 	#ifdef BT_MODULE
-	if (from & COMMAND_FROM_BT) bt_set_lossy_transmission(onoff);
+	if (from & COMMAND_FROM_BT) bt_set_lossless_transmission(onoff);
 	#endif
 }

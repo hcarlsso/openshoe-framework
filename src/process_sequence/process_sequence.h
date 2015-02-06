@@ -19,12 +19,15 @@
 #ifndef PROCESS_SEQUENCE_H_
 #define PROCESS_SEQUENCE_H_
 
-#include "compiler.h"
+#include <stdint.h>
 
 /// Size of process sequence
 #define PROCESS_SEQUENCE_SIZE 10
+#define PROCESS_SEQUENCE_SIZE_M1 9
 /// Typedefinition for functions in the process sequence
 typedef void (*processing_function_p)(void);
+
+void process_sequence_init(void);
 
 void run_process_sequence(void);
 
@@ -36,8 +39,7 @@ void restore_process_sequence(void);
 
 void set_last_process_sequence_element(processing_function_p element_value);
 
-void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem_nr);
-void set_elem_in_process_sequence_by_id(uint8_t proc_func_id, uint8_t elem_nr);
+void set_elem_in_process_sequence(uint8_t proc_func_id, uint8_t elem_nr);
 
 #endif /* PROCESS_SEQUENCE_H_ */
 

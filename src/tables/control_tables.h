@@ -58,6 +58,8 @@ typedef const struct {
 ///  \name Processing functions IDs
 ///  Macros for processing functions IDs
 //@{
+#define PID_LIMIT 0x30
+
 #define STORE_AND_EMPTY_PROC_SEQU 0x01
 #define RESTORE_PROC_SEQU 0x02
 #define EMPTY_PROCESS_SEQUENCE 0x03
@@ -69,6 +71,7 @@ typedef const struct {
 #define FRONTEND_PREPROC 0x10
 #define FRONTEND_STATDET 0x11
 #define FRONTEND_POSTPROC 0x12
+#define READ_INERTIAL 0x13
 
 #define MECHANIZATION 0x20
 #define TIME_UPDATE 0x21
@@ -82,7 +85,7 @@ typedef const struct {
 ///  Macros for external state IDs
 //@{
 // Maximum value of state ID (255)
-#define SID_LIMIT 0xFF
+#define SID_LIMIT 0x80
 #define NOSTATE_SID 0x00
 // State IDs
 // System states
@@ -182,6 +185,8 @@ typedef const struct {
 ///  \name Command IDs
 ///  Macros for command IDs
 //@{
+#define CID_LIMIT 0x50
+
 #define ACK_ID 0x01
 #define PING_ID 0x03
 #define MCU_ID 0x04
@@ -212,19 +217,22 @@ typedef const struct {
 //@}
 
 // Global variables used to access command information
-extern uint8_t command_header_table[32];
-extern command_info* command_info_array[256];
+extern command_info* command_info_array[CID_LIMIT];
 void commands_init(void);
 
 inline static bool is_valid_header(uint8_t header){
-	return command_header_table[header>>3] & (1<<(header & 7));}
+	return header<CID_LIMIT && command_info_array[header];
+}
 	
 inline static command_info* get_command_info(uint8_t header){
-	return command_info_array[header];}
+	if(header<CID_LIMIT)
+		return command_info_array[header];
+	return NULL;
+}
 
 
 // Array containing the processing functions to run
-extern proc_func_info* processing_functions_by_id[256];
+extern proc_func_info* processing_functions_by_id[PID_LIMIT];
 void processing_functions_init(void);
 
 

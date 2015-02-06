@@ -24,6 +24,10 @@ static processing_function_p process_sequence[PROCESS_SEQUENCE_SIZE] = {NULL};
 /// Temporary storage for copy of processing sequence.
 static processing_function_p process_sequence_storage[PROCESS_SEQUENCE_SIZE] = {NULL};
 
+void process_sequence_init(void){
+	set_elem_in_process_sequence(READ_INERTIAL,0);
+}
+
 /// Execute all non-NULL functions in the processing sequence.
 void run_process_sequence(void){
 	for(int i=0;i<(sizeof(process_sequence)/sizeof(processing_function_p));i++){
@@ -77,14 +81,9 @@ void set_last_process_sequence_element(processing_function_p elem_value){
 	@param[in] elem_value Function pointer to insert into \#process_sequence.
 	@param[in] elem_nr    \#process_sequence element index
 */	
-void set_elem_in_process_sequence(processing_function_p elem_value, uint8_t elem_nr){
-	if(elem_nr<PROCESS_SEQUENCE_SIZE){
-		process_sequence[elem_nr] = elem_value;
-	}
-}
 
-void set_elem_in_process_sequence_by_id(uint8_t id, uint8_t elem_nr){
-	if(elem_nr<PROCESS_SEQUENCE_SIZE)
+void set_elem_in_process_sequence(uint8_t id, uint8_t elem_nr){
+	if(elem_nr<PROCESS_SEQUENCE_SIZE && id<PID_LIMIT)
 		process_sequence[elem_nr] = processing_functions_by_id[id] ? processing_functions_by_id[id]->func_p : NULL;
 }
 

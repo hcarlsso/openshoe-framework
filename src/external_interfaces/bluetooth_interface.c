@@ -207,7 +207,7 @@ void bt_receive_command(void){
 	return;
 }
 
-bool lossy_transmission = false;
+bool lossless_transmission = false;
 
 void bt_transmit_data(void){
 	static uint8_t tx_buffer_array[TX_BUFFER_SIZE];
@@ -220,20 +220,20 @@ void bt_transmit_data(void){
 
 		// Transmit output
 		if (tx_buffer.read_position<tx_buffer.write_position) {
-			if (lossy_transmission) {
-				bt_send_buf(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position);
-			} else {
+			if (lossless_transmission) {
 				add_package_to_queue(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position,package_number);
+			} else {
+				bt_send_buf(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position);
 			}
 		}
-		if (!lossy_transmission) {
+		if (lossless_transmission) {
 			send_package_from_queue();
 		}
 	}
 }
 
 void bt_set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT && state_info_access_by_id[state_id]){
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id]){
 		if (divider>=MIN_LOG2_DIVIDER){
 			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
 			uint16_t rate_divider_reminder_mask = rate_divider - 1;
@@ -252,10 +252,10 @@ void bt_set_state_output(uint8_t state_id, uint8_t divider){
 }
 
 void bt_set_conditional_output(uint8_t state_id){
-	if(state_info_access_by_id[state_id])
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		state_output_cond[state_id]=true;
 }
 
-void bt_set_lossy_transmission(bool onoff){
-	lossy_transmission = onoff;
+void bt_set_lossless_transmission(bool onoff){
+	lossless_transmission = onoff;
 }

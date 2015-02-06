@@ -100,15 +100,11 @@ static const command_info* commands[] = {&ack,
 										 &normal_imu_with_bias_est_cmd};
 												  
 // Arrays/tables for commands
-uint8_t command_header_table[32]={0};
-command_info* command_info_array[256]={NULL};
-												  
+command_info* command_info_array[CID_LIMIT]={NULL};
+
 void commands_init(void){
-	// Initialize tables
-	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
-		command_header_table[ (commands[i]->header) >> 3 ] |= 1<<( (commands[i]->header) & 7);}
-		
-	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++){
-		command_info_array[commands[i]->header] = commands[i];}
+	for(int i = 0;i<(sizeof(commands)/sizeof(commands[0]));i++)
+		if(commands[i]->header<CID_LIMIT)
+			command_info_array[commands[i]->header] = commands[i];
 }
 

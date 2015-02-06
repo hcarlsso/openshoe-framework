@@ -251,7 +251,7 @@ void usb_transmit_data(void){
 	divider is within the allowable range.
 */
 void usb_set_state_output(uint8_t state_id, uint8_t divider){
-	if(state_id<=SID_LIMIT && state_info_access_by_id[state_id]){
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id]){
 		if (divider>=MIN_LOG2_DIVIDER){
 			uint16_t rate_divider = 1<<( (divider&MAX_LOG2_DIVIDER) - 1 );
 			uint16_t rate_divider_reminder_mask = rate_divider - 1;
@@ -270,7 +270,7 @@ void usb_set_state_output(uint8_t state_id, uint8_t divider){
 }
 
 void usb_set_conditional_output(uint8_t state_id){
-	if(state_info_access_by_id[state_id])
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		state_output_cond[state_id]=true;
 }
 
