@@ -144,7 +144,7 @@ void zupt_aided_ins(uint8_t** no_arg){
 	bool tmp=false;
 	set_state(INIT_DONE_SID,(void*)&tmp);
 	restor_proc_sequ_if_setup(INIT_DONE_SID);
-	set_elem_in_process_sequence(RESTORE_PROC_SEQU_IF,5);
+	set_last_process_sequence_element(RESTORE_PROC_SEQU_IF);
 }
 
 void stepwise_dead_reckoning(uint8_t** cmd_arg){
@@ -184,7 +184,7 @@ void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	bool tmp=false;
 	set_state(INIT_DONE_SID,(void*)&tmp);
 	restor_proc_sequ_if_setup(INIT_DONE_SID);
-	set_elem_in_process_sequence(RESTORE_PROC_SEQU_IF,5);
+	set_last_process_sequence_element(RESTORE_PROC_SEQU_IF);
 }
 
 void start_inertial_frontend(uint8_t** no_arg){

@@ -46,7 +46,6 @@ uint8_t space_in_bt_uart_buf(void){
 	return ( (uart_tx_buf_read-uart_tx_buf_write) & (SIZE_BT_UART_BUF-1) ) - 1;
 }
 
-//TODO: Change to int such that larger buffers can be used
 //TODO: Prevent overwriting and return number of written bytes (zero or all?)
 void bt_send_buf(uint8_t* buf,uint32_t nob) {
 	for (uint32_t i=0;i<nob;i++)

@@ -37,7 +37,7 @@ void store_and_empty_process_sequence(void);
 
 void restore_process_sequence(void);
 
-void set_last_process_sequence_element(processing_function_p element_value);
+void set_last_process_sequence_element(uint8_t id);
 
 void set_elem_in_process_sequence(uint8_t proc_func_id, uint8_t elem_nr);
 

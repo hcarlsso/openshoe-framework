@@ -67,8 +67,10 @@ void restore_process_sequence(void){
 	
 	@param[in] elem_value Function pointer to insert into \#process_sequence.
 */
-void set_last_process_sequence_element(processing_function_p elem_value){
-	process_sequence[PROCESS_SEQUENCE_SIZE-1] = elem_value;}
+void set_last_process_sequence_element(uint8_t id){
+	if(id<PID_LIMIT)
+		process_sequence[PROCESS_SEQUENCE_SIZE-1] = processing_functions_by_id[id] ? processing_functions_by_id[id]->func_p : NULL;
+}
 
 /**
 	\brief Sets process sequence element number to elem_value
