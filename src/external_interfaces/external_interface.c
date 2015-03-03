@@ -7,6 +7,8 @@
 #include "external_interface.h"
 #include "usb_interface.h"
 #include "bluetooth_interface.h"
+#include "package_queue.h"
+#include "usb_package_queue.h"
 
 #include <board.h>
 
@@ -29,11 +31,11 @@ void external_interface_init(void){
 }
 
 void transmit_data(void){
-	usb_transmit_data();
-	
 	#ifdef BT_MODULE
 	bt_transmit_data();
 	#endif
+	
+	usb_transmit_data();
 }
 
 void receive_command(void){
@@ -60,11 +62,21 @@ void set_conditional_output(uint8_t state_id,uint8_t from){
 	#endif
 }
 void set_lossless_transmission(bool onoff,uint8_t from){
-	if (from & COMMAND_FROM_USB) {
-		// NOT IMPLEMENTED FOR USB
-	}
+	if (from & COMMAND_FROM_USB)
+		usb_set_lossless_transmission(onoff);
 	
 	#ifdef BT_MODULE
-	if (from & COMMAND_FROM_BT) bt_set_lossless_transmission(onoff);
+	if (from & COMMAND_FROM_BT)
+		bt_set_lossless_transmission(onoff);
 	#endif
+}
+
+void receive_package_ack(uint16_t package_number, uint8_t from){
+	if (from & COMMAND_FROM_USB)
+		usb_remove_package_from_queue(package_number);
+	
+	#ifdef BT_MODULE
+	if (from & COMMAND_FROM_BT)
+		remove_package_from_queue(package_number);
+	#endif	
 }

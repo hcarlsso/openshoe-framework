@@ -5,6 +5,7 @@
 */
 
 #include <usart.h>
+#include <string.h>
 
 #include "bt_uart_interrupt.h"
 
@@ -16,9 +17,9 @@
 #  include "MIMU22BT.h"
 #endif
 
-// Most be <=8
-#define LOG2_SIZE_BT_UART_BUF 9
+#define LOG2_SIZE_BT_UART_BUF 10
 #define SIZE_BT_UART_BUF (1<<LOG2_SIZE_BT_UART_BUF)
+#define BUF_MASK (SIZE_BT_UART_BUF-1)
 
 uint8_t uart_rx_buf[SIZE_BT_UART_BUF];
 volatile uint32_t uart_rx_buf_write=0;
@@ -35,23 +36,52 @@ bool bt_is_data_available(void) {
 uint8_t bt_get_byte(uint8_t* dest) {
 	if (uart_rx_buf_write!=uart_rx_buf_read) {
 		*dest = uart_rx_buf[uart_rx_buf_read];
-		uart_rx_buf_read = (uart_rx_buf_read+1) & (SIZE_BT_UART_BUF-1);
+		uart_rx_buf_read = (uart_rx_buf_read+1) & BUF_MASK;
 		return 1;
 	}
 	return 0;
 }
 
-uint8_t space_in_bt_uart_buf(void){
-	// The -1 is there since we cannot distinguish between full and empty buffer. This way we should not make the buffer completely full.
-	return ( (uart_tx_buf_read-uart_tx_buf_write) & (SIZE_BT_UART_BUF-1) ) - 1;
+//TODO: Prevent overwriting and return number of written bytes (zero or all?)
+uint32_t bt_send_buf_allornothing(uint8_t* buf,uint32_t nob) {
+	uint32_t space_in_buf = (uart_tx_buf_read-uart_tx_buf_write)&BUF_MASK;
+	space_in_buf = space_in_buf ? space_in_buf-1 : (SIZE_BT_UART_BUF-1);
+	if(space_in_buf<nob)
+		return nob;
+	int nob_to_end_of_buf = min(nob,SIZE_BT_UART_BUF-uart_tx_buf_write);
+	memcpy(uart_tx_buf+uart_tx_buf_write,buf,nob_to_end_of_buf);
+	memcpy(uart_tx_buf,buf+nob_to_end_of_buf,max(0,nob-nob_to_end_of_buf));
+//	for (uint32_t i=0;i<nob;i++)
+//		uart_tx_buf[(uart_tx_buf_write+i) & BUF_MASK]=buf[i];
+//	int i=0;
+//	while(nob>0 && uart_rx_buf_write!=uart_rx_buf_read){
+		//	for (uint32_t i=0;i<nob;i++){
+//		uart_tx_buf[uart_tx_buf_write]=buf[i];
+//		uart_rx_buf_write=uart_rx_buf_write + 1 & BUF_MASK;
+//		nob--;
+//		i++;
+//	}
+	uart_tx_buf_write = (uart_tx_buf_write+nob) & BUF_MASK;
+	BT_UART.ier = AVR32_USART_IER_TXRDY_MASK;
+	return 0;
 }
 
-//TODO: Prevent overwriting and return number of written bytes (zero or all?)
-void bt_send_buf(uint8_t* buf,uint32_t nob) {
-	for (uint32_t i=0;i<nob;i++)
-		uart_tx_buf[(uart_tx_buf_write+i) & (SIZE_BT_UART_BUF-1)]=buf[i];
-	uart_tx_buf_write = (uart_tx_buf_write+nob) & (SIZE_BT_UART_BUF-1);
+uint32_t bt_send_buf(uint8_t* buf,uint32_t nob){
+	uint32_t space_in_buf = (uart_tx_buf_read-uart_tx_buf_write)&BUF_MASK;
+	space_in_buf = space_in_buf ? space_in_buf-1 : (SIZE_BT_UART_BUF-1);
+	if(!space_in_buf)
+		return 0;
+	uint32_t nr_bytes_left = 0;
+	if(space_in_buf<nob){
+		nr_bytes_left = nob-space_in_buf;
+		nob = space_in_buf;
+	}
+	int nob_to_end_of_buf = min(nob,SIZE_BT_UART_BUF-uart_tx_buf_write);
+	memcpy(uart_tx_buf+uart_tx_buf_write,buf,nob_to_end_of_buf);
+	memcpy(uart_tx_buf,buf+nob_to_end_of_buf,max(0,nob-nob_to_end_of_buf));
+	uart_tx_buf_write = (uart_tx_buf_write+nob) & BUF_MASK;
 	BT_UART.ier = AVR32_USART_IER_TXRDY_MASK;
+	return nr_bytes_left;
 }
 
 
@@ -68,13 +98,12 @@ static void usart_int_handler(void)
 	if (BT_UART.csr & AVR32_USART_CSR_RXRDY_MASK) { // Something HAS BEEN read
 		uart_rx_buf[uart_rx_buf_write] = (uint8_t) ( (BT_UART.rhr & AVR32_USART_RHR_RXCHR_MASK) >> AVR32_USART_RHR_RXCHR_OFFSET );
 		uart_rx_buf_write++;
-		uart_rx_buf_write &= (SIZE_BT_UART_BUF-1);
+		uart_rx_buf_write &= BUF_MASK;
 	}
 	if (BT_UART.csr & BT_UART.imr & AVR32_USART_CSR_TXRDY_MASK) { // Something CAN be sent
 		if (uart_tx_buf_read!=uart_tx_buf_write) {  // Something should be sent
 			BT_UART.thr = ( (int) uart_tx_buf[uart_tx_buf_read] << AVR32_USART_THR_TXCHR_OFFSET) & AVR32_USART_THR_TXCHR_MASK;
-			uart_tx_buf_read++;
-			uart_tx_buf_read &= (SIZE_BT_UART_BUF-1);
+			uart_tx_buf_read=(uart_tx_buf_read+1)&BUF_MASK;
 		}
 		if (uart_tx_buf_read==uart_tx_buf_write) BT_UART.idr = AVR32_USART_IER_TXRDY_MASK;
 	}

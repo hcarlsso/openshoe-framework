@@ -470,6 +470,7 @@ void udi_cdc_data_recevied(udd_ep_status_t status, iram_size_t n)
 	udi_cdc_rx_start();
 }
 
+//#include "usb_package_queue.h"
 
 void udi_cdc_data_sent(udd_ep_status_t status, iram_size_t n)
 {
@@ -480,6 +481,7 @@ void udi_cdc_data_sent(udd_ep_status_t status, iram_size_t n)
 	udi_cdc_tx_buf_nb[(udi_cdc_tx_buf_sel==0)?1:0] = 0;
 	udi_cdc_tx_both_buf_to_send = false;
 	udi_cdc_tx_trans_ongoing = false;
+//	usb_send_and_remove_data_from_queue();
 	udi_cdc_tx_send();
 }
 
@@ -741,6 +743,99 @@ udi_cdc_write_buf_loop_wait:
 	if (size) {
 		goto udi_cdc_write_buf_loop_wait;
 	}
+
+	return 0;
+}
+
+iram_size_t udi_cdc_write_buf_nonblocking(const int* buf, iram_size_t size)
+{
+	irqflags_t flags;
+	uint8_t buf_sel;
+	uint16_t buf_nb;
+	iram_size_t copy_nb;
+	uint8_t *ptr_buf = (uint8_t *)buf;
+
+	if (9 == udi_cdc_line_coding.bDataBits) {
+		size *=2;
+	}
+
+	udi_cdc_write_buf_loop_wait2:
+	// Check avaliable space
+	if (!udi_cdc_is_tx_ready()) {
+//		if (!udi_cdc_running) {
+			return size;
+//		}
+//		goto udi_cdc_write_buf_loop_wait2;
+	}
+
+	// Write values
+	flags = cpu_irq_save();
+	buf_sel = udi_cdc_tx_buf_sel;
+	buf_nb = udi_cdc_tx_buf_nb[buf_sel];
+	copy_nb = UDI_CDC_TX_BUFFERS - buf_nb;
+	if (copy_nb>size) {
+		copy_nb = size;
+	}
+	memcpy(&udi_cdc_tx_buf[buf_sel][buf_nb], ptr_buf, copy_nb);
+	udi_cdc_tx_buf_nb[buf_sel] = buf_nb + copy_nb;
+	cpu_irq_restore(flags);
+
+	// Update buffer pointer
+	ptr_buf = ptr_buf + copy_nb;
+	size -= copy_nb;
+
+	if (size) {
+		goto udi_cdc_write_buf_loop_wait2;
+	}
+
+	return 0;
+}
+
+iram_size_t udi_cdc_write_buf_nonblocking_allornothing(const int* buf, iram_size_t size)
+{
+	irqflags_t flags;
+	uint8_t buf_sel;
+	uint16_t buf_nb;
+	iram_size_t copy_nb;
+	uint8_t *ptr_buf = (uint8_t *)buf;
+
+	if (9 == udi_cdc_line_coding.bDataBits) {
+		size *=2;
+	}
+
+	udi_cdc_write_buf_loop_wait2:
+	// Check avaliable space
+	if (!udi_cdc_is_tx_ready()) {
+		//		if (!udi_cdc_running) {
+		return size;
+		//		}
+		//		goto udi_cdc_write_buf_loop_wait2;
+	}
+
+	// Write values
+	flags = cpu_irq_save();
+	buf_sel = udi_cdc_tx_buf_sel;
+	buf_nb = udi_cdc_tx_buf_nb[buf_sel];
+	copy_nb = UDI_CDC_TX_BUFFERS - buf_nb;
+	if (copy_nb<size)
+	{
+		cpu_irq_restore(flags);
+		return size;
+	}
+	if (copy_nb>size) {
+		copy_nb = size;
+	}
+	memcpy(&udi_cdc_tx_buf[buf_sel][buf_nb], ptr_buf, copy_nb);
+	udi_cdc_tx_buf_nb[buf_sel] = buf_nb + copy_nb;
+	cpu_irq_restore(flags);
+
+	// Update buffer pointer
+//	ptr_buf = ptr_buf + copy_nb;
+//	size -= copy_nb;
+
+//	if (size) {
+//		goto udi_cdc_write_buf_loop_wait2;
+//	}
 
 	return 0;
 }

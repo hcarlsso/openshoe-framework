@@ -33,7 +33,7 @@
 ///\name State output divider limits
 //@{
 #define MAX_LOG2_DIVIDER 15
-#define MIN_LOG2_DIVIDER 2
+#define MIN_LOG2_DIVIDER 1
 //@}
 
 #define	LOSSY_TRANSMISSION_BIT_MASK 16
@@ -89,7 +89,8 @@ static inline void send_ak(struct rxtx_buffer* buffer){
 	uint16_t chk = calc_checksum(ack,ack+1);
 	ack[2] = MSB(chk);
 	ack[3] = LSB(chk);
-	bt_send_buf(ack,4);
+//	bt_send_buf_allornothing(ack,4);
+	add_package_to_queue(ack,4,0,SINGLE_TRANSMIT);
 }
 
 // TODO: Remove these. Both USB and BT uses the same now.
@@ -104,8 +105,7 @@ static inline uint16_t assemble_output_data(struct rxtx_buffer* buffer){
 	
 	// Save position of header
 	uint8_t* state_output_header_p = buffer->write_position;
-	// Add header for state data output
-	*buffer->write_position = STATE_OUTPUT_HEADER;
+	// Leave one blank buffer slot for package header (see below)
 	increment_counter(buffer->write_position);
 	// Leave two blank buffer slot for package number (see below)
 	increment_counter(buffer->write_position);
@@ -132,6 +132,7 @@ static inline uint16_t assemble_output_data(struct rxtx_buffer* buffer){
 	// If any data was added, add payload size and calculate and add checksum
 	if(BT_FIRST_PAYLOAD_BYTE!=buffer->write_position) {
 		package_number++;
+		*state_output_header_p = STATE_OUTPUT_HEADER;
 		*(state_output_header_p+1) = (package_number & 0xFF00) >> 8;
 		*(state_output_header_p+2) =  package_number & 0xFF;
 		*BT_PAYLOAD_SIZE_BYTE=buffer->write_position-BT_FIRST_PAYLOAD_BYTE;
@@ -145,14 +146,6 @@ static inline uint16_t assemble_output_data(struct rxtx_buffer* buffer){
 		buffer->write_position = state_output_header_p;
 	}
 	return package_number;
-}
-
-void handle_ack(uint8_t** cmd_arg){
-	uint8_t from = (uint8_t)cmd_arg[0];
-	if (from & COMMAND_FROM_BT)	{
-		uint16_t package_number = (cmd_arg[1][0]<<8) | cmd_arg[1][1];
-		remove_package_from_queue(package_number);
-	}
 }
 
 void bt_receive_command(void){
@@ -185,10 +178,9 @@ void bt_receive_command(void){
 			// Or a full command?
 			else if(is_end_of_command(rx_buffer.nrb)){
 				if(has_valid_checksum(&rx_buffer)){
-					// TODO: change order ot send_ak/send_nack. If parsing fails due to invalid arguments, we should send nack.
+					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_BT);
 					if (get_command_header(&rx_buffer) != ACK_ID)
 						send_ak(&rx_buffer);
-					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_BT);
 				}
 				reset_buffer(&rx_buffer);
 				continue;}
@@ -198,7 +190,7 @@ void bt_receive_command(void){
 			decrement_counter(rx_buffer.nrb);
 		}
 		// Reset buffer if initiated command transmission do not complete within timeout limit
-		if(has_timed_out(command_tx_timer,rx_buffer.nrb)){
+		if(!bt_is_data_available() && has_timed_out(command_tx_timer,rx_buffer.nrb)){
 			reset_buffer(&rx_buffer);
 		}
 	} else{
@@ -212,22 +204,17 @@ bool lossless_transmission = false;
 void bt_transmit_data(void){
 	static uint8_t tx_buffer_array[TX_BUFFER_SIZE];
 	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,tx_buffer_array,0};
-	//	static uint8_t downsampling_tx_counter = 0;
 
 	if(is_bluetooth_paired()){
 		// Generate output
 		uint16_t package_number = assemble_output_data(&tx_buffer);
-
-		// Transmit output
-		if (tx_buffer.read_position<tx_buffer.write_position) {
-			if (lossless_transmission) {
-				add_package_to_queue(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position,package_number);
-			} else {
-				bt_send_buf(tx_buffer.read_position,tx_buffer.write_position-tx_buffer.read_position);
-			}
-		}
+		if(tx_buffer.read_position<tx_buffer.write_position)
+			add_package_to_queue(tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer,package_number, lossless_transmission ? 0 : SINGLE_TRANSMIT );
+		
 		if (lossless_transmission) {
 			send_package_from_queue();
+		} else {
+			send_and_remove_data_from_queue();
 		}
 	}
 }

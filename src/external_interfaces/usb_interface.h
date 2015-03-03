@@ -8,6 +8,7 @@
 #define USB_INTERFACE_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define COMMAND_FROM_USB 1
 
@@ -18,6 +19,7 @@ void usb_receive_command(void);
 
 void usb_set_state_output(uint8_t state_id, uint8_t divider);
 void usb_set_conditional_output(uint8_t state_id);
+void usb_set_lossless_transmission(bool onoff);
 
 
 #include <stdbool.h>

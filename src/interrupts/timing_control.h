@@ -8,12 +8,14 @@
 #define TIMING_CONTROL_H_
 
 #include <stdint.h>
+#include <compiler.h>
 
 extern uint32_t interrupt_counter;
 extern uint32_t interrupt_ts;
 extern uint32_t gp_dt;
 
 void wait_for_interrupt(void);
+bool time_is_up(void);
 void end_of_main_loop(void);
 
 

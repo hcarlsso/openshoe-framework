@@ -35,7 +35,7 @@
 typedef const struct {
 	uint8_t header;
 	void (*cmd_response)(uint8_t**);
-	uint8_t nrb_payload;
+	uint16_t nrb_payload;
 	uint8_t nr_fields;
 	uint8_t field_widths[];
 } command_info;

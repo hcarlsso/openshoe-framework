@@ -27,7 +27,7 @@
 ///  \name Command response functions
 ///  Functions which are executed in response to commands.
 //@{
-extern void handle_ack(uint8_t**);
+void handle_ack(uint8_t**);
 void do_nothing(uint8_t**);
 void get_mcu_serial(uint8_t**);
 void input_imu_rd(uint8_t**);

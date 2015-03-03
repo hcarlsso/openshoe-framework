@@ -18,9 +18,10 @@
 #include "usb_interface.h"
 #include "parsing_util.h"
 #include "control_tables.h"
+#include "timing_control.h"
+#include "usb_package_queue.h"
 
-// All USB include files (possibly not all needed)
-#include "conf_usb.h"
+//#include "conf_usb.h"
 #include "udd.h"
 #include "udc.h"
 #include "udi_cdc.h"
@@ -31,7 +32,7 @@
 #define RX_BUFFER_SIZE 512
 #define TX_BUFFER_SIZE 512
 #define SINGLE_TX_BUFFER_SIZE 10
-#define MAX_RX_NRB 50
+#define MAX_RX_NRB 400
 //@}
 
 ///\name State output divider limits
@@ -67,24 +68,12 @@ static inline void get_byte_from_usb(uint8_t* write_position){
 	*write_position = udi_cdc_getc();}
 	
 static inline void send_ak(struct rxtx_buffer* buffer){
-	*single_tx_buffer.write_position = 0xa0;
-	increment_counter(single_tx_buffer.write_position);
-	*single_tx_buffer.write_position = *buffer->buffer;
-	uint16_t chk = calc_checksum(single_tx_buffer.write_position-1,single_tx_buffer.write_position);
-	increment_counter(single_tx_buffer.write_position);
-	*single_tx_buffer.write_position = MSB(chk);
-	increment_counter(single_tx_buffer.write_position);
-	*single_tx_buffer.write_position = LSB(chk);
-	increment_counter(single_tx_buffer.write_position);}
-	
-static inline void send_nak(void){
-	*single_tx_buffer.write_position = 0xa1;
-	increment_counter(single_tx_buffer.write_position);
-	*single_tx_buffer.write_position = 0x0;
-	increment_counter(single_tx_buffer.write_position);
-	*single_tx_buffer.write_position = 0xa1;
-	increment_counter(single_tx_buffer.write_position);}
-
+	uint8_t ack[4] = {0xa0,*buffer->buffer,0,0};
+	uint16_t chk = calc_checksum(ack,ack+1);
+	ack[2] = MSB(chk);
+	ack[3] = LSB(chk);
+	usb_add_package_to_queue(ack,4,0,SINGLE_TRANSMIT);
+}
 
 /*! \brief This functions collect the data which is to be transmitted and stores it in the argument buffer.
 
@@ -98,23 +87,15 @@ static inline void send_nak(void){
 	@param[in]  state_output_rate_divider	Array containing the dividers of the state output frequencies (and if they are to be output at all)
 	@param[in]  state_output_rate_counter	Array for keeping track of when to output data next
 */
-static inline void assemble_output_data(struct rxtx_buffer* buffer){
+static inline uint16_t assemble_output_data(struct rxtx_buffer* buffer){
 	static uint16_t package_number = 0;
 	
 	// Clear buffer
 	reset_buffer(buffer);
 	
-	// Copy one time transmit data to buffer
-	if(single_tx_buffer.write_position!=single_tx_buffer.buffer){
-		memcpy(buffer->write_position,single_tx_buffer.buffer,single_tx_buffer.write_position-single_tx_buffer.buffer);
-		buffer->write_position+=single_tx_buffer.write_position-single_tx_buffer.buffer;
-		reset_buffer(&single_tx_buffer);
-	}
-
 	// Save position of header
 	uint8_t* state_output_header_p = buffer->write_position;
-	// Add header for state data output
-	*buffer->write_position = STATE_OUTPUT_HEADER;
+	// Leave one blank buffer slot for package header (see below)
 	increment_counter(buffer->write_position);
 	// Leave two blank buffer slot for package number (see below)
 	increment_counter(buffer->write_position);
@@ -142,6 +123,7 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	// If any data was added, add payload size and calculate and add checksum
 	if(FIRST_PAYLOAD_BYTE!=buffer->write_position){
 		package_number++;
+		*state_output_header_p = STATE_OUTPUT_HEADER;
 		*(state_output_header_p+1) = (package_number & 0xFF00) >> 8;
 		*(state_output_header_p+2) =  package_number & 0xFF;
 		*PAYLOAD_SIZE_BYTE=buffer->write_position-FIRST_PAYLOAD_BYTE;
@@ -153,6 +135,7 @@ static inline void assemble_output_data(struct rxtx_buffer* buffer){
 	else {
 		buffer->write_position = state_output_header_p;
 	}
+	return package_number;
 }
 
 /**
@@ -192,10 +175,9 @@ void usb_receive_command(void){
 			// Or a full command?
 			else if(is_end_of_command(rx_buffer.nrb)){
 				if(has_valid_checksum(&rx_buffer)){
-					send_ak(&rx_buffer);
-					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_USB);}
-				else{
-					send_nak();
+					parse_and_execute_command(&rx_buffer,info_last_command,COMMAND_FROM_USB);
+					if (get_command_header(&rx_buffer) != ACK_ID)
+						send_ak(&rx_buffer);
 				}
 				reset_buffer(&rx_buffer);
 				continue;}
@@ -207,7 +189,6 @@ void usb_receive_command(void){
 		// Reset buffer if initiated command transmission do not complete within timeout limit
 		if(has_timed_out(command_tx_timer,rx_buffer.nrb)){
 			reset_buffer(&rx_buffer);
-			send_nak();
 		}
 	}
 	// If USB detached, reset buffers
@@ -225,22 +206,29 @@ void usb_receive_command(void){
 	This stores the relevant data (single output messages and continual state output) in the buffer.
 	Subsequently the data is written over byte by byte to the USB output buffer.
 */
+
+bool usb_lossless_tranmission = false;
+
 void usb_transmit_data(void){
 	static uint8_t tx_buffer_array[TX_BUFFER_SIZE];
-	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,tx_buffer_array,0};
-//	static uint8_t downsampling_tx_counter = 0;
+	static struct rxtx_buffer tx_buffer = {tx_buffer_array,tx_buffer_array,tx_buffer_array,TX_BUFFER_SIZE};
 
 	if(is_usb_attached()){
-		// Generate output
-		assemble_output_data(&tx_buffer);
-		// Transmit output
-		while(tx_buffer.read_position<tx_buffer.write_position && udi_cdc_is_tx_ready()){
-			udi_cdc_putc(*tx_buffer.read_position);
-			tx_buffer.read_position++;
+		// Push potential old data into the USB-buffers before preparing new
+		if(!usb_lossless_tranmission)
+			usb_send_and_remove_data_from_queue();
+				
+		uint16_t package_number = assemble_output_data(&tx_buffer);
+		if(tx_buffer.read_position<tx_buffer.write_position)
+			usb_add_package_to_queue(tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer,package_number, usb_lossless_tranmission ? 0 : SINGLE_TRANSMIT );
+		
+		if (usb_lossless_tranmission) {
+			usb_send_package_from_queue();
+		} else {
+			usb_send_and_remove_data_from_queue();
+			while (!time_is_up())
+				usb_send_and_remove_data_from_queue();
 		}
-		// This does not work cause it will hang if user does not clear his buffers sufficiently fast.
-		// Equivalent but non-blocking function should be written.
-//		udi_cdc_write_buf((int*)tx_buffer.buffer,tx_buffer.write_position-tx_buffer.buffer);
 	}
 }
 
@@ -262,7 +250,7 @@ void usb_set_state_output(uint8_t state_id, uint8_t divider){
 					min_counter = max(min_counter,state_output_rate_counter[i]&rate_divider_reminder_mask);
 			state_output_rate_divider[state_id] = rate_divider;
 			state_output_rate_counter[state_id] = min_counter;
-			} else {
+		} else {
 			state_output_rate_divider[state_id] = 0;
 			state_output_rate_counter[state_id] = 0;
 		}
@@ -272,6 +260,10 @@ void usb_set_state_output(uint8_t state_id, uint8_t divider){
 void usb_set_conditional_output(uint8_t state_id){
 	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		state_output_cond[state_id]=true;
+}
+
+void usb_set_lossless_transmission(bool onoff){
+	usb_lossless_tranmission = onoff;
 }
 
 

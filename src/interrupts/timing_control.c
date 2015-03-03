@@ -5,8 +5,6 @@
 */
 
 #include "timing_control.h"
-#include <compiler.h>
-
 
 // Interrupt counter (essentially a time stamp)
 uint32_t interrupt_counter = 0;
@@ -23,7 +21,7 @@ uint32_t gp_dt;
 /// Wait for the interrupt flag to be set, toggle it, increase interrupt counter, and return.
 void wait_for_interrupt(void){
 	while(true){
-		if(imu_interrupt_flag==true){
+		if(imu_interrupt_flag){
 			imu_interrupt_flag=false;
 			gp_t = Get_system_register(AVR32_COUNT);
 			return;
@@ -31,10 +29,14 @@ void wait_for_interrupt(void){
 	}
 }
 
+bool time_is_up(void){
+	return imu_interrupt_flag;
+}
+
 /// Checks that the main loop has finished before next interrupt
 void end_of_main_loop(void){
 	gp_dt = Get_system_register(AVR32_COUNT) - gp_t;
-	if (imu_interrupt_flag!=false){
+	if (imu_interrupt_flag){
 		// Todo: Set some error state
 	}
 }

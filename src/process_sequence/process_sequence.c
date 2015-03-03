@@ -25,26 +25,29 @@ static processing_function_p process_sequence[PROCESS_SEQUENCE_SIZE] = {NULL};
 static processing_function_p process_sequence_storage[PROCESS_SEQUENCE_SIZE] = {NULL};
 
 void process_sequence_init(void){
-	set_elem_in_process_sequence(READ_INERTIAL,0);
+	//set_elem_in_process_sequence(READ_INERTIAL,0);
 }
 
 /// Execute all non-NULL functions in the processing sequence.
 void run_process_sequence(void){
-	for(int i=0;i<(sizeof(process_sequence)/sizeof(processing_function_p));i++){
-		if(process_sequence[i]){		// If function point not NULL 
-			process_sequence[i]();}}	// Call function
+	for(int i=0;i<PROCESS_SEQUENCE_SIZE;i++)
+		if(process_sequence[i])
+			process_sequence[i]();
 }
 
 /// Sets alla elements in processing sequence to NULL.
 void empty_process_sequence(void){
-	for(int i = 0;i<PROCESS_SEQUENCE_SIZE;i++){
-		process_sequence[i]=NULL;}}
+	for(int i=0;i<PROCESS_SEQUENCE_SIZE;i++)
+		process_sequence[i]=NULL;
+}
 
 /// Copy processing sequence to temporary storage and sets all elements to NULL.
 void store_and_empty_process_sequence(void){
 	for(int i = 0;i<PROCESS_SEQUENCE_SIZE;i++){
 		process_sequence_storage[i] = process_sequence[i];
-		process_sequence[i]=NULL;}}
+		process_sequence[i]=NULL;
+	}
+}
 
 
 /**	
@@ -54,8 +57,9 @@ void store_and_empty_process_sequence(void){
 	been run prior to this routine call.
 */
 void restore_process_sequence(void){
-	for(int i = 0;i<PROCESS_SEQUENCE_SIZE;i++){
-		process_sequence[i] = process_sequence_storage[i];}}
+	for(int i = 0;i<PROCESS_SEQUENCE_SIZE;i++)
+		process_sequence[i] = process_sequence_storage[i];
+}
 	
 		
 /**	

@@ -10,9 +10,19 @@
 #include "response_util.h"
 #include "external_interface.h"
 #include "bluetooth_interface.h"
+#include "usb_interface.h"
 #include "process_sequence.h"
 #include "package_queue.h"
+#include "usb_package_queue.h"
 #include "control_tables.h"
+
+#define OUTPUT_LOSSY_MASK   0x10
+
+void handle_ack(uint8_t** cmd_arg){
+	uint8_t from = (uint8_t)cmd_arg[0];
+	uint16_t package_number = (cmd_arg[1][0]<<8) | cmd_arg[1][1];
+	receive_package_ack(package_number,from);
+}
 
 void do_nothing(uint8_t** arg){;}
 
@@ -51,7 +61,6 @@ void set_state_max_24bytes(uint8_t** cmd_arg){ check_size_and_set_state(24,cmd_a
 void set_state_max_48bytes(uint8_t** cmd_arg){ check_size_and_set_state(48,cmd_arg); }
 void set_state_max_254bytes(uint8_t** cmd_arg){ check_size_and_set_state(254,cmd_arg); }
 
-#define OUTPUT_LOSSY_MASK   0x10
 void output_state(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t state_id = cmd_arg[1][0];
@@ -75,6 +84,8 @@ void all_output_off(uint8_t** cmd_arg){
 	state_output_if_setup(NOSTATE_SID,0,0,tmp,0);
 	if (from & COMMAND_FROM_BT)
 		empty_package_queue();
+	if(from & COMMAND_FROM_USB)
+		usb_empty_package_queue();
 }
 void state_if_setup_resp(uint8_t** cmd_arg){
 	state_output_if_setup(cmd_arg[1][0],(uint8_t)cmd_arg[0],cmd_arg[2][0],cmd_arg[3],0);

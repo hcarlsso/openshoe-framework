@@ -300,6 +300,8 @@ int udi_cdc_putc(int value);
  * \return the number of data remaining
  */
 iram_size_t udi_cdc_write_buf(const int* buf, iram_size_t size);
+iram_size_t udi_cdc_write_buf_nonblocking(const int* buf, iram_size_t size);
+iram_size_t udi_cdc_write_buf_nonblocking_allornothing(const int* buf, iram_size_t size);
 
 //@}
 
