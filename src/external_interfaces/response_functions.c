@@ -139,18 +139,20 @@ void zupt_aided_ins(uint8_t** no_arg){
 	set_elem_in_process_sequence(READ_INERTIAL,0);
 	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
 	set_elem_in_process_sequence(FRONTEND_STATDET,2);
-	set_elem_in_process_sequence(FRONTEND_POSTPROC,3);
-	set_elem_in_process_sequence(MECHANIZATION,4);
-	set_elem_in_process_sequence(TIME_UPDATE,5);
-	set_elem_in_process_sequence(ZUPT_UPDATE,6);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(MECHANIZATION,5);
+	set_elem_in_process_sequence(TIME_UPDATE,6);
+	set_elem_in_process_sequence(ZUPT_UPDATE,7);
 	// Hide away stepwise dead reckoning while initializing
 	store_and_empty_process_sequence();
 	// Setup initialization
 	set_elem_in_process_sequence(READ_INERTIAL,0);
 	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
 	set_elem_in_process_sequence(FRONTEND_STATDET,2);
-	set_elem_in_process_sequence(FRONTEND_POSTPROC,3);
-	set_elem_in_process_sequence(FRONTEND_INITIAL_ALIGNMENT,4);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(FRONTEND_INITIAL_ALIGNMENT,5);
 	// Setup initialization termination actions
 	bool tmp=false;
 	set_state(INIT_DONE_SID,(void*)&tmp);
@@ -172,25 +174,27 @@ void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	set_elem_in_process_sequence(READ_INERTIAL,0);
 	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
 	set_elem_in_process_sequence(FRONTEND_STATDET,2);
-	set_elem_in_process_sequence(FRONTEND_POSTPROC,3);
-	set_elem_in_process_sequence(STEPWISE_SYSTEM_RESET,4);
-	set_elem_in_process_sequence(MECHANIZATION,5);
-	set_elem_in_process_sequence(TIME_UPDATE,6);
-	set_elem_in_process_sequence(ZUPT_UPDATE,7);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(STEPWISE_SYSTEM_RESET,5);
+	set_elem_in_process_sequence(MECHANIZATION,6);
+	set_elem_in_process_sequence(TIME_UPDATE,7);
+	set_elem_in_process_sequence(ZUPT_UPDATE,8);
 	// Setup conditional (reset) output
 	state_output_if_setup(FILTER_RESET_FLAG_SID,from,OUTPUT_PULL_MASK,NULL,0);
 	state_output_if_state_add(DX_SID,0);
 	state_output_if_state_add(DP_SID,1);
 	state_output_if_state_add(STEP_COUNTER_SID,2);
-	set_elem_in_process_sequence(STATE_OUTPUT_IF,8);
+	set_elem_in_process_sequence(STATE_OUTPUT_IF,9);
 	// Hide away stepwise dead reckoning while initializing
 	store_and_empty_process_sequence();
 	// Setup initialization
 	set_elem_in_process_sequence(READ_INERTIAL,0);
 	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
 	set_elem_in_process_sequence(FRONTEND_STATDET,2);
-	set_elem_in_process_sequence(FRONTEND_POSTPROC,3);
-	set_elem_in_process_sequence(FRONTEND_INITIAL_ALIGNMENT,4);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(FRONTEND_INITIAL_ALIGNMENT,5);
 	// Setup initialization termination actions
 	bool tmp=false;
 	set_state(INIT_DONE_SID,(void*)&tmp);
@@ -203,7 +207,8 @@ void start_inertial_frontend(uint8_t** no_arg){
 	set_elem_in_process_sequence(READ_INERTIAL,0);
 	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
 	set_elem_in_process_sequence(FRONTEND_STATDET,2);
-	set_elem_in_process_sequence(FRONTEND_POSTPROC,3);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
 }
 
 void normal_imu(uint8_t** cmd_arg){
@@ -229,7 +234,8 @@ void normal_imu_with_bias_est(uint8_t** cmd_arg){
 	set_elem_in_process_sequence(READ_INERTIAL,0);
 	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
 	set_elem_in_process_sequence(FRONTEND_STATDET,2);
-	set_elem_in_process_sequence(FRONTEND_POSTPROC,3);
-	set_elem_in_process_sequence(STATE_OUTPUT_IF_COUNTER,4);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(STATE_OUTPUT_IF_COUNTER,5);
 }
 //@}

@@ -6,6 +6,7 @@
 
 #include "MPU9150_interface.h"
 #include "mpu6150.h"
+#include "conf_clock.h"
 #include <stdint.h>
 #include <string.h>
 #include <asf.h>
@@ -370,6 +371,10 @@ static const uint8_t imu_map[NR_IMUS]=IMU_POS;
 // Read inertial measurements from IMU
 void mpu9150_read(void)
 {
+	static uint32_t last_read;
+	static int16_t previous_acc[32][3];
+	uint32_t this_read = Get_system_register(AVR32_COUNT);
+	
 	// Read all sensor registers (acc,temp,gyro)
 	burst_read(0x3B,data_matrix,14);
 	
@@ -380,12 +385,31 @@ void mpu9150_read(void)
 	transpose32(data_matrix+96);
 
 	// Copy to data state arrays
-	uint8_t i;
-	for (i=0; i<NR_IMUS; i++) {
-		memcpy(mimu_data[i],data_matrix+(32-1)-imu_map[i],4);
-		memcpy(mimu_data[i]+2,data_matrix+(64-1)-imu_map[i],2);
-		memcpy(mimu_data[i]+3,data_matrix+(96-1)-imu_map[i],4);
-		memcpy(mimu_data[i]+5,data_matrix+(128-1)-imu_map[i],2);
-		memcpy(mimu_data[i]+6,(uint16_t*)(data_matrix+(64-1)-imu_map[i])+1,2);
+	// Delay acc measurements one sample if sampling is >750Hz.
+	// Because there is a built in delay of the gyro measurements of 0.98ms.
+	if (this_read-last_read < (CLOCK_FREQ/(750u))) {
+		for (uint8_t i=0; i<NR_IMUS; i++) {
+			// Previous acc measurements
+			memcpy(mimu_data[i],previous_acc[i],6);
+			// Store acc measurements
+			memcpy(previous_acc[i],data_matrix+(32-1)-imu_map[i],4);
+			memcpy(previous_acc[i]+2,data_matrix+(64-1)-imu_map[i],2);
+			// Copy gyro and temp measurements
+			memcpy(mimu_data[i]+3,data_matrix+(96-1)-imu_map[i],4);
+			memcpy(mimu_data[i]+5,data_matrix+(128-1)-imu_map[i],2);
+			memcpy(mimu_data[i]+6,(uint16_t*)(data_matrix+(64-1)-imu_map[i])+1,2);
+		}
+		
+	} else {
+		for (uint8_t i=0; i<NR_IMUS; i++) {
+			memcpy(previous_acc[i],data_matrix+(32-1)-imu_map[i],4);
+			memcpy(previous_acc[i]+2,data_matrix+(64-1)-imu_map[i],2);
+			memcpy(mimu_data[i],data_matrix+(32-1)-imu_map[i],4);
+			memcpy(mimu_data[i]+2,data_matrix+(64-1)-imu_map[i],2);
+			memcpy(mimu_data[i]+3,data_matrix+(96-1)-imu_map[i],4);
+			memcpy(mimu_data[i]+5,data_matrix+(128-1)-imu_map[i],2);
+			memcpy(mimu_data[i]+6,(uint16_t*)(data_matrix+(64-1)-imu_map[i])+1,2);
+		}
 	}
+	last_read = this_read;
 }

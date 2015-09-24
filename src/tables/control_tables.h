@@ -70,8 +70,9 @@ typedef const struct {
 
 #define FRONTEND_PREPROC 0x10
 #define FRONTEND_STATDET 0x11
-#define FRONTEND_POSTPROC 0x12
+#define FRONTEND_BIASEST 0x12
 #define READ_INERTIAL 0x13
+#define FRONTEND_CONVCOMP 0x14
 
 #define MECHANIZATION 0x20
 #define TIME_UPDATE 0x21
@@ -104,6 +105,8 @@ typedef const struct {
 #define T2S2F 0x16
 #define ZUPT_SID 0x17
 #define ZARU_SID 0x18
+#define TH_ZUPT_SID 0x19
+#define TH_ZARU_SID 0x1A
 // Filtering states
 #define POSITION_SID 0x20
 #define VELOCITY_SID 0x21

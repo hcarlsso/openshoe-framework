@@ -55,6 +55,8 @@ static state_t_info T1s2f_sti = {T1S2F, (void*) &T1s2f, sizeof(T1s2f)};
 static state_t_info T2s2f_sti = {T2S2F, (void*) &T2s2f, sizeof(T2s2f)};
 static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(zupt)};
 static state_t_info zaru_sti = {ZARU_SID, (void*) &zaru, sizeof(zaru)};
+static state_t_info th_zupt_sti = {TH_ZUPT_SID, (void*) &th_zupt, sizeof(th_zupt)};
+static state_t_info th_zaru_sti = {TH_ZARU_SID, (void*) &th_zaru, sizeof(th_zaru)};
 static state_t_info pos_sti = {POSITION_SID, (void*) pos, sizeof(pos)};
 static state_t_info vel_sti = {VELOCITY_SID, (void*) vel, sizeof(vel)};
 static state_t_info quat_sti = {QUATERNION_SID, (void*) quat, sizeof(quat)};
@@ -146,6 +148,8 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &T2s2f_sti,
 												   &zupt_sti,
 												   &zaru_sti,
+												   &th_zupt_sti,
+												   &th_zaru_sti,
 												   &pos_sti,
 								 	               &vel_sti,
 												   &quat_sti,

@@ -45,8 +45,9 @@ static proc_func_info empty_process_sequence_info = {EMPTY_PROCESS_SEQUENCE,&emp
 static proc_func_info state_output_if_counter_info = {STATE_OUTPUT_IF_COUNTER,&state_output_if_counter,0};
 static proc_func_info frontend_preproc_info = {FRONTEND_PREPROC,&frontend_preproc,0};
 static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statdet,0};
-static proc_func_info frontend_postproc_info = {FRONTEND_POSTPROC,&frontend_postproc,0};
-static proc_func_info imu_read_info = {READ_INERTIAL,&imu_read,0};	
+static proc_func_info frontend_biasest_info = {FRONTEND_BIASEST,&frontend_biasest,0};
+static proc_func_info imu_read_info = {READ_INERTIAL,&imu_read,0};
+static proc_func_info frontend_convcomp_info = {FRONTEND_CONVCOMP,&frontend_convcomp,0};
 static proc_func_info initial_alignment_info = {FRONTEND_INITIAL_ALIGNMENT,&frontend_initial_alignment,0};
 static proc_func_info strapdown_mechanisation_equations_info = {MECHANIZATION,&strapdown_mechanisation_equations,0};
 static proc_func_info time_up_data_info = {TIME_UPDATE,&time_up_data,0};
@@ -67,8 +68,9 @@ static const proc_func_info* processing_functions[] = {&store_and_empty_proc_seq
 													   &stepwise_system_reset_info,
 													   &frontend_preproc_info,
 													   &frontend_statdet_info,
-													   &frontend_postproc_info,
+													   &frontend_biasest_info,
 													   &imu_read_info,
+													   &frontend_convcomp_info,
 													   &initial_alignment_info};
 
 // Array containing the processing functions to run
