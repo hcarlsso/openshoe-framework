@@ -10,17 +10,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define COMMAND_FROM_USB 1
-
-
 void usb_interface_init(void);
-void usb_transmit_data(void);
-void usb_receive_command(void);
 
-void usb_set_state_output(uint8_t state_id, uint8_t divider);
-void usb_set_conditional_output(uint8_t state_id);
-void usb_set_lossless_transmission(bool onoff);
-
+bool is_usb_attached(void);
+bool is_data_available(void);
+void get_byte_from_usb(uint8_t* write_position);
+uint32_t usb_write_buf_nonblocking(const uint8_t* buf, uint32_t size);
+uint32_t usb_write_buf_nonblocking_allornothing(const uint8_t* buf, uint32_t size);
 
 #include <stdbool.h>
 // USB vbus callback function

@@ -9,11 +9,7 @@
 #include "response_functions.h"
 #include "response_util.h"
 #include "external_interface.h"
-#include "bluetooth_interface.h"
-#include "usb_interface.h"
 #include "process_sequence.h"
-#include "package_queue.h"
-#include "usb_package_queue.h"
 #include "control_tables.h"
 
 #define OUTPUT_LOSSY_MASK   0x10
@@ -21,14 +17,14 @@
 void handle_ack(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint16_t package_number = (cmd_arg[1][0]<<8) | cmd_arg[1][1];
-	receive_package_ack(package_number,from);
+	receive_pkg_ack(package_number,from);
 }
 
 void do_nothing(uint8_t** arg){;}
 
 void get_mcu_serial(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
-	set_conditional_output(MCU_ID_SID,from);
+	set_cond_output(MCU_ID_SID,from);
 }
 
 void input_imu_rd(uint8_t** cmd_arg){
@@ -65,13 +61,13 @@ void output_state(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t state_id = cmd_arg[1][0];
 	uint8_t mode_select = cmd_arg[2][0];
-	set_lossless_transmission(mode_select & OUTPUT_LOSSY_MASK,from);
+	set_lossless_trans(mode_select & OUTPUT_LOSSY_MASK,from);
 	state_output(from,mode_select,state_id);
 }
 void output_multiple_states(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint8_t mode_select = cmd_arg[9][0];
-	set_lossless_transmission(mode_select & OUTPUT_LOSSY_MASK,from);
+	set_lossless_trans(mode_select & OUTPUT_LOSSY_MASK,from);
 	for (int i=1;i<=8;i++)
 		state_output(from,mode_select,cmd_arg[i][0]);
 }
@@ -82,10 +78,7 @@ void all_output_off(uint8_t** cmd_arg){
 		set_state_output(i,0,from);
 	uint8_t tmp[8] = {0,0,0,0,0,0,0,0};
 	state_output_if_setup(NOSTATE_SID,0,0,tmp,0);
-	if (from & COMMAND_FROM_BT)
-		empty_package_queue();
-	if(from & COMMAND_FROM_USB)
-		usb_empty_package_queue();
+	empty_pkg_queues(from);
 }
 void state_if_setup_resp(uint8_t** cmd_arg){
 	state_output_if_setup(cmd_arg[1][0],(uint8_t)cmd_arg[0],cmd_arg[2][0],cmd_arg[3],0);
@@ -103,7 +96,7 @@ void output_imu_rd(uint8_t** cmd_arg){
 	imu_selector |= cmd_arg[1][2]<<8;
 	imu_selector |= cmd_arg[1][3];
 	uint8_t mode_select = cmd_arg[2][0];
-	set_lossless_transmission(mode_select & OUTPUT_LOSSY_MASK,from);
+	set_lossless_trans(mode_select & OUTPUT_LOSSY_MASK,from);
 	for (uint8_t i=0;i<32;i++) {
 		if( (imu_selector>>i)&1 ){
 			if (mode_select & OUTPUT_INERTIAL_MASK)
@@ -112,7 +105,7 @@ void output_imu_rd(uint8_t** cmd_arg){
 				state_output(from,mode_select,IMU0_TEMP_SID+i);
 		}
 	}
-	set_state_output(IMU_TS_SID,mode_select & OUTPUT_DIVIDER_MASK,from);
+	state_output(from,mode_select,IMU_TS_SID);
 }
 
 void set_proc(uint8_t** cmd_arg){
@@ -166,7 +159,7 @@ void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	empty_process_sequence();
 	all_output_off(cmd_arg);
 	// Make sure we have error-resistant transmission
-	set_lossless_transmission(true,from);
+	set_lossless_trans(true,from);
 	// Reset step counter;
 	uint16_t zero_value=0;
 	set_state(STEP_COUNTER_SID,(void*)&zero_value);
@@ -216,7 +209,7 @@ void normal_imu(uint8_t** cmd_arg){
 	uint8_t mode_select = cmd_arg[1][0];
 	all_output_off(cmd_arg);
 	empty_process_sequence();
-	set_lossless_transmission(mode_select & OUTPUT_LOSSY_MASK,from);
+	set_lossless_trans(mode_select & OUTPUT_LOSSY_MASK,from);
 	state_output(from,mode_select,IMU_TS_SID);
 	state_output(from,mode_select,U_K_SID);
 	set_elem_in_process_sequence(READ_INERTIAL,0);
@@ -227,7 +220,7 @@ void normal_imu_with_bias_est(uint8_t** cmd_arg){
 	uint8_t mode_select = cmd_arg[1][0];
 	all_output_off(cmd_arg);
 	empty_process_sequence();
-	set_lossless_transmission(mode_select & OUTPUT_LOSSY_MASK,from);
+	set_lossless_trans(mode_select & OUTPUT_LOSSY_MASK,from);
 	state_output_if_setup(NOSTATE_SID,from,mode_select,NULL,128); // Wait until buffers have filled up
 	state_output_if_state_add(IMU_TS_SID,0);
 	state_output_if_state_add(U_K_SID,1);

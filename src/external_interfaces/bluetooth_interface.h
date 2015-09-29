@@ -10,15 +10,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define COMMAND_FROM_BT 2
-
-
 void bt_interface_init(void);
-void bt_receive_command(void);
-void bt_transmit_data(void);
+bool is_bluetooth_paired(void);
 
-void bt_set_state_output(uint8_t state_id, uint8_t divider);
-void bt_set_conditional_output(uint8_t state_id);
-void bt_set_lossless_transmission(bool onoff);
+uint32_t bt_send_buf(const uint8_t* buf,uint32_t nob);
+uint32_t bt_send_buf_allornothing(const uint8_t* buf,uint32_t nob);
+bool bt_is_data_available(void);
+uint8_t bt_get_byte(uint8_t* dest);
+
 
 #endif /* BLUETOOTH_INTERFACE_H_ */

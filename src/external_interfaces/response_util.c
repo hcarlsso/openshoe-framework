@@ -15,7 +15,7 @@
 // SET OUTPUT GIVEN MODE BYTE
 void state_output(uint8_t from,uint8_t mode,uint8_t state_id){
 	if (mode & OUTPUT_PULL_MASK)
-		set_conditional_output(state_id,from);
+		set_cond_output(state_id,from);
 	else
 		set_state_output(state_id,mode & OUTPUT_DIVIDER_MASK,from);
 }

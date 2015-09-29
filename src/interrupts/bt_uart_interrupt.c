@@ -29,11 +29,11 @@ uint8_t uart_tx_buf[SIZE_BT_UART_BUF];
 volatile uint32_t uart_tx_buf_write=0;
 volatile uint32_t uart_tx_buf_read=0;
 
-bool bt_is_data_available(void) {
+bool uart_is_data_available(void) {
 	return uart_rx_buf_write!=uart_rx_buf_read;
 }
 
-uint8_t bt_get_byte(uint8_t* dest) {
+uint8_t uart_get_byte(uint8_t* dest) {
 	if (uart_rx_buf_write!=uart_rx_buf_read) {
 		*dest = uart_rx_buf[uart_rx_buf_read];
 		uart_rx_buf_read = (uart_rx_buf_read+1) & BUF_MASK;
@@ -43,7 +43,7 @@ uint8_t bt_get_byte(uint8_t* dest) {
 }
 
 //TODO: Prevent overwriting and return number of written bytes (zero or all?)
-uint32_t bt_send_buf_allornothing(uint8_t* buf,uint32_t nob) {
+uint32_t uart_send_buf_allornothing(const uint8_t* buf,uint32_t nob) {
 	uint32_t space_in_buf = (uart_tx_buf_read-uart_tx_buf_write)&BUF_MASK;
 	space_in_buf = space_in_buf ? space_in_buf-1 : (SIZE_BT_UART_BUF-1);
 	if(space_in_buf<nob)
@@ -66,7 +66,7 @@ uint32_t bt_send_buf_allornothing(uint8_t* buf,uint32_t nob) {
 	return 0;
 }
 
-uint32_t bt_send_buf(uint8_t* buf,uint32_t nob){
+uint32_t uart_send_buf(const uint8_t* buf,uint32_t nob){
 	uint32_t space_in_buf = (uart_tx_buf_read-uart_tx_buf_write)&BUF_MASK;
 	space_in_buf = space_in_buf ? space_in_buf-1 : (SIZE_BT_UART_BUF-1);
 	if(!space_in_buf)
