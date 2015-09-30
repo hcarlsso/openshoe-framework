@@ -56,9 +56,6 @@
 #include <compiler.h>
 #include <status_codes.h>
 
-// From module: EIC - External Interrupt Controller
-#include <eic.h>
-
 // From module: FLASHC - Flash Controller
 #include <flashc.h>
 
@@ -68,18 +65,25 @@
 // From module: Generic board support
 #include <board.h>
 
+// From module: INTC - Interrupt Controller
+#include <intc.h>
+
 // From module: Interrupt management - UC3 implementation
 #include <interrupt.h>
+
+// From module: PM Power Manager - UC3 C0/C1/C2 implementation
+#include <power_clocks_lib.h>
+#include <sleep.h>
 
 // From module: Part identification macros
 #include <parts.h>
 
-// From module: SPI - Serial Peripheral Interface
-#include <spi.h>
+// From module: SCIF System Control Interface - UC3C implementation
+#include <scif_uc3c.h>
 
-// From module: SPI - UC3 implementation
-#include <spi_master.h>
-#include <spi_master.h>
+// From module: Sleep manager - UC3 implementation
+#include <sleepmgr.h>
+#include <uc3/sleepmgr.h>
 
 // From module: System Clock Control - UC3 C implementation
 #include <sysclk.h>
@@ -87,7 +91,23 @@
 // From module: TC - Timer/Counter
 #include <tc.h>
 
+// From module: USART - Serial interface - UC3 implementation
+#include <serial.h>
+
 // From module: USART - Universal Synchronous/Asynchronous Receiver/Transmitter
 #include <usart.h>
+
+// From module: USB - Universial Serial Bus driver (with sleep manager)
+#include <usbc_device.h>
+
+// From module: USB CDC Protocol
+#include <usb_protocol_cdc.h>
+
+// From module: USB Device CDC (Single Interface Device)
+#include <udi_cdc.h>
+
+// From module: USB Device Stack Core (Common API)
+#include <udc.h>
+#include <udd.h>
 
 #endif // ASF_H

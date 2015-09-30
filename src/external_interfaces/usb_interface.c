@@ -38,8 +38,9 @@ bool is_data_available(void) {
 	return udi_cdc_is_rx_ready();
 }
 
-void get_byte_from_usb(uint8_t* write_position) {
+uint8_t get_byte_from_usb(uint8_t* write_position) {
 	*write_position = udi_cdc_getc();
+	return 1;
 }
 
 uint32_t usb_write_buf_nonblocking(const uint8_t* buf, uint32_t size) {

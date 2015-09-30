@@ -3,7 +3,9 @@
  *
  * \brief FLASHC driver for AVR32 UC3.
  *
- * Copyright (C) 2009 - 2011 Atmel Corporation. All rights reserved.
+ * Copyright (c) 2009-2015 Atmel Corporation. All rights reserved.
+ *
+ * \asf_license_start
  *
  * \page License
  *
@@ -11,34 +13,48 @@
  * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
+ *    this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
  * 3. The name of Atmel may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *    from this software without specific prior written permission.
  *
  * 4. This software may only be redistributed and used in connection with an
- * Atmel AVR product.
+ *    Atmel microcontroller product.
  *
  * THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
  * EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR
  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * \asf_license_stop
+ *
+ */
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 
 
 #ifndef _FLASHC_H_
 #define _FLASHC_H_
+
+/**
+ * \defgroup group_avr32_drivers_flashc MEMORY - FLASHC - Flash Controller
+ *
+ * FLASHC interfaces a flash block with the 32-bit internal HSB bus.
+ *
+ * \{
+ */
 
 #include <avr32/io.h>
 #include <stddef.h>
@@ -540,7 +556,7 @@ extern bool flashc_erase_all_gp_fuses(bool check);
  * \note The FLASHC error status returned by \ref flashc_is_lock_error and
  *       \ref flashc_is_programming_error is updated.
  *
- * \note A write operation can only clear bits; in other words, an erase operation 
+ * \note A write operation can only clear bits; in other words, an erase operation
  *  must first be done if some bits need to be set to 1.
  *
  * \note The actual number of general-purpose fuse bits implemented by hardware
@@ -563,7 +579,7 @@ extern void flashc_write_gp_fuse_bit(unsigned int gp_fuse_bit, bool value);
  * \note The FLASHC error status returned by \ref flashc_is_lock_error and
  *       \ref flashc_is_programming_error is updated.
  *
- * \note A write operation can only clear bits; in other words, an erase operation 
+ * \note A write operation can only clear bits; in other words, an erase operation
  *  must first be done if some bits need to be set to 1.
  *
  * \note The actual number of general-purpose fuse bits implemented by hardware
@@ -582,7 +598,7 @@ extern void flashc_write_gp_fuse_bitfield(unsigned int pos, unsigned int width, 
  * \note The FLASHC error status returned by \ref flashc_is_lock_error and
  *       \ref flashc_is_programming_error is updated.
  *
- * \note A write operation can only clear bits; in other words, an erase operation 
+ * \note A write operation can only clear bits; in other words, an erase operation
  *  must first be done if some bits need to be set to 1.
  *
  * \note The actual number of general-purpose fuse bits implemented by hardware
@@ -600,7 +616,7 @@ extern void flashc_write_gp_fuse_byte(unsigned int gp_fuse_byte, uint8_t value);
  * \note The FLASHC error status returned by \ref flashc_is_lock_error and
  *       \ref flashc_is_programming_error is updated.
  *
- * \note A write operation can only clear bits; in other words, an erase operation 
+ * \note A write operation can only clear bits; in other words, an erase operation
  *  must first be done if some bits need to be set to 1.
  *
  * \note The actual number of general-purpose fuse bits implemented by hardware
@@ -775,7 +791,7 @@ extern bool flashc_erase_all_pages(bool check);
  * \note The FLASHC error status returned by \ref flashc_is_lock_error and
  *       \ref flashc_is_programming_error is updated.
  *
- * \note A write operation can only clear bits; in other words, an erase operation 
+ * \note A write operation can only clear bits; in other words, an erase operation
  *  must first be done if some bits need to be set to 1.
  */
 extern void flashc_write_page(int page_number);
@@ -810,7 +826,7 @@ extern bool flashc_erase_user_page(bool check);
  * \note The FLASHC error status returned by \ref flashc_is_lock_error and
  *       \ref flashc_is_programming_error is updated.
  *
- * \note A write operation can only clear bits; in other words, an erase operation 
+ * \note A write operation can only clear bits; in other words, an erase operation
  *  must first be done if some bits need to be set to 1.
  */
 extern void flashc_write_user_page(void);
@@ -952,7 +968,7 @@ extern volatile void *flashc_memset64(volatile void *dst, uint64_t src, size_t n
  *         from the source pointed to by \a src.
  *
  * The destination areas that are not within the flash
- * array or the User page are caught by an assert() operation.
+ * array or the User page are caught by an Assert() operation.
  *
  * All pointer and size alignments are supported.
  *
@@ -982,7 +998,7 @@ extern volatile void *flashc_memcpy(volatile void *dst, const void *src, size_t 
 
 #if UC3C
 
-/*! \brief Depednding to the CPU frequency, set the wait states of flash read
+/*! \brief Depending to the CPU frequency, set the wait states of flash read
  *         accesses and enable or disable the High speed read mode.
  *
  * \param cpu_f_hz The CPU frequency
@@ -992,5 +1008,8 @@ void flashc_set_flash_waitstate_and_readmode(unsigned long cpu_f_hz);
 
 //! @}
 
+/**
+ * \}
+ */
 
 #endif  // _FLASHC_H_
