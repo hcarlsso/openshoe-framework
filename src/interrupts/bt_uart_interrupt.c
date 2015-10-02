@@ -51,16 +51,6 @@ uint32_t uart_send_buf_allornothing(const uint8_t* buf,uint32_t nob) {
 	int nob_to_end_of_buf = min(nob,SIZE_BT_UART_BUF-uart_tx_buf_write);
 	memcpy(uart_tx_buf+uart_tx_buf_write,buf,nob_to_end_of_buf);
 	memcpy(uart_tx_buf,buf+nob_to_end_of_buf,max(0,nob-nob_to_end_of_buf));
-//	for (uint32_t i=0;i<nob;i++)
-//		uart_tx_buf[(uart_tx_buf_write+i) & BUF_MASK]=buf[i];
-//	int i=0;
-//	while(nob>0 && uart_rx_buf_write!=uart_rx_buf_read){
-		//	for (uint32_t i=0;i<nob;i++){
-//		uart_tx_buf[uart_tx_buf_write]=buf[i];
-//		uart_rx_buf_write=uart_rx_buf_write + 1 & BUF_MASK;
-//		nob--;
-//		i++;
-//	}
 	uart_tx_buf_write = (uart_tx_buf_write+nob) & BUF_MASK;
 	BT_UART.ier = AVR32_USART_IER_TXRDY_MASK;
 	return 0;
@@ -70,7 +60,7 @@ uint32_t uart_send_buf(const uint8_t* buf,uint32_t nob){
 	uint32_t space_in_buf = (uart_tx_buf_read-uart_tx_buf_write)&BUF_MASK;
 	space_in_buf = space_in_buf ? space_in_buf-1 : (SIZE_BT_UART_BUF-1);
 	if(!space_in_buf)
-		return 0;
+		return nob;
 	uint32_t nr_bytes_left = 0;
 	if(space_in_buf<nob){
 		nr_bytes_left = nob-space_in_buf;
