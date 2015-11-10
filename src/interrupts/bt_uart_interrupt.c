@@ -42,7 +42,6 @@ uint8_t uart_get_byte(uint8_t* dest) {
 	return 0;
 }
 
-//TODO: Prevent overwriting and return number of written bytes (zero or all?)
 uint32_t uart_send_buf_allornothing(const uint8_t* buf,uint32_t nob) {
 	uint32_t space_in_buf = (uart_tx_buf_read-uart_tx_buf_write)&BUF_MASK;
 	space_in_buf = space_in_buf ? space_in_buf-1 : (SIZE_BT_UART_BUF-1);

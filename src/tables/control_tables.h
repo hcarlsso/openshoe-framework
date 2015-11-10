@@ -243,6 +243,7 @@ void processing_functions_init(void);
 extern state_t_info* state_info_access_by_id[SID_LIMIT];
 void system_states_init(void);
 void set_state(uint8_t state_id,void* value);
+void get_state(uint8_t state_id,void* value);
 void* get_state_p(uint8_t state_id);
 uint8_t get_state_size(uint8_t state_id);
 

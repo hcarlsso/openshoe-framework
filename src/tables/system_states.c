@@ -238,6 +238,11 @@ void set_state(uint8_t state_id,void* value){
 		memcpy(state_info_access_by_id[state_id]->state_p,value,state_info_access_by_id[state_id]->state_size);
 }
 
+void get_state(uint8_t state_id,void* value){
+	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
+		memcpy(value,state_info_access_by_id[state_id]->state_p,state_info_access_by_id[state_id]->state_size);
+}
+
 void* get_state_p(uint8_t state_id){
 	if(state_id<SID_LIMIT && state_info_access_by_id[state_id])
 		return state_info_access_by_id[state_id]->state_p;
