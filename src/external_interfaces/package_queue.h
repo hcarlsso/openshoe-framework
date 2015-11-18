@@ -19,7 +19,7 @@ typedef struct package_info {
 	uint8_t flag;
 } package_info;
 
-#define LOG2_PACKAGE_BUFFER_SIZE 12
+#define LOG2_PACKAGE_BUFFER_SIZE 11
 #define PKG_BUFFER_SIZE (1<<LOG2_PACKAGE_BUFFER_SIZE)
 #define MAX_NR_PACKAGES (PKG_BUFFER_SIZE>>2)
 

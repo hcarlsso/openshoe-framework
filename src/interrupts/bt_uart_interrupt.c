@@ -21,13 +21,13 @@
 #define SIZE_BT_UART_BUF (1<<LOG2_SIZE_BT_UART_BUF)
 #define BUF_MASK (SIZE_BT_UART_BUF-1)
 
-uint8_t uart_rx_buf[SIZE_BT_UART_BUF];
-volatile uint32_t uart_rx_buf_write=0;
-volatile uint32_t uart_rx_buf_read=0;
+static uint8_t uart_rx_buf[SIZE_BT_UART_BUF];
+static volatile uint32_t uart_rx_buf_write=0;
+static volatile uint32_t uart_rx_buf_read=0;
 
-uint8_t uart_tx_buf[SIZE_BT_UART_BUF];
-volatile uint32_t uart_tx_buf_write=0;
-volatile uint32_t uart_tx_buf_read=0;
+static uint8_t uart_tx_buf[SIZE_BT_UART_BUF];
+static volatile uint32_t uart_tx_buf_write=0;
+static volatile uint32_t uart_tx_buf_read=0;
 
 bool uart_is_data_available(void) {
 	return uart_rx_buf_write!=uart_rx_buf_read;

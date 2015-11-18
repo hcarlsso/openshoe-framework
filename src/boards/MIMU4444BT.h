@@ -14,6 +14,8 @@
 #define BT_MODULE
 #define BT_PAIRED AVR32_PIN_PD13
 
+#define CAN_INTERFACE
+
 // IMU clock pins
 #define CLK_PORT 3
 #define CLK_PINS ( (1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<8)|(1<<9)|(1<<10) )

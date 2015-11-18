@@ -11,6 +11,7 @@
 #include "parsing_util.h"
 #include "usb_interface.h"
 #include "bluetooth_interface.h"
+#include "can_interface.h"
 #include "package_queue.h"
 
 #include "control_tables.h"
@@ -54,9 +55,17 @@ static uint8_t usb_rx_array[RX_BUFFER_SIZE];
 static uint8_t usb_tx_array[TX_BUFFER_SIZE];
 static extif usbif = {COMMAND_FROM_USB,{0},{0},{0}, {{0},{0},0,0,0,&usb_write_buf_nonblocking,&usb_write_buf_nonblocking_allornothing}, {usb_rx_array,usb_rx_array,usb_rx_array,0}, 0,NULL, {usb_tx_array,usb_tx_array,usb_tx_array,0}, 0,false,&is_usb_attached,&is_data_available,&get_byte_from_usb};
 // Bluetooth interface resources
+#ifdef BT_MODULE
 static uint8_t bt_rx_array[RX_BUFFER_SIZE];
 static uint8_t bt_tx_array[TX_BUFFER_SIZE];
 static extif btif = {COMMAND_FROM_BT,{0},{0},{0}, {{0},{0},0,0,0,&bt_send_buf,&bt_send_buf_allornothing}, {bt_rx_array,bt_rx_array,bt_rx_array,0}, 0,NULL, {bt_tx_array,bt_tx_array,bt_tx_array,0}, 0,false,&is_bluetooth_paired,&bt_is_data_available,&bt_get_byte};
+#endif
+// CAN interface resources
+#ifdef CAN_INTERFACE
+static uint8_t can_rx_array[RX_BUFFER_SIZE];
+static uint8_t can_tx_array[TX_BUFFER_SIZE];
+static extif canif = {COMMAND_FROM_CAN,{0},{0},{0}, {{0},{0},0,0,0,&can_send_buf,&can_send_buf_allornothing}, {can_rx_array,can_rx_array,can_rx_array,0}, 0,NULL, {can_tx_array,can_tx_array,can_tx_array,0}, 0,false,&is_can_ready,&can_is_data_available,&can_get_byte};
+#endif
 
 // Communication logics
 void rxif_cmd(extif* extif_p);
@@ -83,6 +92,9 @@ void external_interface_init(void){
 	#ifdef BT_MODULE
 	bt_interface_init();
 	#endif
+	#ifdef CAN_INTERFACE
+	can_interface_init();
+	#endif
 }
 
 void transmit_data(void){
@@ -91,6 +103,9 @@ void transmit_data(void){
 	#ifdef BT_MODULE
 	txif_data(&btif);
 	#endif
+	#ifdef CAN_INTERFACE
+	txif_data(&canif);
+	#endif
 }
 
 void receive_command(void){
@@ -98,6 +113,9 @@ void receive_command(void){
 	
 	#ifdef BT_MODULE
 	rxif_cmd(&btif);
+	#endif
+	#ifdef CAN_INTERFACE
+	rxif_cmd(&canif);
 	#endif
 }
 
@@ -109,7 +127,10 @@ void set_state_output(uint8_t state_id, uint8_t divider,uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_BT)
 		if_set_state_output(state_id,divider,&btif);
 	#endif
-	
+	#ifdef CAN_INTERFACE
+	if(intern_arg & COMMAND_FROM_CAN)
+	if_set_state_output(state_id,divider,&canif);
+	#endif	
 }
 void set_cond_output(uint8_t state_id,uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_USB)
@@ -119,6 +140,10 @@ void set_cond_output(uint8_t state_id,uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_BT)
 		if_set_cond_output(state_id,&btif);
 	#endif
+	#ifdef CAN_INTERFACE
+	if(intern_arg & COMMAND_FROM_CAN)
+	if_set_cond_output(state_id,&	canif);
+	#endif
 }
 void set_lossless_trans(bool onoff,uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_USB)
@@ -127,6 +152,10 @@ void set_lossless_trans(bool onoff,uint8_t intern_arg){
 	#ifdef BT_MODULE
 	if(intern_arg & COMMAND_FROM_BT)
 		if_set_lossless_trans(onoff,&btif);
+	#endif
+	#ifdef CAN_INTERFACE
+	if(intern_arg & COMMAND_FROM_CAN)
+	if_set_lossless_trans(onoff,&canif);
 	#endif
 }
 
@@ -138,6 +167,10 @@ void empty_pkg_queues(uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_BT)
 		if_empty_pkg_queue(&btif);
 	#endif
+	#ifdef CAN_INTERFACE
+	if(intern_arg & COMMAND_FROM_CAN)
+	if_empty_pkg_queue(&canif);
+	#endif
 }
 
 void receive_pkg_ack(uint16_t package_number, uint8_t intern_arg){
@@ -147,7 +180,11 @@ void receive_pkg_ack(uint16_t package_number, uint8_t intern_arg){
 	#ifdef BT_MODULE
 	if(intern_arg & COMMAND_FROM_BT)
 		if_remove_pkg_from_queue(package_number,&btif);
-	#endif	
+	#endif
+	#ifdef CAN_INTERFACE
+	if(intern_arg & COMMAND_FROM_CAN)
+	if_remove_pkg_from_queue(package_number,&canif);
+	#endif
 }
 
 

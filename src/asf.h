@@ -52,9 +52,24 @@
  * running the ASF driver selector tool. Any changes will be discarded.
  */
 
+// From module: CAN software stack
+#include <can.h>
+
+// From module: CANIF - Control Area Network Interface
+#include <canif.h>
+
+// From module: CPU Cycle Counter
+#include <cycle_counter.h>
+
+// From module: Calendar functionality
+#include <calendar.h>
+
 // From module: Compiler abstraction layer and code utilities
 #include <compiler.h>
 #include <status_codes.h>
+
+// From module: Delay routines
+#include <delay.h>
 
 // From module: FLASHC - Flash Controller
 #include <flashc.h>
