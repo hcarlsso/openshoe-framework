@@ -410,7 +410,7 @@ void mpu9150_2_port_interface_init(void){
 
 
 // IMU array data
-extern int16_t mimu_data[32][7];
+extern int16_t mimu_data[32][10];
 
 // Buffers for reading data from the IMUs
 static uint32_t data_array_port0[128];

@@ -70,11 +70,16 @@ void send_and_remove_package_from_queue(pkg_queue* queue) {
 }
 
 void send_package_from_queue(pkg_queue* queue) {
-	if (is_buffer_nonempty(queue) && (queue->pkg_delay_counter==0 || queue->pkg_info[queue->oldest_pkg].flag & SINGLE_TRANSMIT))
-		if(!queue->send_buf_allornothing(queue->pkg_buffer+queue->pkg_info[queue->oldest_pkg].pos,queue->pkg_info[queue->oldest_pkg].size)){
+	if (is_buffer_nonempty(queue)){
+		if (queue->pkg_delay_counter==0 || queue->pkg_info[queue->oldest_pkg].flag & SINGLE_TRANSMIT){ // TODO: is latter requirement really necessary. In this case, delay counter is 0 anyway?
+			if(!queue->send_buf_allornothing(queue->pkg_buffer+queue->pkg_info[queue->oldest_pkg].pos,queue->pkg_info[queue->oldest_pkg].size)){
+				queue->pkg_delay_counter = (queue->pkg_delay_counter+1) & RESEND_DELAY_MASK;
+				if (queue->pkg_info[queue->oldest_pkg].flag & SINGLE_TRANSMIT)
+					remove_oldest_package(queue);
+			}
+		} else {
 			queue->pkg_delay_counter = (queue->pkg_delay_counter+1) & RESEND_DELAY_MASK;
-			if (queue->pkg_info[queue->oldest_pkg].flag & SINGLE_TRANSMIT)
-				remove_oldest_package(queue);
+		}
 	}
 }
 

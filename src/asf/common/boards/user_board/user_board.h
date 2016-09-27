@@ -21,6 +21,8 @@
 #  include "MIMU22BT.h"
 #elif defined(MIMU4444BT)
 #  include "MIMU4444BT.h"
+#elif defined(MIMU22BTv3)
+#  include "MIMU22BTv3.h"
 #else
 #  error No known board specified
 #endif

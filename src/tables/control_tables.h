@@ -73,6 +73,7 @@ typedef const struct {
 #define FRONTEND_BIASEST 0x12
 #define READ_INERTIAL 0x13
 #define FRONTEND_CONVCOMP 0x14
+#define FRONTEND_CONV16 0x15
 
 #define MECHANIZATION 0x20
 #define TIME_UPDATE 0x21
@@ -80,13 +81,16 @@ typedef const struct {
 #define FRONTEND_INITIAL_ALIGNMENT 0x23
 #define STEPWISE_SYSTEM_RESET 0x24
 
+#define BACKWARD 0x25
+#define FORWARD 0x26
+
 //@}
 
 ///  \name External state IDs
 ///  Macros for external state IDs
 //@{
 // Maximum value of state ID (255)
-#define SID_LIMIT 0x80
+#define SID_LIMIT 0xB0
 #define NOSTATE_SID 0x00
 // State IDs
 // System states
@@ -107,6 +111,7 @@ typedef const struct {
 #define ZARU_SID 0x18
 #define TH_ZUPT_SID 0x19
 #define TH_ZARU_SID 0x1A
+#define U_INT16_K_SID 0x1B
 // Filtering states
 #define POSITION_SID 0x20
 #define VELOCITY_SID 0x21
@@ -118,6 +123,11 @@ typedef const struct {
 #define DP_SID 0x31
 #define STEP_COUNTER_SID 0x32
 #define	FILTER_RESET_FLAG_SID 0x33
+// Smoothing states
+#define PNN_SID 0x38
+#define PR_SID 0x39
+#define SMOOTHING_DATA_SID 0x3A
+#define SMOOTHING_DONE_SID 0x3B
 // MIMU raw register states
 #define IMU0_RD_SID 0x40
 #define IMU1_RD_SID (IMU0_RD_SID+1)
@@ -183,6 +193,52 @@ typedef const struct {
 #define IMU29_TEMP_SID (IMU0_TEMP_SID+29)
 #define IMU30_TEMP_SID (IMU0_TEMP_SID+30)
 #define IMU31_TEMP_SID (IMU0_TEMP_SID+31)
+// Process sequence time stamps
+#define PS_DT0_SID 0x80
+#define PS_DT1_SID (PS_DT0_SID+1)
+#define PS_DT2_SID (PS_DT0_SID+2)
+#define PS_DT3_SID (PS_DT0_SID+3)
+#define PS_DT4_SID (PS_DT0_SID+4)
+#define PS_DT5_SID (PS_DT0_SID+5)
+#define PS_DT6_SID (PS_DT0_SID+6)
+#define PS_DT7_SID (PS_DT0_SID+7)
+#define PS_DT8_SID (PS_DT0_SID+8)
+#define PS_DT9_SID (PS_DT0_SID+9)
+#define PS_DT10_SID (PS_DT0_SID+10)
+#define PS_DT11_SID (PS_DT0_SID+11)
+// MIMU raw mag register states
+#define IMU0_MAG_SID 0x90
+#define IMU1_MAG_SID (IMU0_MAG_SID+1)
+#define IMU2_MAG_SID (IMU0_MAG_SID+2)
+#define IMU3_MAG_SID (IMU0_MAG_SID+3)
+#define IMU4_MAG_SID (IMU0_MAG_SID+4)
+#define IMU5_MAG_SID (IMU0_MAG_SID+5)
+#define IMU6_MAG_SID (IMU0_MAG_SID+6)
+#define IMU7_MAG_SID (IMU0_MAG_SID+7)
+#define IMU8_MAG_SID (IMU0_MAG_SID+8)
+#define IMU9_MAG_SID (IMU0_MAG_SID+9)
+#define IMU10_MAG_SID (IMU0_MAG_SID+10)
+#define IMU11_MAG_SID (IMU0_MAG_SID+11)
+#define IMU12_MAG_SID (IMU0_MAG_SID+12)
+#define IMU13_MAG_SID (IMU0_MAG_SID+13)
+#define IMU14_MAG_SID (IMU0_MAG_SID+14)
+#define IMU15_MAG_SID (IMU0_MAG_SID+15)
+#define IMU16_MAG_SID (IMU0_MAG_SID+16)
+#define IMU17_MAG_SID (IMU0_MAG_SID+17)
+#define IMU18_MAG_SID (IMU0_MAG_SID+18)
+#define IMU19_MAG_SID (IMU0_MAG_SID+19)
+#define IMU20_MAG_SID (IMU0_MAG_SID+20)
+#define IMU21_MAG_SID (IMU0_MAG_SID+21)
+#define IMU22_MAG_SID (IMU0_MAG_SID+22)
+#define IMU23_MAG_SID (IMU0_MAG_SID+23)
+#define IMU24_MAG_SID (IMU0_MAG_SID+24)
+#define IMU25_MAG_SID (IMU0_MAG_SID+25)
+#define IMU26_MAG_SID (IMU0_MAG_SID+26)
+#define IMU27_MAG_SID (IMU0_MAG_SID+27)
+#define IMU28_MAG_SID (IMU0_MAG_SID+28)
+#define IMU29_MAG_SID (IMU0_MAG_SID+29)
+#define IMU30_MAG_SID (IMU0_MAG_SID+30)
+#define IMU31_MAG_SID (IMU0_MAG_SID+31)
 //@}
 
 ///  \name Command IDs
@@ -206,6 +262,7 @@ typedef const struct {
 #define OUTPUT_ALL_OFF 0x22
 #define STATE_IF_SETUP 0x23
 #define OUTPUT_IMU_RD 0x28
+#define SET_IMU_BANDWIDTH 0x29
 #define RUN_PROC 0x30
 #define RUN_MULT_PROC 0x31
 #define ALL_PROC_OFF 0x32
@@ -213,10 +270,12 @@ typedef const struct {
 #define STORE_AND_EMPTY_CMD_ID 0x37
 #define RESTORE_PROC_SEQU_CMD_ID 0x38
 #define RESET_ZUPT_AIDED_INS 0x33
+#define SMOOTHED_ZUPT_AIDED_INS 0x43
 #define STEPWISE_DEAD_RECKONING 0x34
 #define MIMU_FRONTEND 0x35
 #define NORMAL_IMU 0x40
 #define NORMAL_IMU_WITH_BIAS_EST 0x41
+#define GP_TEST_ID 0x42
 //@}
 
 // Global variables used to access command information

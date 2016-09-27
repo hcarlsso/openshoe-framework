@@ -27,6 +27,7 @@
 
 #include "control_tables.h"
 #include "inertial_frontend.h"
+#include "smoothing.h"
 #include "nav_eq.h"
 #include "process_sequence.h"
 #include "response_util.h"
@@ -48,11 +49,14 @@ static proc_func_info frontend_statdet_info = {FRONTEND_STATDET,&frontend_statde
 static proc_func_info frontend_biasest_info = {FRONTEND_BIASEST,&frontend_biasest,0};
 static proc_func_info imu_read_info = {READ_INERTIAL,&imu_read,0};
 static proc_func_info frontend_convcomp_info = {FRONTEND_CONVCOMP,&frontend_convcomp,0};
+static proc_func_info frontend_conv16_info = {FRONTEND_CONV16,&frontend_conv16,0};
 static proc_func_info initial_alignment_info = {FRONTEND_INITIAL_ALIGNMENT,&frontend_initial_alignment,0};
 static proc_func_info strapdown_mechanisation_equations_info = {MECHANIZATION,&strapdown_mechanisation_equations,0};
 static proc_func_info time_up_data_info = {TIME_UPDATE,&time_up_data,0};
 static proc_func_info zupt_update_info = {ZUPT_UPDATE,&zupt_update,0};
 static proc_func_info stepwise_system_reset_info = {STEPWISE_SYSTEM_RESET,&stepwise_system_reset,0};
+static proc_func_info backward_info = {BACKWARD,&backward,0};
+static proc_func_info forward_info = {FORWARD,&forward,0};
 //@}
 
 static const proc_func_info* processing_functions[] = {&store_and_empty_proc_sequ_info,
@@ -71,7 +75,10 @@ static const proc_func_info* processing_functions[] = {&store_and_empty_proc_seq
 													   &frontend_biasest_info,
 													   &imu_read_info,
 													   &frontend_convcomp_info,
-													   &initial_alignment_info};
+													   &frontend_conv16_info,
+													   &initial_alignment_info,
+													   &backward_info,
+													   &forward_info};
 
 // Array containing the processing functions to run
 proc_func_info* processing_functions_by_id[PID_LIMIT];

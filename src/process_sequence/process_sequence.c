@@ -23,6 +23,8 @@
 static processing_function_p process_sequence[PROCESS_SEQUENCE_SIZE] = {NULL};	
 /// Temporary storage for copy of processing sequence.
 static processing_function_p process_sequence_storage[PROCESS_SEQUENCE_SIZE] = {NULL};
+	
+uint32_t ps_dt[PROCESS_SEQUENCE_SIZE] = {0};
 
 void process_sequence_init(void){
 	//set_elem_in_process_sequence(READ_INERTIAL,0);
@@ -30,9 +32,15 @@ void process_sequence_init(void){
 
 /// Execute all non-NULL functions in the processing sequence.
 void run_process_sequence(void){
-	for(int i=0;i<PROCESS_SEQUENCE_SIZE;i++)
+	uint32_t ps_ts0 = Get_system_register(AVR32_COUNT);
+	uint32_t ps_ts1;
+	for(int i=0;i<PROCESS_SEQUENCE_SIZE;i++){
 		if(process_sequence[i])
 			process_sequence[i]();
+		ps_ts1 = Get_system_register(AVR32_COUNT);
+		ps_dt[i] = ps_ts1-ps_ts0;
+		ps_ts0 = ps_ts1;
+	}
 }
 
 /// Sets alla elements in processing sequence to NULL.

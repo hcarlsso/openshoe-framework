@@ -7,11 +7,10 @@
 
 #ifndef CAN_INTERFACE_H_
 #define CAN_INTERFACE_H_
+//#ifdef CAN_INTERFACE
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#define COMMAND_FROM_CAN 4
 
 void can_interface_init(void);
 bool is_can_ready(void);
@@ -21,5 +20,5 @@ uint32_t can_send_buf_allornothing(const uint8_t* buf,uint32_t nob);
 bool     can_is_data_available(void);
 uint8_t  can_get_byte(uint8_t* dest);
 
-
+//#endif
 #endif /* CAN_INTERFACE_H_ */

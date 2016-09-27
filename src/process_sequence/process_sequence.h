@@ -22,10 +22,11 @@
 #include <stdint.h>
 
 /// Size of process sequence
-#define PROCESS_SEQUENCE_SIZE 10
-#define PROCESS_SEQUENCE_SIZE_M1 9
+#define PROCESS_SEQUENCE_SIZE 12
 /// Typedefinition for functions in the process sequence
 typedef void (*processing_function_p)(void);
+
+extern uint32_t ps_dt[PROCESS_SEQUENCE_SIZE];
 
 void process_sequence_init(void);
 

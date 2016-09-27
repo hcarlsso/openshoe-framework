@@ -32,6 +32,11 @@
 #include "nav_eq.h"
 #include "timing_control.h"
 #include "imu_interface.h"
+#include "process_sequence.h"
+#if defined(SMOOTHING)
+#  include "smoothing.h"
+#endif
+
 
 // General purpose ID
 uint8_t gp_id;
@@ -57,6 +62,7 @@ static state_t_info zupt_sti = {ZUPT_SID, (void*) &zupt, sizeof(zupt)};
 static state_t_info zaru_sti = {ZARU_SID, (void*) &zaru, sizeof(zaru)};
 static state_t_info th_zupt_sti = {TH_ZUPT_SID, (void*) &th_zupt, sizeof(th_zupt)};
 static state_t_info th_zaru_sti = {TH_ZARU_SID, (void*) &th_zaru, sizeof(th_zaru)};
+static state_t_info u_int16_k_sti = {U_INT16_K_SID, (void*) &u_int16_k, sizeof(u_int16_k)};
 static state_t_info pos_sti = {POSITION_SID, (void*) pos, sizeof(pos)};
 static state_t_info vel_sti = {VELOCITY_SID, (void*) vel, sizeof(vel)};
 static state_t_info quat_sti = {QUATERNION_SID, (void*) quat, sizeof(quat)};
@@ -66,6 +72,12 @@ static state_t_info dx_sti = {DX_SID, (void*) dx, sizeof(dx)};
 static state_t_info dP_sti = {DP_SID, (void*) dP, sizeof(dP)};
 static state_t_info step_counter_sti = {STEP_COUNTER_SID, (void*) &step_counter, sizeof(step_counter)};
 static state_t_info filter_reset_flag_sti = {FILTER_RESET_FLAG_SID, (void*) &filter_reset_flag, sizeof(filter_reset_flag)};
+#if defined(SMOOTHING)
+static state_t_info Pnn_sti = {PNN_SID, (void*) Pnn, sizeof(Pnn)};
+static state_t_info Pr_sti = {PR_SID, (void*) Pr, sizeof(Pr)};
+static state_t_info smoothing_data_sti = {SMOOTHING_DATA_SID, (void*) &send_buf, sizeof(send_buf)};
+static state_t_info smoothing_done_sti = {SMOOTHING_DONE_SID, (void*) &smoothing_done, sizeof(smoothing_done)};
+#endif
 static state_t_info imu0_rd_sti = {IMU0_RD_SID, (void*) mimu_data[0], 12};
 static state_t_info imu1_rd_sti = {IMU1_RD_SID, (void*) mimu_data[1], 12};
 static state_t_info imu2_rd_sti = {IMU2_RD_SID, (void*) mimu_data[2], 12};
@@ -131,6 +143,52 @@ static state_t_info imu28_temp_sti = {IMU28_TEMP_SID, (void*) &mimu_data[28][6],
 static state_t_info imu29_temp_sti = {IMU29_TEMP_SID, (void*) &mimu_data[29][6], 2};
 static state_t_info imu30_temp_sti = {IMU30_TEMP_SID, (void*) &mimu_data[30][6], 2};
 static state_t_info imu31_temp_sti = {IMU31_TEMP_SID, (void*) &mimu_data[31][6], 2};
+
+static state_t_info ps_dt0_sti = {PS_DT0_SID, (void*) &ps_dt[0], sizeof(ps_dt[0])};
+static state_t_info ps_dt1_sti = {PS_DT1_SID, (void*) &ps_dt[1], sizeof(ps_dt[1])};
+static state_t_info ps_dt2_sti = {PS_DT2_SID, (void*) &ps_dt[2], sizeof(ps_dt[2])};
+static state_t_info ps_dt3_sti = {PS_DT3_SID, (void*) &ps_dt[3], sizeof(ps_dt[3])};
+static state_t_info ps_dt4_sti = {PS_DT4_SID, (void*) &ps_dt[4], sizeof(ps_dt[4])};
+static state_t_info ps_dt5_sti = {PS_DT5_SID, (void*) &ps_dt[5], sizeof(ps_dt[5])};
+static state_t_info ps_dt6_sti = {PS_DT6_SID, (void*) &ps_dt[6], sizeof(ps_dt[6])};
+static state_t_info ps_dt7_sti = {PS_DT7_SID, (void*) &ps_dt[7], sizeof(ps_dt[7])};
+static state_t_info ps_dt8_sti = {PS_DT8_SID, (void*) &ps_dt[8], sizeof(ps_dt[8])};
+static state_t_info ps_dt9_sti = {PS_DT9_SID, (void*) &ps_dt[9], sizeof(ps_dt[9])};
+static state_t_info ps_dt10_sti = {PS_DT10_SID, (void*) &ps_dt[10], sizeof(ps_dt[10])};
+static state_t_info ps_dt11_sti = {PS_DT11_SID, (void*) &ps_dt[11], sizeof(ps_dt[11])};
+	
+static state_t_info imu0_mag_sti = {IMU0_MAG_SID, (void*) &mimu_data[0][7], 6};
+static state_t_info imu1_mag_sti = {IMU1_MAG_SID, (void*) &mimu_data[1][7], 6};
+static state_t_info imu2_mag_sti = {IMU2_MAG_SID, (void*) &mimu_data[2][7], 6};
+static state_t_info imu3_mag_sti = {IMU3_MAG_SID, (void*) &mimu_data[3][7], 6};
+static state_t_info imu4_mag_sti = {IMU4_MAG_SID, (void*) &mimu_data[4][7], 6};
+static state_t_info imu5_mag_sti = {IMU5_MAG_SID, (void*) &mimu_data[5][7], 6};
+static state_t_info imu6_mag_sti = {IMU6_MAG_SID, (void*) &mimu_data[6][7], 6};
+static state_t_info imu7_mag_sti = {IMU7_MAG_SID, (void*) &mimu_data[7][7], 6};
+static state_t_info imu8_mag_sti = {IMU8_MAG_SID, (void*) &mimu_data[8][7], 6};
+static state_t_info imu9_mag_sti = {IMU9_MAG_SID, (void*) &mimu_data[9][7], 6};
+static state_t_info imu10_mag_sti = {IMU10_MAG_SID, (void*) &mimu_data[10][7], 6};
+static state_t_info imu11_mag_sti = {IMU11_MAG_SID, (void*) &mimu_data[11][7], 6};
+static state_t_info imu12_mag_sti = {IMU12_MAG_SID, (void*) &mimu_data[12][7], 6};
+static state_t_info imu13_mag_sti = {IMU13_MAG_SID, (void*) &mimu_data[13][7], 6};
+static state_t_info imu14_mag_sti = {IMU14_MAG_SID, (void*) &mimu_data[14][7], 6};
+static state_t_info imu15_mag_sti = {IMU15_MAG_SID, (void*) &mimu_data[15][7], 6};
+static state_t_info imu16_mag_sti = {IMU16_MAG_SID, (void*) &mimu_data[16][7], 6};
+static state_t_info imu17_mag_sti = {IMU17_MAG_SID, (void*) &mimu_data[17][7], 6};
+static state_t_info imu18_mag_sti = {IMU18_MAG_SID, (void*) &mimu_data[18][7], 6};
+static state_t_info imu19_mag_sti = {IMU19_MAG_SID, (void*) &mimu_data[19][7], 6};
+static state_t_info imu20_mag_sti = {IMU20_MAG_SID, (void*) &mimu_data[20][7], 6};
+static state_t_info imu21_mag_sti = {IMU21_MAG_SID, (void*) &mimu_data[21][7], 6};
+static state_t_info imu22_mag_sti = {IMU22_MAG_SID, (void*) &mimu_data[22][7], 6};
+static state_t_info imu23_mag_sti = {IMU23_MAG_SID, (void*) &mimu_data[23][7], 6};
+static state_t_info imu24_mag_sti = {IMU24_MAG_SID, (void*) &mimu_data[24][7], 6};
+static state_t_info imu25_mag_sti = {IMU25_MAG_SID, (void*) &mimu_data[25][7], 6};
+static state_t_info imu26_mag_sti = {IMU26_MAG_SID, (void*) &mimu_data[26][7], 6};
+static state_t_info imu27_mag_sti = {IMU27_MAG_SID, (void*) &mimu_data[27][7], 6};
+static state_t_info imu28_mag_sti = {IMU28_MAG_SID, (void*) &mimu_data[28][7], 6};
+static state_t_info imu29_mag_sti = {IMU29_MAG_SID, (void*) &mimu_data[29][7], 6};
+static state_t_info imu30_mag_sti = {IMU30_MAG_SID, (void*) &mimu_data[30][7], 6};
+static state_t_info imu31_mag_sti = {IMU31_MAG_SID, (void*) &mimu_data[31][7], 6};
 //@}
 	
 // Array of state data type struct pointers
@@ -150,6 +208,7 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &zaru_sti,
 												   &th_zupt_sti,
 												   &th_zaru_sti,
+												   &u_int16_k_sti,
 												   &pos_sti,
 								 	               &vel_sti,
 												   &quat_sti,
@@ -159,6 +218,12 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &dP_sti,
 												   &step_counter_sti,
 												   &filter_reset_flag_sti,
+												   #if defined(SMOOTHING)
+												   &Pnn_sti,
+												   &Pr_sti,
+												   &smoothing_data_sti,
+												   &smoothing_done_sti,
+												   #endif
 												   &imu0_rd_sti,
 												   &imu1_rd_sti,
 												   &imu2_rd_sti,
@@ -222,7 +287,51 @@ const static state_t_info* state_struct_array[] = {&imu_ts_sti,
 												   &imu28_temp_sti,
 												   &imu29_temp_sti,
 												   &imu30_temp_sti,
-												   &imu31_temp_sti};
+												   &imu31_temp_sti,
+												   &ps_dt0_sti,
+												   &ps_dt1_sti,
+												   &ps_dt2_sti,
+												   &ps_dt3_sti,
+												   &ps_dt4_sti,
+												   &ps_dt5_sti,
+												   &ps_dt6_sti,
+												   &ps_dt7_sti,
+												   &ps_dt8_sti,
+												   &ps_dt9_sti,
+												   &ps_dt10_sti,
+												   &ps_dt11_sti,
+												   &imu0_mag_sti,
+												   &imu1_mag_sti,
+												   &imu2_mag_sti,
+												   &imu3_mag_sti,
+												   &imu4_mag_sti,
+												   &imu5_mag_sti,
+												   &imu6_mag_sti,
+												   &imu7_mag_sti,
+												   &imu8_mag_sti,
+												   &imu9_mag_sti,
+												   &imu10_mag_sti,
+												   &imu11_mag_sti,
+												   &imu12_mag_sti,
+												   &imu13_mag_sti,
+												   &imu14_mag_sti,
+												   &imu15_mag_sti,
+												   &imu16_mag_sti,
+												   &imu17_mag_sti,
+												   &imu18_mag_sti,
+												   &imu19_mag_sti,
+												   &imu20_mag_sti,
+												   &imu21_mag_sti,
+												   &imu22_mag_sti,
+												   &imu23_mag_sti,
+												   &imu24_mag_sti,
+												   &imu25_mag_sti,
+												   &imu26_mag_sti,
+												   &imu27_mag_sti,
+												   &imu28_mag_sti,
+												   &imu29_mag_sti,
+												   &imu30_mag_sti,
+												   &imu31_mag_sti};
 
 
 state_t_info* state_info_access_by_id[SID_LIMIT];

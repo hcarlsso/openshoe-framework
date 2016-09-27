@@ -13,14 +13,9 @@
 #include "bt_uart_interrupt.h"
 #include <usart.h>
 #include "conf_clock.h"
+#include "user_board.h"
 
-#if defined(MIMU22BT)
-#  include "MIMU22BT.h"
-#elif defined(MIMU4444BT)
-#  include "MIMU4444BT.h"
-#else
-#  include "MIMU22BT.h"
-#endif
+#ifdef BT_MODULE
 
 void bt_interface_init(void){
 	
@@ -46,7 +41,7 @@ void bt_interface_init(void){
 	gpio_enable_module(USART_GPIO_MAP, sizeof(USART_GPIO_MAP) / sizeof(USART_GPIO_MAP[0]));
 
 	// Initialize USART in RS232 mode.
-	usart_init_rs232(BT_UART_P, &USART_OPTIONS, CLOCK_FREQ);
+	usart_init_rs232((&AVR32_USART1), &USART_OPTIONS, CLOCK_FREQ);
 }
 
 bool is_bluetooth_paired(void) {
@@ -74,3 +69,5 @@ bool bt_is_data_available(void) {
 uint8_t bt_get_byte(uint8_t* dest) {
 	return uart_get_byte(dest);
 }
+
+#endif /* BT_MODULE */

@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-extern int16_t mimu_data[32][7];
+extern int16_t mimu_data[32][10];
 extern uint32_t ts_u;
 
 void imu_interface_init(void);

@@ -5,8 +5,10 @@
 #include "gpio.h"
 #include "can.h"
 #include "canif.h"
-
+#include "user_board.h"
 #include "scif_uc3c.h"
+
+#ifdef CAN_INTERFACE
 
 
 #define LOG2_SIZE_CAN_BUF 10
@@ -46,7 +48,7 @@ can_msg_t msg_tx_sot = {
 can_msg_t msg_tx_sot = {
   {
     {
-      .id = 0x130,                    // Identifier
+      .id = 0x700,                    // Identifier
       .id_mask  = 0x1ff,              // Mask
     },
   },
@@ -102,7 +104,7 @@ void can_event_callback(U8 handle, U8 event)
 		switch (event) {
 		case CAN_STATUS_COMPLETED:
 			// Free and reset tx msg
-			can_mob_free(0,handle);
+			can_mob_free(CAN_CHANNEL,handle);
 			tx_msg.handle = CAN_MOB_NOT_ALLOCATED;
 			tx_msg.dlc = 0;
 			tx_msg.req_type = CAN_DATA_FRAME;
@@ -110,7 +112,7 @@ void can_event_callback(U8 handle, U8 event)
 			// More to send?
 			if (can_tx_buf_write!=can_tx_buf_read) {
 				// Try to allocate message object (mob)
-				tx_msg.handle = can_mob_alloc(0);
+				tx_msg.handle = can_mob_alloc(CAN_CHANNEL);
 				tx_msg.status = CAN_STATUS_NOT_COMPLETED;
 				if (tx_msg.handle!=CAN_CMD_REFUSED) {
 					// Fill mob
@@ -120,7 +122,7 @@ void can_event_callback(U8 handle, U8 event)
 						tx_msg.dlc++;
 					} while (tx_msg.dlc<MAX_CAN_MSG_SIZE && can_tx_buf_write!=can_tx_buf_read);
 					// Push data
-					can_tx(0, tx_msg.handle, tx_msg.dlc, tx_msg.req_type, tx_msg.can_msg);
+					can_tx(CAN_CHANNEL, tx_msg.handle, tx_msg.dlc, tx_msg.req_type, tx_msg.can_msg);
 				}
 				// Handle case when there is no mob
 				// TODO
@@ -137,11 +139,11 @@ void can_event_callback(U8 handle, U8 event)
 		switch (event) {
 		case (CAN_STATUS_COMPLETED):
 			// Handle handle
-			rx_msg.can_msg->data.u64 = can_get_mob_data(0,handle).u64;
-			rx_msg.can_msg->id = can_get_mob_id(0,handle);
-			rx_msg.dlc = can_get_mob_dlc(0,handle);
+			rx_msg.can_msg->data.u64 = can_get_mob_data(CAN_CHANNEL,handle).u64;
+			rx_msg.can_msg->id = can_get_mob_id(CAN_CHANNEL,handle);
+			rx_msg.dlc = can_get_mob_dlc(CAN_CHANNEL,handle);
 			rx_msg.status = event;
-			can_mob_free(0,handle);
+			can_mob_free(CAN_CHANNEL,handle);
 			// Filter messages
 			// TODO
 			// Copy message to internal buffers
@@ -150,8 +152,8 @@ void can_event_callback(U8 handle, U8 event)
 				can_rx_buf_write=(can_rx_buf_write+1)&CAN_BUF_MASK;
 			}
 			// Set up for new reception
-			rx_msg.handle = can_mob_alloc(0);
-			can_rx(0, rx_msg.handle, rx_msg.req_type, rx_msg.can_msg);
+			rx_msg.handle = can_mob_alloc(CAN_CHANNEL);
+			can_rx(CAN_CHANNEL, rx_msg.handle, rx_msg.req_type, rx_msg.can_msg);
 			// Handle case when there is no mob
 			// TODO
 			break;
@@ -167,7 +169,7 @@ void can_event_callback(U8 handle, U8 event)
 void can_request_tx(void) {
 	// THIS IS NOT SAFE SINCE THE SAME THING IS DONE IN THE INTERRUPT ROUTINE
 	if (can_tx_buf_write!=can_tx_buf_read && tx_msg.status == CAN_STATUS_COMPLETED) {
-		tx_msg.handle = can_mob_alloc(0);
+		tx_msg.handle = can_mob_alloc(CAN_CHANNEL);
 		tx_msg.status = CAN_STATUS_NOT_COMPLETED;
 		if (tx_msg.handle!=CAN_CMD_REFUSED) {
 			// Fill mob
@@ -177,7 +179,7 @@ void can_request_tx(void) {
 				tx_msg.dlc++;
 			} while (tx_msg.dlc<MAX_CAN_MSG_SIZE && can_tx_buf_write!=can_tx_buf_read);
 			// Push data
-			can_tx(0, tx_msg.handle, tx_msg.dlc, tx_msg.req_type, tx_msg.can_msg);
+			can_tx(CAN_CHANNEL, tx_msg.handle, tx_msg.dlc, tx_msg.req_type, tx_msg.can_msg);
 		}
 	}
 }
@@ -193,18 +195,18 @@ void can_interface_init(void){
 
 	// Assign GPIOs to CAN
 	static const gpio_map_t CAN_GPIO_MAP = {
-		{AVR32_CANIF_RXLINE_0_4_PIN, AVR32_CANIF_RXLINE_0_4_FUNCTION},
-		{AVR32_CANIF_TXLINE_0_4_PIN, AVR32_CANIF_TXLINE_0_4_FUNCTION}
+		{CAN_RX_PIN, CAN_RX_FUNC},
+		{CAN_TX_PIN, CAN_TX_FUNC}
 	};
 	gpio_enable_module(CAN_GPIO_MAP,
 	sizeof(CAN_GPIO_MAP) / sizeof(CAN_GPIO_MAP[0]));
 
 	// Initialize CAN channel 0
-	can_init(0, ((uint32_t)&mob_ram_ch0[0]), CANIF_CHANNEL_MODE_NORMAL, can_event_callback);
+	can_init(CAN_CHANNEL, ((uint32_t)&mob_ram_ch0[0]), CANIF_CHANNEL_MODE_NORMAL, can_event_callback);
 
 	// Setup rx
-	rx_msg.handle = can_mob_alloc(0);
-	can_rx(0, rx_msg.handle, rx_msg.req_type, rx_msg.can_msg);
+	rx_msg.handle = can_mob_alloc(CAN_CHANNEL);
+	can_rx(CAN_CHANNEL, rx_msg.handle, rx_msg.req_type, rx_msg.can_msg);
 }
 
 bool is_can_ready(void){
@@ -267,3 +269,5 @@ uint8_t can_get_byte(uint8_t* dest){
 	}
 	return 0;
 }
+
+#endif

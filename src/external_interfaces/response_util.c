@@ -22,7 +22,7 @@ void state_output(uint8_t from,uint8_t mode,uint8_t state_id){
 
 static uint8_t state_output_if_from;
 static uint8_t state_output_if_mode;
-static uint8_t state_output_if_states[8];
+static uint8_t state_output_if_states[STATE_OUTPUT_IF_SIZE];
 static bool* state_output_if_flagp;
 static uint32_t state_output_if_cnt;
 static uint32_t wait_cycles;

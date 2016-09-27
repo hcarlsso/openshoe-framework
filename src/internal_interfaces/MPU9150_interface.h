@@ -12,4 +12,6 @@ void mpu9150_interface_init(void);
 // Routine for fast reading of vcc, acc, gyro, and temp from IMU
 void mpu9150_read(void);
 
+//void mpu9150_read_mag(void);
+
 #endif /* MPU9150_INTERFACE_H_ */

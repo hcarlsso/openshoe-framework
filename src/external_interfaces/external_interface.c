@@ -10,21 +10,25 @@
 #include "external_interface.h"
 #include "parsing_util.h"
 #include "usb_interface.h"
-#include "bluetooth_interface.h"
-#include "can_interface.h"
 #include "package_queue.h"
 
 #include "control_tables.h"
+#include "user_board.h"
+
+#if CAN_INTERFACE
+#include "can_interface.h"
+#endif
+#ifdef BT_MODULE
+#include "bluetooth_interface.h"
+#endif
+#ifdef EXT_UART_MODULE
+#include "uart_interface.h"
+#endif
 
 #define COMMAND_FROM_USB 1
 #define COMMAND_FROM_BT 2
-
-///\name Buffer settings
-//@{
-#define RX_BUFFER_SIZE 512
-#define TX_BUFFER_SIZE 512
-#define MAX_RX_NRB 400
-//@}
+#define COMMAND_FROM_CAN 4
+#define COMMAND_FROM_UART 5
 
 ///\name State output divider limits
 //@{
@@ -66,6 +70,12 @@ static uint8_t can_rx_array[RX_BUFFER_SIZE];
 static uint8_t can_tx_array[TX_BUFFER_SIZE];
 static extif canif = {COMMAND_FROM_CAN,{0},{0},{0}, {{0},{0},0,0,0,&can_send_buf,&can_send_buf_allornothing}, {can_rx_array,can_rx_array,can_rx_array,0}, 0,NULL, {can_tx_array,can_tx_array,can_tx_array,0}, 0,false,&is_can_ready,&can_is_data_available,&can_get_byte};
 #endif
+// External UART
+#ifdef EXT_UART_MODULE
+static uint8_t ext_uart_rx_array[RX_BUFFER_SIZE];
+static uint8_t ext_uart_tx_array[TX_BUFFER_SIZE];
+static extif uartif = {COMMAND_FROM_UART,{0},{0},{0}, {{0},{0},0,0,0,&uartif_send_buf,&uartif_send_buf_allornothing}, {ext_uart_rx_array,ext_uart_rx_array,ext_uart_rx_array,0}, 0,NULL, {ext_uart_tx_array,ext_uart_tx_array,ext_uart_tx_array,0}, 0,false,&uartif_ready,&uartif_is_data_available,&uartif_get_byte};
+#endif
 
 // Communication logics
 void rxif_cmd(extif* extif_p);
@@ -88,12 +98,19 @@ void external_interface_init(void){
 	processing_functions_init();
 	
 	usb_interface_init();
-	
+		
 	#ifdef BT_MODULE
 	bt_interface_init();
 	#endif
 	#ifdef CAN_INTERFACE
+	// For some reason we have to wait between usb_interface_init() and can_interface_init()
+	volatile int count;
+	for(count = 0; count < 2000000; count++){
+	}
 	can_interface_init();
+	#endif
+	#ifdef EXT_UART_MODULE
+	uartif_init();
 	#endif
 }
 
@@ -106,6 +123,9 @@ void transmit_data(void){
 	#ifdef CAN_INTERFACE
 	txif_data(&canif);
 	#endif
+	#ifdef EXT_UART_MODULE
+	txif_data(&uartif);
+	#endif
 }
 
 void receive_command(void){
@@ -116,6 +136,9 @@ void receive_command(void){
 	#endif
 	#ifdef CAN_INTERFACE
 	rxif_cmd(&canif);
+	#endif
+	#ifdef EXT_UART_MODULE
+	rxif_cmd(&uartif);
 	#endif
 }
 
@@ -130,6 +153,10 @@ void set_state_output(uint8_t state_id, uint8_t divider,uint8_t intern_arg){
 	#ifdef CAN_INTERFACE
 	if(intern_arg & COMMAND_FROM_CAN)
 	if_set_state_output(state_id,divider,&canif);
+	#endif
+	#ifdef EXT_UART_MODULE
+	if(intern_arg & COMMAND_FROM_UART)
+		if_set_state_output(state_id,divider,&uartif);
 	#endif	
 }
 void set_cond_output(uint8_t state_id,uint8_t intern_arg){
@@ -144,6 +171,10 @@ void set_cond_output(uint8_t state_id,uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_CAN)
 	if_set_cond_output(state_id,&	canif);
 	#endif
+	#ifdef EXT_UART_MODULE
+	if(intern_arg & COMMAND_FROM_UART)
+	if_set_cond_output(state_id,&uartif);
+	#endif
 }
 void set_lossless_trans(bool onoff,uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_USB)
@@ -156,6 +187,10 @@ void set_lossless_trans(bool onoff,uint8_t intern_arg){
 	#ifdef CAN_INTERFACE
 	if(intern_arg & COMMAND_FROM_CAN)
 	if_set_lossless_trans(onoff,&canif);
+	#endif
+	#ifdef EXT_UART_MODULE
+	if(intern_arg & COMMAND_FROM_UART)
+	if_set_lossless_trans(onoff,&uartif);
 	#endif
 }
 
@@ -171,6 +206,10 @@ void empty_pkg_queues(uint8_t intern_arg){
 	if(intern_arg & COMMAND_FROM_CAN)
 	if_empty_pkg_queue(&canif);
 	#endif
+	#ifdef EXT_UART_MODULE
+	if(intern_arg & COMMAND_FROM_UART)
+	if_empty_pkg_queue(&uartif);
+	#endif
 }
 
 void receive_pkg_ack(uint16_t package_number, uint8_t intern_arg){
@@ -184,6 +223,10 @@ void receive_pkg_ack(uint16_t package_number, uint8_t intern_arg){
 	#ifdef CAN_INTERFACE
 	if(intern_arg & COMMAND_FROM_CAN)
 	if_remove_pkg_from_queue(package_number,&canif);
+	#endif
+	#ifdef EXT_UART_MODULE
+	if(intern_arg & COMMAND_FROM_UART)
+	if_remove_pkg_from_queue(package_number,&uartif);
 	#endif
 }
 

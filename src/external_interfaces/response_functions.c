@@ -11,6 +11,9 @@
 #include "external_interface.h"
 #include "process_sequence.h"
 #include "control_tables.h"
+#if defined(SMOOTHING)
+#  include "smoothing.h"
+#endif
 
 #define OUTPUT_LOSSY_MASK   0x10
 
@@ -34,7 +37,9 @@ void input_imu_rd(uint8_t** cmd_arg){
 	restore_process_sequence(); // Presumably setup by setup_debug_processing(..);
 	state_output_once_force();
 }
-
+void gp_test_command(uint8_t** cmd_arg){
+	;
+}
 void setup_debug_processing(uint8_t** cmd_arg){
 	empty_process_sequence();
 	state_output_if_setup(NOSTATE_SID,cmd_arg[3][0],OUTPUT_PULL_MASK,NULL,0);
@@ -76,7 +81,7 @@ void all_output_off(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	for(uint8_t i=0;i<SID_LIMIT;i++)
 		set_state_output(i,0,from);
-	uint8_t tmp[8] = {0,0,0,0,0,0,0,0};
+	uint8_t tmp[STATE_OUTPUT_IF_SIZE] = {0};
 	state_output_if_setup(NOSTATE_SID,0,0,tmp,0);
 	empty_pkg_queues(from);
 }
@@ -89,6 +94,7 @@ void state_if_add_state(uint8_t** cmd_arg){
 
 #define OUTPUT_INERTIAL_MASK 0x40
 #define OUTPUT_TEMP_MASK 0x80
+#define OUTPUT_MAG_MASK 0x08
 void output_imu_rd(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];
 	uint32_t imu_selector = cmd_arg[1][0]<<24;
@@ -103,9 +109,16 @@ void output_imu_rd(uint8_t** cmd_arg){
 				state_output(from,mode_select,IMU0_RD_SID+i);
 			if (mode_select & OUTPUT_TEMP_MASK)
 				state_output(from,mode_select,IMU0_TEMP_SID+i);
+			if (mode_select & OUTPUT_MAG_MASK)
+				state_output(from,mode_select,IMU0_MAG_SID+i);
 		}
 	}
 	state_output(from,mode_select,IMU_TS_SID);
+}
+
+extern void mpu9150_set_bandwidth(uint8_t DLPF_CFG);
+void set_imu_bandwidth(uint8_t** cmd_arg){
+	mpu9150_set_bandwidth(cmd_arg[1][0]);
 }
 
 void set_proc(uint8_t** cmd_arg){
@@ -152,6 +165,47 @@ void zupt_aided_ins(uint8_t** no_arg){
 	restor_proc_sequ_if_setup(INIT_DONE_SID);
 	set_last_process_sequence_element(RESTORE_PROC_SEQU_IF);
 }
+
+#if defined(SMOOTHING)
+void smoothed_zupt_aided_ins(uint8_t** no_arg){
+	uint8_t from = (uint8_t)no_arg[0];
+	bool tmp=false;
+	// Stop whatever was going on
+	empty_process_sequence();
+	all_output_off(no_arg);
+	// Reset smoothing
+	smoothing_init();
+	// Setup stepwise dead reckoning
+	set_elem_in_process_sequence(READ_INERTIAL,0);
+	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
+	set_elem_in_process_sequence(FRONTEND_STATDET,2);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(MECHANIZATION,5);
+	set_elem_in_process_sequence(TIME_UPDATE,6);
+	set_elem_in_process_sequence(ZUPT_UPDATE,7);
+	set_elem_in_process_sequence(FORWARD,8);
+	set_elem_in_process_sequence(BACKWARD,9);
+	// Setup conditional (reset) output
+	set_state(SMOOTHING_DONE_SID,(void*)&tmp);
+	state_output_if_setup(SMOOTHING_DONE_SID,from,OUTPUT_PULL_MASK,NULL,0);
+	state_output_if_state_add(SMOOTHING_DATA_SID,0);
+	set_elem_in_process_sequence(STATE_OUTPUT_IF,10);
+	// Hide away stepwise dead reckoning while initializing
+	store_and_empty_process_sequence();
+	// Setup initialization
+	set_elem_in_process_sequence(READ_INERTIAL,0);
+	set_elem_in_process_sequence(FRONTEND_PREPROC,1);
+	set_elem_in_process_sequence(FRONTEND_STATDET,2);
+	set_elem_in_process_sequence(FRONTEND_BIASEST,3);
+	set_elem_in_process_sequence(FRONTEND_CONVCOMP,4);
+	set_elem_in_process_sequence(FRONTEND_INITIAL_ALIGNMENT,5);
+	// Setup initialization termination actions
+	set_state(INIT_DONE_SID,(void*)&tmp);
+	restor_proc_sequ_if_setup(INIT_DONE_SID);
+	set_last_process_sequence_element(RESTORE_PROC_SEQU_IF);
+}
+#endif
 
 void stepwise_dead_reckoning(uint8_t** cmd_arg){
 	uint8_t from = (uint8_t)cmd_arg[0];

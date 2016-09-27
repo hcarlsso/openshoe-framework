@@ -12,8 +12,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define OUTPUT_DIVIDER_MASK 0x0F
+#define OUTPUT_DIVIDER_MASK 0x07
 #define OUTPUT_PULL_MASK    0x20
+#define STATE_OUTPUT_IF_SIZE 10
 
 void state_output(uint8_t from,uint8_t mode,uint8_t state_id);
 
